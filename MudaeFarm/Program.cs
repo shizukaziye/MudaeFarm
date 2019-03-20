@@ -85,7 +85,7 @@ namespace MudaeFarm
             {
                 var channel = _discord.GetChannel(channelId) as ITextChannel;
 
-                await channel.SendMessageAsync("$mu");
+                await channel.SendMessageAsync("$" + _config.AutoRollGender);
 
                 // Cooldown to not spam the API
                 await Task.Delay(TimeSpan.FromSeconds(5));
@@ -201,6 +201,16 @@ namespace MudaeFarm
                         _config.AutoRollInterval = rollInterval == -1 ? (double?)null : rollInterval;
                         _logger.LogInformation($"Set autoroll interval to every '{rollInterval}' minutes.");
                     }
+                    break;
+                case "marry":
+                    if (argument.ToLowerInvariant() == "waifu")
+                        _config.AutoRollGender = 'w';
+                    else if (argument.ToLowerInvariant() == "husbando")
+                        _config.AutoRollGender = 'h';
+                    else
+                        break;
+                    
+                    _logger.LogInformation($"Set marry target gender to '{argument}'.");
                     break;
                 default:
                     return;

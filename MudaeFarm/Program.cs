@@ -130,7 +130,7 @@ namespace MudaeFarm
             if (author == _discord.CurrentUser.Id)
                 await handleSelfCommandAsync(userMessage);
 
-            else if (Array.IndexOf(MudaeIds, message.AuthorId) != -1)
+            else if (Array.IndexOf(MudaeIds, message.Author.Id) != -1)
                 foreach (var emote in userMessage.Reactions.Keys)
                     await tryAutoClaimAsync(userMessage, emote);
         }

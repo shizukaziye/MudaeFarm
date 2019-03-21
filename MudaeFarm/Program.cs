@@ -246,8 +246,8 @@ namespace MudaeFarm
             {
                 _logger.LogInformation($"Found character '{name}', trying marriage.");
 
-                await message.AddReactionAsync(new Emoji("\uD83D\uDC96"));
-                await _discord.SetStatusAsync(UserStatus.Online);
+                foreach (var emote in message.Reactions.Keys)
+                    await message.AddReactionAsync(emote);
 
                 await SaveConfigAsync();
             }

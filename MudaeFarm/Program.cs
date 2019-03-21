@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -38,6 +39,7 @@ namespace MudaeFarm
                 // Register events
                 _discord.Log += HandleLogAsync;
                 _discord.MessageReceived += HandleMessageAsync;
+                _discord.ReactionAdded += HandleReactionAsync;
 
                 // Login
                 var connectionSource = new TaskCompletionSource<object>();
@@ -74,6 +76,7 @@ namespace MudaeFarm
                 // Unregister events
                 _discord.Log -= HandleLogAsync;
                 _discord.MessageReceived -= HandleMessageAsync;
+                _discord.ReactionAdded -= HandleReactionAsync;
 
                 // Logout
                 await _discord.StopAsync();
@@ -235,6 +238,24 @@ namespace MudaeFarm
             await SaveConfigAsync();
         }
 
+        static readonly Dictionary<ulong, IUserMessage> _claimQueue = new Dictionary<ulong, IUserMessage>();
+
+        static async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel,
+            SocketReaction reaction)
+        {
+            IUserMessage message;
+
+            lock (_claimQueue)
+            {
+                if (!_claimQueue.TryGetValue(reaction.MessageId, out message))
+                    return;
+
+                _claimQueue.Remove(reaction.MessageId);
+            }
+
+            await message.AddReactionAsync(reaction.Emote);
+        }
+
         static async Task HandleMudaeMessageAsync(SocketUserMessage message)
         {
             if (!message.Embeds.Any())
@@ -261,10 +282,11 @@ namespace MudaeFarm
             {
                 _logger.LogInformation($"Found character '{name}', trying marriage.");
 
-                await message.AddReactionAsync(new Emoji("\uD83D\uDC96"));
-                await _discord.SetStatusAsync(UserStatus.Online);
+                lock (_claimQueue)
+                    _claimQueue.Add(message.Id, message);
 
-                await SaveConfigAsync();
+                foreach (var emote in message.Reactions.Keys)
+                    await message.AddReactionAsync(emote);
             }
             else
                 _logger.LogInformation($"Ignored character '{name}', not wished.");

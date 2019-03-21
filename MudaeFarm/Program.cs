@@ -219,10 +219,15 @@ namespace MudaeFarm
             await SaveConfigAsync();
         }
 
-        static async Task handleMudaeMessageAsync(SocketUserMessage message, SocketReaction reaction)
+        static async Task handleMudaeMessageAsync(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
         {
             if (Array.IndexOf(MudaeIds, reaction.UserId) == -1)
                 return;
+
+            if (!reaction.Message.IsSpecified)
+                return;
+
+            var message = reaction.Message.Value;
 
             if (!message.Embeds.Any())
                 return;

@@ -13,7 +13,7 @@ namespace MudaeFarm
 {
     class Program
     {
-        public static ulong[] MudaeIds = new ulong[]
+        public static ulong[] MudaeIds =
         {
             432610292342587392,
             522749851922989068
@@ -22,10 +22,10 @@ namespace MudaeFarm
         static ILogger _logger;
         static DiscordSocketClient _discord;
 
-        static async Task Main(string[] args)
+        static async Task Main()
         {
             // Configure services
-            var services = configureServices(new ServiceCollection()).BuildServiceProvider();
+            var services = ConfigureServices(new ServiceCollection()).BuildServiceProvider();
 
             using (services.CreateScope())
             {
@@ -36,13 +36,14 @@ namespace MudaeFarm
                 await LoadConfigAsync();
 
                 // Register events
-                _discord.Log += handleLogAsync;
-                _discord.MessageReceived += handleMessageAsync;
+                _discord.Log += HandleLogAsync;
+                _discord.MessageReceived += HandleMessageAsync;
 
                 // Login
                 var connectionSource = new TaskCompletionSource<object>();
 
                 _discord.Connected += handleConnect;
+
                 Task handleConnect()
                 {
                     connectionSource.SetResult(null);
@@ -64,15 +65,15 @@ namespace MudaeFarm
                     {
                         await Task.Delay(TimeSpan.FromMinutes(_config.AutoRollInterval.Value));
 
-                        await sendRollAsync();
+                        await SendRollAsync();
                     }
                     else
                         await Task.Delay(1000);
                 }
 
                 // Unregister events
-                _discord.Log -= handleLogAsync;
-                _discord.MessageReceived -= handleMessageAsync;
+                _discord.Log -= HandleLogAsync;
+                _discord.MessageReceived -= HandleMessageAsync;
 
                 // Logout
                 await _discord.StopAsync();
@@ -80,7 +81,7 @@ namespace MudaeFarm
             }
         }
 
-        static async Task sendRollAsync()
+        static async Task SendRollAsync()
         {
             foreach (var channelId in _config.BotChannels)
             {
@@ -93,22 +94,34 @@ namespace MudaeFarm
             }
         }
 
-        static IServiceCollection configureServices(IServiceCollection services) => services
+        static IServiceCollection ConfigureServices(IServiceCollection services) => services
             .AddSingleton<DiscordSocketClient>()
             .AddLogging(l => l.AddConsole());
 
-        static Task handleLogAsync(LogMessage m)
+        static Task HandleLogAsync(LogMessage m)
         {
             var level = LogLevel.None;
 
             switch (m.Severity)
             {
-                case LogSeverity.Verbose: level = LogLevel.Trace; break;
-                case LogSeverity.Debug: level = LogLevel.Debug; break;
-                case LogSeverity.Info: level = LogLevel.Information; break;
-                case LogSeverity.Warning: level = LogLevel.Warning; break;
-                case LogSeverity.Error: level = LogLevel.Error; break;
-                case LogSeverity.Critical: level = LogLevel.Critical; break;
+                case LogSeverity.Verbose:
+                    level = LogLevel.Trace;
+                    break;
+                case LogSeverity.Debug:
+                    level = LogLevel.Debug;
+                    break;
+                case LogSeverity.Info:
+                    level = LogLevel.Information;
+                    break;
+                case LogSeverity.Warning:
+                    level = LogLevel.Warning;
+                    break;
+                case LogSeverity.Error:
+                    level = LogLevel.Error;
+                    break;
+                case LogSeverity.Critical:
+                    level = LogLevel.Critical;
+                    break;
             }
 
             if (m.Exception == null)
@@ -119,7 +132,7 @@ namespace MudaeFarm
             return Task.CompletedTask;
         }
 
-        static async Task handleMessageAsync(SocketMessage message)
+        static async Task HandleMessageAsync(SocketMessage message)
         {
             if (!(message is SocketUserMessage userMessage))
                 return;
@@ -127,13 +140,13 @@ namespace MudaeFarm
             var author = message.Author.Id;
 
             if (author == _discord.CurrentUser.Id)
-                await handleSelfCommandAsync(userMessage);
+                await HandleSelfCommandAsync(userMessage);
 
             else if (Array.IndexOf(MudaeIds, author) != -1)
-                await handleMudaeMessageAsync(userMessage);
+                await HandleMudaeMessageAsync(userMessage);
         }
 
-        static async Task handleSelfCommandAsync(SocketUserMessage message)
+        static async Task HandleSelfCommandAsync(SocketUserMessage message)
         {
             var content = message.Content;
 
@@ -199,9 +212,10 @@ namespace MudaeFarm
                 case "rollinterval":
                     if (double.TryParse(argument, out var rollInterval))
                     {
-                        _config.AutoRollInterval = rollInterval == -1 ? (double?)null : rollInterval;
+                        _config.AutoRollInterval = rollInterval == -1 ? (double?) null : rollInterval;
                         _logger.LogInformation($"Set autoroll interval to every '{rollInterval}' minutes.");
                     }
+
                     break;
                 case "marry":
                     if (argument.ToLowerInvariant() == "waifu")
@@ -210,7 +224,7 @@ namespace MudaeFarm
                         _config.AutoRollGender = 'h';
                     else
                         break;
-                    
+
                     _logger.LogInformation($"Set marry target gender to '{argument}'.");
                     break;
                 default:
@@ -221,7 +235,7 @@ namespace MudaeFarm
             await SaveConfigAsync();
         }
 
-        static async Task handleMudaeMessageAsync(SocketUserMessage message)
+        static async Task HandleMudaeMessageAsync(SocketUserMessage message)
         {
             if (!message.Embeds.Any())
                 return;

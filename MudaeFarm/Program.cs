@@ -15,6 +15,7 @@ namespace MudaeFarm
     {
         public static ulong[] MudaeIds = new ulong[]
         {
+            432610292342587392,
             522749851922989068
         };
 

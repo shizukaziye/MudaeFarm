@@ -129,6 +129,10 @@ namespace MudaeFarm
 
             if (author == _discord.CurrentUser.Id)
                 await handleSelfCommandAsync(userMessage);
+
+            else if (Array.IndexOf(MudaeIds, message.AuthorId) != -1)
+                foreach (var emote in userMessage.Reactions.Keys)
+                    await tryAutoClaimAsync(userMessage, emote);
         }
 
         static async Task handleSelfCommandAsync(SocketUserMessage message)
@@ -227,8 +231,11 @@ namespace MudaeFarm
             if (!reaction.Message.IsSpecified)
                 return;
 
-            var message = reaction.Message.Value;
+            await tryAutoClaimAsync(reaction.Message.Value, reaction.Emote);
+        }
 
+        static async Task tryAutoClaimAsync(IUserMessage message, IEmote emote)
+        {
             if (!message.Embeds.Any())
                 return;
 
@@ -253,7 +260,7 @@ namespace MudaeFarm
             {
                 _logger.LogInformation($"Found character '{name}', trying marriage.");
 
-                await message.AddReactionAsync(reaction.Emote);
+                await message.AddReactionAsync(emote);
             }
             else
                 _logger.LogInformation($"Ignored character '{name}', not wished.");

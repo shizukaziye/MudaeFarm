@@ -37,6 +37,7 @@ namespace MudaeFarm
                 // Register events
                 _discord.Log += handleLogAsync;
                 _discord.MessageReceived += handleMessageAsync;
+                _discord.ReactionAdded += handleMudaeMessageAsync;
 
                 // Login
                 var connectionSource = new TaskCompletionSource<object>();
@@ -72,6 +73,7 @@ namespace MudaeFarm
                 // Unregister events
                 _discord.Log -= handleLogAsync;
                 _discord.MessageReceived -= handleMessageAsync;
+                _discord.ReactionAdded -= handleMudaeMessageAsync;
 
                 // Logout
                 await _discord.StopAsync();
@@ -127,9 +129,6 @@ namespace MudaeFarm
 
             if (author == _discord.CurrentUser.Id)
                 await handleSelfCommandAsync(userMessage);
-
-            else if (Array.IndexOf(MudaeIds, author) != -1)
-                await handleMudaeMessageAsync(userMessage);
         }
 
         static async Task handleSelfCommandAsync(SocketUserMessage message)
@@ -220,8 +219,11 @@ namespace MudaeFarm
             await SaveConfigAsync();
         }
 
-        static async Task handleMudaeMessageAsync(SocketUserMessage message)
+        static async Task handleMudaeMessageAsync(SocketUserMessage message, SocketReaction reaction)
         {
+            if (Array.IndexOf(MudaeIds, reaction.UserId) == -1)
+                return;
+
             if (!message.Embeds.Any())
                 return;
 
@@ -246,10 +248,7 @@ namespace MudaeFarm
             {
                 _logger.LogInformation($"Found character '{name}', trying marriage.");
 
-                foreach (var emote in message.Reactions.Keys)
-                    await message.AddReactionAsync(emote);
-
-                await SaveConfigAsync();
+                await message.AddReactionAsync(reaction.Emote);
             }
             else
                 _logger.LogInformation($"Ignored character '{name}', not wished.");

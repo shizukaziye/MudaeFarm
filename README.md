@@ -10,7 +10,7 @@ This is a simple bot I wrote in a few hours that automatically rolls and claims 
 
 1. Install [.NET Core SDK](https://dotnet.microsoft.com/download).
 
-2. Download this repository [as a zip](https://github.com/phosphene47/MudaeFarm/archive/master.zip).
+2. Download this repository [as a zip](https://github.com/chiyadev/MudaeFarm/archive/master.zip).
 
 3. Once the file is downloaded, unzip it. Move into the folder named `MudaeFarm` and create a file called `config.json` with the following contents:
 

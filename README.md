@@ -1,6 +1,6 @@
 # MudaeFarm
 
-**WARNING**: selfbots are officially banned. It is considered an API abuse and is [no longer tolerated](https://support.discordapp.com/hc/en-us/articles/115002192352-Automated-user-accounts-self-bots-).
+**WARNING**: Selfbots are officially banned. It is considered an API abuse and is [no longer tolerated](https://support.discordapp.com/hc/en-us/articles/115002192352-Automated-user-accounts-self-bots-). By using this bot, *you are running a risk*.
 
 This is a simple bot that automatically rolls and claims Mudae waifus/husbandoes.
 
@@ -18,9 +18,7 @@ This is a simple bot that automatically rolls and claims Mudae waifus/husbandoes
 }
 ```
 
-How to find your user token:
-
-Press `Ctrl+Shift+I` or `Command+Option+I` on Discord which opens Chrome inspector then click on the tab named `Network`. Click on `XHR`.
+To find your token, press `Ctrl+Shift+I` or `Command+Option+I` on Discord which opens Chrome inspector, then click on the tab named `Network`. Click on `XHR`.
 
 ![xhr](images/xhr.png)
 

@@ -2,7 +2,7 @@
 
 **WARNING**: selfbots are officially banned. It is considered an API abuse and is [no longer tolerated](https://support.discordapp.com/hc/en-us/articles/115002192352-Automated-user-accounts-self-bots-).
 
-This is a simple bot I wrote in a few hours that automatically rolls and claims Mudae waifus/husbandos.
+This is a simple bot that automatically rolls and claims Mudae waifus/husbandoes.
 
 ## Setup
 
@@ -18,25 +18,27 @@ This is a simple bot I wrote in a few hours that automatically rolls and claims 
 }
 ```
 
-You can find your user token: press Ctrl+Shift+I or Command+Option+I while on Discord which opens Chrome inspector then click on the tab named `Network`. Click on `XHR`.
+How to find your user token:
+
+Press `Ctrl+Shift+I` or `Command+Option+I` on Discord which opens Chrome inspector then click on the tab named `Network`. Click on `XHR`.
 
 ![xhr](images/xhr.png)
 
-Open a channel on Discord which should create a request called `science`.
+Open any channel or type something on Discord, which should create an entry named `science`.
 
 ![science](images/science.png)
 
-Under `Request Headers` find your authorization token and copy that.
+Under `Request Headers` find your authorization token.
 
 ![headers](images/headers.png)
 
-DO NOT EVER SHARE THIS TOKEN WITH ANYONE. SHARING THIS TOKEN IS SHARING YOUR PASSWORD.
+DO NOT EVER SHARE THIS TOKEN WITH ANYONE. TREAT THIS TOKEN LIKE YOU TREAT YOUR PASSWORD.
 
-4. Open terminal or cmd in the folder and run the following commands: `dotnet build`, `dotnet run`
+4. Open terminal or CMD in the folder and run these commands: `dotnet build`, `dotnet run`
 
 ### Note
 
-This bot does not automatically know which Mudae maid you are using. You may need to copy the ID of Mudae maid bot and add it in `MudaeFarm/Program.cs`:
+This bot does not automatically know which Mudae maid you are using. You may need to copy the ID of the Mudae maid and add it to `MudaeFarm/Program.cs` before running the bot.
 
 ```csharp
 public static ulong[] MudaeIds = new ulong[]

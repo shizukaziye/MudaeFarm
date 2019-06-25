@@ -1,8 +1,6 @@
 # MudaeFarm
 
-**Warning**: selfbots are officially banned. It is considered an API abuse and is [no longer tolerated](https://support.discordapp.com/hc/en-us/articles/115002192352-Automated-user-accounts-self-bots-).
-
-~~So please don't be caught using this bot.~~
+**WARNING**: selfbots are officially banned. It is considered an API abuse and is [no longer tolerated](https://support.discordapp.com/hc/en-us/articles/115002192352-Automated-user-accounts-self-bots-).
 
 This is a simple bot I wrote in a few hours that automatically rolls and claims Mudae waifus/husbandos.
 
@@ -51,19 +49,23 @@ public static ulong[] MudaeIds = new ulong[]
 
 ## Commands
 
+Autorolling:
+
+- `/rollinterval {minutes}` — Sets the autoroll interval in minutes. Setting this to `-1` disables autorolling.
+
+- `/setchannel` — Sets the channel where you send this command as a bot channel. You can do this in however many channels as you like.
+- `/unsetchannel` — Stops autorolling in the channel where you send this command.
+
+- `/marry waifu` — Sets the marry command to waifus (`$w`). This is the default.
+- `/marry husbando` — Sets the marry command to husbandoes (`$h`).
+
 Autoclaiming:
 
 - `/wish {character}` — Adds a character to your wishlist.
 - `/unwish {character}` — Removes a character from your wishlist.
+
 - `/wishani {anime}` — Adds an anime to your wishlist. This is akin to wishing every character from that anime.
 - `/unwishani {anime}` — Removes an anime from your wishlist.
+
 - `/wishlist` — Shows the list of your wished characters.
 - `/wishlistani` — Shows the list of your wished anime.
-
-Autorolling:
-
-- `/rollinterval {minutes}` — Sets the autoroll interval in minutes. Setting this to `-1` disables autorolling.
-- `/setchannel` — Sets the channel where you send this command as a bot channel. You can do this in however many channels as you like.
-- `/unsetchannel` — Stops autorolling in the channel where you send this command.
-- `/marry waifu` — Sets marry target to waifus (`$w`). This is the default roll command.
-- `/marry husbando` — Sets marry target husbandoes (`$h`).

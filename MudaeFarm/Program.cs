@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace MudaeFarm
 {
-    class Program
+    static class Program
     {
         static DiscordSocketClient _discord = new DiscordSocketClient(new DiscordSocketConfig
         {

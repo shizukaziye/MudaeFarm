@@ -205,11 +205,12 @@ namespace MudaeFarm
                         m.Content =
                             "Character wishlist: \n" +
                             (_config.WishlistCharacters.Count == 0
-                                ? "Empty\n"
-                                : $"- `{string.Join("`\n- `", _config.WishlistCharacters)}`\n\n") +
+                                ? "Empty"
+                                : $"- `{string.Join("`\n- `", _config.WishlistCharacters)}`") +
+                            "\n\n" +
                             "Anime wishlist: \n" +
                             (_config.WishlistAnime.Count == 0
-                                ? "Empty\n"
+                                ? "Empty"
                                 : $"- `{string.Join("`\n- `", _config.WishlistAnime)}`");
                     });
 

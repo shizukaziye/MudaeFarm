@@ -236,6 +236,13 @@ namespace MudaeFarm
 
                     break;
 
+                case "clearwishes":
+                    _config.WishlistCharacters.Clear();
+                    _config.WishlistAnime.Clear();
+
+                    Log(LogSeverity.Warning, "Cleared character and anime wishlist.");
+                    break;
+
                 case "rollinterval" when double.TryParse(argument, out var rollInterval):
                     _config.RollInterval = rollInterval < 0 ? (double?) null : rollInterval;
 

@@ -62,7 +62,7 @@ namespace MudaeFarm
                               "Proceed? (y/n) ");
 
                 if (!Console.ReadKey().KeyChar.ToString().Equals("y", StringComparison.OrdinalIgnoreCase))
-                    return;
+                    Environment.Exit(1);
 
                 Console.Write("\nToken: ");
 

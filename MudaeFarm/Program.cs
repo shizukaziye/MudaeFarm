@@ -31,7 +31,7 @@ namespace MudaeFarm
                     // fatal error recovery
                     Log(LogSeverity.Critical, e.ToString());
 
-                    Console.WriteLine("\n\nRestarting in 10 seconds...");
+                    Log(LogSeverity.Warning, "\n\nRestarting in 10 seconds...");
 
                     await Task.Delay(TimeSpan.FromSeconds(10));
                 }

@@ -213,27 +213,27 @@ namespace MudaeFarm
             switch (command.ToLowerInvariant())
             {
                 case "wish":
-                    _config.WishlistCharacters.Add(argument.ToLowerInvariant());
+                    if (_config.WishlistCharacters.Add(argument.ToLowerInvariant()))
+                        Log(LogSeverity.Info, $"Added character '{argument}' to the wishlist.");
 
-                    Log(LogSeverity.Info, $"Added character '{argument}' to the wishlist.");
                     break;
 
                 case "unwish":
-                    _config.WishlistCharacters.Remove(argument.ToLowerInvariant());
+                    if (_config.WishlistCharacters.Remove(argument.ToLowerInvariant()))
+                        Log(LogSeverity.Info, $"Removed character '{argument}' from the wishlist.");
 
-                    Log(LogSeverity.Info, $"Removed character '{argument}' from the wishlist.");
                     break;
 
                 case "wishani":
-                    _config.WishlistAnime.Add(argument.ToLowerInvariant());
+                    if (_config.WishlistAnime.Add(argument.ToLowerInvariant()))
+                        Log(LogSeverity.Info, $"Added anime '{argument}' to the wishlist.");
 
-                    Log(LogSeverity.Info, $"Added anime '{argument}' to the wishlist.");
                     break;
 
                 case "unwishani":
-                    _config.WishlistAnime.Remove(argument.ToLowerInvariant());
+                    if (_config.WishlistAnime.Remove(argument.ToLowerInvariant()))
+                        Log(LogSeverity.Info, $"Removed anime '{argument}' from the wishlist.");
 
-                    Log(LogSeverity.Info, $"Removed anime '{argument}' from the wishlist.");
                     break;
 
                 case "rollinterval" when double.TryParse(argument, out var rollInterval):

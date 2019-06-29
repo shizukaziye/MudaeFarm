@@ -14,7 +14,7 @@ This is a simple bot that automatically rolls and claims Mudae waifus/husbandoes
 
 4. Read the printed text carefully and proceed by pressing `y`.
 
-### Finding your user token
+### Finding Your User Token
 
 Press `Ctrl+Shift+I` or `Command+Option+I` on Discord which opens Chrome inspector, then click on the tab named `Network`. Click on `XHR`.
 

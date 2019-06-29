@@ -1,10 +1,12 @@
+using System;
 using System.Collections.Generic;
 
 namespace MudaeFarm
 {
     public class Config
     {
-        public string AuthToken { get; set; }
+        public string AuthToken { get; set; } = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
+
         public double? AutoRollInterval { get; set; }
         public char AutoRollGender { get; set; } = 'w';
 

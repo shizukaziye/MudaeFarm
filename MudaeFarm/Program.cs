@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace MudaeFarm
@@ -20,132 +18,103 @@ namespace MudaeFarm
             522749851922989068
         };
 
-        static ILogger _logger;
-        static DiscordSocketClient _discord;
+        static DiscordSocketClient _discord = new DiscordSocketClient(new DiscordSocketConfig
+        {
+            LogLevel         = LogSeverity.Info,
+            MessageCacheSize = 5
+        });
 
         static async Task Main()
         {
-            // Configure services
-            var services = ConfigureServices(new ServiceCollection()).BuildServiceProvider();
+            // load config
+            await LoadConfigAsync();
 
-            using (services.CreateScope())
+            // events
+            _discord.Log             += HandleLogAsync;
+            _discord.MessageReceived += HandleMessageAsync;
+            _discord.ReactionAdded   += HandleReactionAsync;
+
+            // login and wait for ready
+            var connectionSource = new TaskCompletionSource<object>();
+
+            _discord.Connected += handleConnect;
+
+            Task handleConnect()
             {
-                _logger = services.GetService<ILogger<Program>>();
-                _discord = services.GetService<DiscordSocketClient>();
+                connectionSource.SetResult(null);
+                return Task.CompletedTask;
+            }
 
-                // Load configuration
-                await LoadConfigAsync();
+            await _discord.LoginAsync(TokenType.User, _config.AuthToken);
+            await _discord.StartAsync();
 
-                // Register events
-                _discord.Log += HandleLogAsync;
-                _discord.MessageReceived += HandleMessageAsync;
-                _discord.ReactionAdded += HandleReactionAsync;
+            await connectionSource.Task;
 
-                // Login
-                var connectionSource = new TaskCompletionSource<object>();
+            _discord.Connected -= handleConnect;
 
-                _discord.Connected += handleConnect;
-
-                Task handleConnect()
+            // keep the bot running
+            while (true)
+            {
+                // autorolling
+                if (_config.AutoRollInterval.HasValue)
                 {
-                    connectionSource.SetResult(null);
-                    return Task.CompletedTask;
+                    await Task.Delay(TimeSpan.FromMinutes(_config.AutoRollInterval.Value));
+
+                    await SendRollsAsync();
                 }
 
-                await _discord.LoginAsync(TokenType.User, _config.AuthToken);
-                await _discord.StartAsync();
-
-                await connectionSource.Task;
-
-                _discord.Connected -= handleConnect;
-
-                // Keep the bot running
-                // TODO: graceful shutdown?
-                while (true)
+                // else sleep
+                else
                 {
-                    if (_config.AutoRollInterval.HasValue)
-                    {
-                        await Task.Delay(TimeSpan.FromMinutes(_config.AutoRollInterval.Value));
-
-                        await SendRollAsync();
-                    }
-                    else
-                        await Task.Delay(1000);
+                    await Task.Delay(1000);
                 }
-
-                // Unregister events
-                _discord.Log -= HandleLogAsync;
-                _discord.MessageReceived -= HandleMessageAsync;
-                _discord.ReactionAdded -= HandleReactionAsync;
-
-                // Logout
-                await _discord.StopAsync();
-                await _discord.LogoutAsync();
             }
         }
 
-        static async Task SendRollAsync()
+        static async Task SendRollsAsync()
         {
             foreach (var channelId in _config.BotChannels)
             {
-                var channel = _discord.GetChannel(channelId) as ITextChannel;
+                if (_discord.GetChannel(channelId) is ITextChannel channel)
+                    await channel.SendMessageAsync("$" + _config.AutoRollGender);
+                else
+                    Log(LogSeverity.Warning, $"Channel {channelId} is unavailable.");
 
-                await channel.SendMessageAsync("$" + _config.AutoRollGender);
-
-                // Cooldown to not spam the API
+                // don't spam the api
                 await Task.Delay(TimeSpan.FromSeconds(5));
             }
         }
 
-        static IServiceCollection ConfigureServices(IServiceCollection services) => services
-            .AddSingleton<DiscordSocketClient>()
-            .AddLogging(l => l.AddConsole());
-
         static Task HandleLogAsync(LogMessage m)
         {
-            var level = LogLevel.None;
+            var message = m.Exception == null
+                ? m.Message
+                : $"{m.Message}: {m.Exception}";
 
-            switch (m.Severity)
-            {
-                case LogSeverity.Verbose:
-                    level = LogLevel.Trace;
-                    break;
-                case LogSeverity.Debug:
-                    level = LogLevel.Debug;
-                    break;
-                case LogSeverity.Info:
-                    level = LogLevel.Information;
-                    break;
-                case LogSeverity.Warning:
-                    level = LogLevel.Warning;
-                    break;
-                case LogSeverity.Error:
-                    level = LogLevel.Error;
-                    break;
-                case LogSeverity.Critical:
-                    level = LogLevel.Critical;
-                    break;
-            }
-
-            if (m.Exception == null)
-                _logger.Log(level, m.Message);
-            else
-                _logger.Log(level, m.Exception, m.Exception.Message);
+            Log(m.Severity, message);
 
             return Task.CompletedTask;
         }
+
+        // mudamaid username regex
+        static readonly Regex _maidUsernameRegex = new Regex(
+            @"^Mudamaid\s\d+$",
+            RegexOptions.Singleline | RegexOptions.Compiled);
 
         static async Task HandleMessageAsync(SocketMessage message)
         {
             if (!(message is SocketUserMessage userMessage))
                 return;
 
-            var author = message.Author.Id;
+            var author = message.Author;
 
-            if (author == _discord.CurrentUser.Id)
+            // author is ourselves
+            if (author.Id == _discord.CurrentUser.Id)
                 await HandleSelfCommandAsync(userMessage);
 
-            else if (Array.IndexOf(MudaeIds, author) != -1)
+            // author is mudae bot or its maid
+            else if (author.Id == 432610292342587392 ||
+                     _maidUsernameRegex.IsMatch(author.Username))
                 await HandleMudaeMessageAsync(userMessage);
         }
 
@@ -159,8 +128,8 @@ namespace MudaeFarm
             content = content.Substring(1);
 
             var delimitor = content.IndexOf(' ');
-            var command = delimitor == -1 ? content : content.Substring(0, delimitor);
-            var argument = delimitor == -1 ? null : content.Substring(delimitor + 1);
+            var command   = delimitor == -1 ? content : content.Substring(0, delimitor);
+            var argument  = delimitor == -1 ? null : content.Substring(delimitor + 1);
 
             if (string.IsNullOrWhiteSpace(command))
                 return;
@@ -170,23 +139,34 @@ namespace MudaeFarm
                 case "wishlist":
                     await message.ModifyAsync(m =>
                     {
-                        m.Content = $"Character wishlist: {string.Join(", ", _config.WishlistCharacters)}";
+                        m.Content =
+                            "Character wishlist: \n" +
+                            $"- {string.Join("\n- ", _config.WishlistCharacters)}";
                     });
+
                     return;
+
                 case "wishlistani":
                     await message.ModifyAsync(m =>
                     {
-                        m.Content = $"Anime wishlist: {string.Join(", ", _config.WishlistAnimes)}";
+                        m.Content =
+                            "Anime wishlist: \n" +
+                            $"- {string.Join("\n- ", _config.WishlistAnimes)}";
                     });
+
                     return;
+
                 case "setchannel":
                     if (_config.BotChannels.Add(message.Channel.Id))
-                        _logger.LogInformation($"Added bot channel '{message.Channel.Id}'.");
+                        Log(LogSeverity.Info, $"Added bot channel '{message.Channel.Id}'.");
+
                     await message.DeleteAsync();
                     return;
+
                 case "unsetchannel":
                     if (_config.BotChannels.Remove(message.Channel.Id))
-                        _logger.LogInformation($"Removed bot channel '{message.Channel.Id}'.");
+                        Log(LogSeverity.Info, $"Removed bot channel '{message.Channel.Id}'.");
+
                     await message.DeleteAsync();
                     return;
             }
@@ -198,40 +178,55 @@ namespace MudaeFarm
             {
                 case "wish":
                     _config.WishlistCharacters.Add(argument.ToLowerInvariant());
-                    _logger.LogInformation($"Added character '{argument}' to the wishlist.");
+
+                    Log(LogSeverity.Info, $"Added character '{argument}' to the wishlist.");
                     break;
+
                 case "unwish":
                     _config.WishlistCharacters.Remove(argument.ToLowerInvariant());
-                    _logger.LogInformation($"Removed character '{argument}' from the wishlist.");
+
+                    Log(LogSeverity.Info, $"Removed character '{argument}' from the wishlist.");
                     break;
+
                 case "wishani":
                     _config.WishlistAnimes.Add(argument.ToLowerInvariant());
-                    _logger.LogInformation($"Added anime '{argument}' to the wishlist.");
+
+                    Log(LogSeverity.Info, $"Added anime '{argument}' to the wishlist.");
                     break;
+
                 case "unwishani":
                     _config.WishlistAnimes.Remove(argument.ToLowerInvariant());
-                    _logger.LogInformation($"Removed anime '{argument}' from the wishlist.");
+
+                    Log(LogSeverity.Info, $"Removed anime '{argument}' from the wishlist.");
                     break;
+
                 case "rollinterval":
                     if (double.TryParse(argument, out var rollInterval))
                     {
-                        _config.AutoRollInterval = rollInterval == -1 ? (double?) null : rollInterval;
-                        _logger.LogInformation($"Set autoroll interval to every '{rollInterval}' minutes.");
+                        _config.AutoRollInterval = rollInterval < 0 ? (double?) null : rollInterval;
+
+                        Log(LogSeverity.Info,
+                            $"Set roll interval to every '{_config.AutoRollInterval?.ToString() ?? "<null>"}' minutes.");
                     }
 
                     break;
                 case "marry":
-                    if (argument.ToLowerInvariant() == "waifu")
-                        _config.AutoRollGender = 'w';
-                    else if (argument.ToLowerInvariant() == "husbando")
-                        _config.AutoRollGender = 'h';
-                    else
-                        break;
+                    switch (argument.ToLowerInvariant())
+                    {
+                        case "waifu":
+                            _config.AutoRollGender = 'w';
+                            break;
+                        case "husbando":
+                            _config.AutoRollGender = 'h';
+                            break;
 
-                    _logger.LogInformation($"Set marry target gender to '{argument}'.");
+                        default: return;
+                    }
+
+                    Log(LogSeverity.Info, $"Set marry command to '${argument}'.");
                     break;
-                default:
-                    return;
+
+                default: return;
             }
 
             await message.DeleteAsync();
@@ -240,8 +235,9 @@ namespace MudaeFarm
 
         static readonly Dictionary<ulong, IUserMessage> _claimQueue = new Dictionary<ulong, IUserMessage>();
 
-        static async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel,
-            SocketReaction reaction)
+        static async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> cacheable,
+                                              ISocketMessageChannel channel,
+                                              SocketReaction reaction)
         {
             IUserMessage message;
 
@@ -271,7 +267,7 @@ namespace MudaeFarm
                 embed.Author.Value.IconUrl != null)
                 return;
 
-            var name = embed.Author.Value.Name.Trim().ToLowerInvariant();
+            var name  = embed.Author.Value.Name.Trim().ToLowerInvariant();
             var anime = embed.Description.Trim().ToLowerInvariant();
 
             if (anime.Contains('\n'))
@@ -280,7 +276,7 @@ namespace MudaeFarm
             if (_config.WishlistCharacters.Contains(name) ||
                 _config.WishlistAnimes.Contains(anime))
             {
-                _logger.LogInformation($"Found character '{name}', trying marriage.");
+                Log(LogSeverity.Info, $"Found character '{name}', trying marriage.");
 
                 lock (_claimQueue)
                     _claimQueue.Add(message.Id, message);
@@ -289,7 +285,9 @@ namespace MudaeFarm
                     await message.AddReactionAsync(emote);
             }
             else
-                _logger.LogInformation($"Ignored character '{name}', not wished.");
+            {
+                Log(LogSeverity.Info, $"Ignored character '{name}', not wished.");
+            }
         }
 
         static Config _config;
@@ -306,9 +304,9 @@ namespace MudaeFarm
             }
         }
 
-        static async Task SaveConfigAsync()
-        {
-            await File.WriteAllTextAsync("config.json", JsonConvert.SerializeObject(_config));
-        }
+        static Task SaveConfigAsync() => File.WriteAllTextAsync("config.json", JsonConvert.SerializeObject(_config));
+
+        static void Log(LogSeverity severity,
+                        string message) => Console.WriteLine($"{$"[{severity}]".PadRight(10, ' ')} {message}");
     }
 }

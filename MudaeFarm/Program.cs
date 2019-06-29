@@ -20,6 +20,26 @@ namespace MudaeFarm
 
         static async Task Main()
         {
+            while (true)
+            {
+                try
+                {
+                    await RunAsync();
+                }
+                catch (Exception e)
+                {
+                    // fatal error recovery
+                    Log(LogSeverity.Critical, e.ToString());
+
+                    Console.WriteLine("\n\nRestarting in 10 seconds...");
+
+                    await Task.Delay(TimeSpan.FromSeconds(10));
+                }
+            }
+        }
+
+        static async Task RunAsync()
+        {
             // load config
             await LoadConfigAsync();
 
@@ -44,9 +64,11 @@ namespace MudaeFarm
                 if (!Console.ReadKey().KeyChar.ToString().Equals("y", StringComparison.OrdinalIgnoreCase))
                     return;
 
-                Console.Write("\n\nToken: ");
+                Console.Write("\nToken: ");
 
                 _config.AuthToken = Console.ReadLine();
+
+                Console.WriteLine();
 
                 await SaveConfigAsync();
             }

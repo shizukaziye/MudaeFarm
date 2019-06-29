@@ -135,17 +135,11 @@ namespace MudaeFarm
                     {
                         m.Content =
                             "Character wishlist: \n" +
-                            $"- {string.Join("\n- ", _config.WishlistCharacters)}";
-                    });
+                            $"- `{string.Join("`\n- `", _config.WishlistCharacters)}`";
 
-                    return;
-
-                case "wishlistani":
-                    await message.ModifyAsync(m =>
-                    {
                         m.Content =
                             "Anime wishlist: \n" +
-                            $"- {string.Join("\n- ", _config.WishlistAnimes)}";
+                            $"- `{string.Join("`\n- `", _config.WishlistAnimes)}`";
                     });
 
                     return;
@@ -204,6 +198,7 @@ namespace MudaeFarm
                     }
 
                     break;
+
                 case "marry":
                     switch (argument.ToLowerInvariant())
                     {

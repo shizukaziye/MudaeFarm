@@ -192,7 +192,7 @@ namespace MudaeFarm
 
             var delimitor = content.IndexOf(' ');
             var command   = delimitor == -1 ? content : content.Substring(0, delimitor);
-            var argument  = delimitor == -1 ? null : content.Substring(delimitor + 1);
+            var argument  = delimitor == -1 ? null : content.Substring(delimitor).Trim();
 
             if (string.IsNullOrWhiteSpace(command))
                 return;

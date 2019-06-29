@@ -157,8 +157,8 @@ namespace MudaeFarm
                 await HandleSelfCommandAsync(userMessage);
 
             // author is mudae bot or its maid
-            else if (author.Id == 432610292342587392 ||
-                     _maidUsernameRegex.IsMatch(author.Username))
+            else if (author.IsBot && (author.Id == 432610292342587392 ||
+                                      _maidUsernameRegex.IsMatch(author.Username)))
                 await HandleMudaeMessageAsync(userMessage);
         }
 

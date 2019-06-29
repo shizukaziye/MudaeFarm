@@ -34,7 +34,7 @@ DO NOT EVER SHARE THIS TOKEN WITH ANYONE. TREAT THIS TOKEN LIKE YOU TREAT YOUR P
 
 Autorolling:
 
-- `/rollinterval {minutes}` — Sets the roll interval in minutes. Setting this to `-1` disables autorolling.
+- `/rollinterval {minutes}` — Sets the roll interval in minutes. Setting this to `-1` disables autorolling. Autorolling is disabled by default.
 - `/setchannel` — Sets the channel in which you use this command as a bot channel, where MudaeFarm will automatically issue roll commands. You can do this in as many channels as you like.
 - `/unsetchannel` — Stops autorolling in the channel where you send this command.
 - `/marry waifu` — Sets the marry command to waifus (`$w`). This is the default.

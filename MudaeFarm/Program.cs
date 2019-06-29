@@ -12,12 +12,6 @@ namespace MudaeFarm
 {
     class Program
     {
-        public static ulong[] MudaeIds =
-        {
-            432610292342587392,
-            522749851922989068
-        };
-
         static DiscordSocketClient _discord = new DiscordSocketClient(new DiscordSocketConfig
         {
             LogLevel         = LogSeverity.Info,

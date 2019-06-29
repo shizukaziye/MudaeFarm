@@ -47,4 +47,4 @@ Autoclaiming:
 - `/wishani {anime}` — Adds an anime to your wishlist. This is akin to wishing every character from that anime.
 - `/unwishani {anime}` — Removes an anime from your wishlist.
 - `/wishlist` — Shows the list of your wished characters and anime.
-- `/claimdelay` — Sets the number of seconds to wait before automatically claiming a character. This can be used to give a *human-like* feeling at the expense of time spent waiting. The default is `0`.
+- `/claimdelay {seconds}` — Sets the number of seconds to wait before automatically claiming a character. This can be used to give a *human-like* feeling at the expense of time spent waiting. The default is `0`.

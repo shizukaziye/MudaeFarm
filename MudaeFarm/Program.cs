@@ -12,12 +12,6 @@ namespace MudaeFarm
 {
     static class Program
     {
-        static DiscordSocketClient _discord = new DiscordSocketClient(new DiscordSocketConfig
-        {
-            LogLevel         = LogSeverity.Info,
-            MessageCacheSize = 5
-        });
-
         static async Task Main()
         {
             while (true)
@@ -37,8 +31,18 @@ namespace MudaeFarm
             }
         }
 
+        static DiscordSocketClient _discord;
+
         static async Task RunAsync()
         {
+            // reinitialize Discord client
+            _discord?.Dispose();
+            _discord = new DiscordSocketClient(new DiscordSocketConfig
+            {
+                LogLevel         = LogSeverity.Info,
+                MessageCacheSize = 5
+            });
+
             // load config
             await LoadConfigAsync();
 

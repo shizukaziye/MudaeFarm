@@ -369,7 +369,7 @@ namespace MudaeFarm
                 if (_severityColors.TryGetValue(severity, out var newColor))
                     Console.ForegroundColor = newColor;
 
-                Console.WriteLine($"{$"[{severity}]".PadRight(10, ' ')} {message}");
+                Console.WriteLine($"{$"[{severity}]".PadRight(10, ' ')} {message.Trim()}");
 
                 Console.ForegroundColor = oldColor;
             }

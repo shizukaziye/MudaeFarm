@@ -351,7 +351,32 @@ namespace MudaeFarm
 
         static Task SaveConfigAsync() => File.WriteAllTextAsync("config.json", JsonConvert.SerializeObject(_config));
 
+        static readonly object _logLock = new object();
+
         static void Log(LogSeverity severity,
-                        string message) => Console.WriteLine($"{$"[{severity}]".PadRight(10, ' ')} {message}");
+                        string message)
+        {
+            lock (_logLock)
+            {
+                var oldColor = Console.ForegroundColor;
+
+                if (_severityColors.TryGetValue(severity, out var newColor))
+                    Console.ForegroundColor = newColor;
+
+                Console.WriteLine($"{$"[{severity}]".PadRight(10, ' ')} {message}");
+
+                Console.ForegroundColor = oldColor;
+            }
+        }
+
+        static readonly Dictionary<LogSeverity, ConsoleColor> _severityColors =
+            new Dictionary<LogSeverity, ConsoleColor>
+            {
+                { LogSeverity.Debug, ConsoleColor.Gray },
+                { LogSeverity.Verbose, ConsoleColor.Gray },
+                { LogSeverity.Warning, ConsoleColor.Yellow },
+                { LogSeverity.Error, ConsoleColor.Red },
+                { LogSeverity.Critical, ConsoleColor.Red }
+            };
     }
 }

@@ -352,7 +352,7 @@ namespace MudaeFarm
             if (_config.WishlistCharacters.Contains(name) ||
                 _config.WishlistAnime.Contains(anime))
             {
-                Log(LogSeverity.Info, $"Found character '{name}', trying marriage.");
+                Log(LogSeverity.Warning, $"Found character '{name}', trying marriage.");
 
                 lock (_claimQueue)
                     _claimQueue.Add(message.Id, message);

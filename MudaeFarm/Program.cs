@@ -67,7 +67,7 @@ namespace MudaeFarm
 
                 _config.AuthToken = Console.ReadLine();
 
-                Console.WriteLine();
+                Console.Clear();
 
                 await SaveConfigAsync();
             }
@@ -88,7 +88,23 @@ namespace MudaeFarm
                 return Task.CompletedTask;
             }
 
-            await _discord.LoginAsync(TokenType.User, _config.AuthToken);
+            try
+            {
+                await _discord.LoginAsync(TokenType.User, _config.AuthToken);
+            }
+            catch (Exception e)
+            {
+                Log(LogSeverity.Error, e.ToString());
+
+                _config.AuthToken = null;
+                await SaveConfigAsync();
+
+                Log(LogSeverity.Warning,
+                    "User token has been forgotten due to an error while authenticating to Discord.");
+
+                return;
+            }
+
             await _discord.StartAsync();
 
             await connectionSource.Task;

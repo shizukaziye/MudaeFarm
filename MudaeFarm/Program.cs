@@ -135,9 +135,7 @@ namespace MudaeFarm
                     {
                         m.Content =
                             "Character wishlist: \n" +
-                            $"- `{string.Join("`\n- `", _config.WishlistCharacters)}`";
-
-                        m.Content =
+                            $"- `{string.Join("`\n- `", _config.WishlistCharacters)}`\n\n" +
                             "Anime wishlist: \n" +
                             $"- `{string.Join("`\n- `", _config.WishlistAnimes)}`";
                     });

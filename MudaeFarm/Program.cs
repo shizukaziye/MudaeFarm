@@ -50,9 +50,9 @@ namespace MudaeFarm
             while (true)
             {
                 // autorolling
-                if (_config.AutoRollInterval.HasValue)
+                if (_config.RollInterval.HasValue)
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(_config.AutoRollInterval.Value));
+                    await Task.Delay(TimeSpan.FromMinutes(_config.RollInterval.Value));
 
                     await SendRollsAsync();
                 }
@@ -70,7 +70,7 @@ namespace MudaeFarm
             foreach (var channelId in _config.BotChannels)
             {
                 if (_discord.GetChannel(channelId) is ITextChannel channel)
-                    await channel.SendMessageAsync("$" + _config.AutoRollGender);
+                    await channel.SendMessageAsync("$" + _config.RollCommand);
                 else
                     Log(LogSeverity.Warning, $"Channel {channelId} is unavailable.");
 
@@ -137,7 +137,7 @@ namespace MudaeFarm
                             "Character wishlist: \n" +
                             $"- `{string.Join("`\n- `", _config.WishlistCharacters)}`\n\n" +
                             "Anime wishlist: \n" +
-                            $"- `{string.Join("`\n- `", _config.WishlistAnimes)}`";
+                            $"- `{string.Join("`\n- `", _config.WishlistAnime)}`";
                     });
 
                     return;
@@ -175,36 +175,40 @@ namespace MudaeFarm
                     break;
 
                 case "wishani":
-                    _config.WishlistAnimes.Add(argument.ToLowerInvariant());
+                    _config.WishlistAnime.Add(argument.ToLowerInvariant());
 
                     Log(LogSeverity.Info, $"Added anime '{argument}' to the wishlist.");
                     break;
 
                 case "unwishani":
-                    _config.WishlistAnimes.Remove(argument.ToLowerInvariant());
+                    _config.WishlistAnime.Remove(argument.ToLowerInvariant());
 
                     Log(LogSeverity.Info, $"Removed anime '{argument}' from the wishlist.");
                     break;
 
-                case "rollinterval":
-                    if (double.TryParse(argument, out var rollInterval))
-                    {
-                        _config.AutoRollInterval = rollInterval < 0 ? (double?) null : rollInterval;
+                case "rollinterval" when double.TryParse(argument, out var rollInterval):
+                    _config.RollInterval = rollInterval < 0 ? (double?) null : rollInterval;
 
-                        Log(LogSeverity.Info,
-                            $"Set roll interval to every '{_config.AutoRollInterval?.ToString() ?? "<null>"}' minutes.");
-                    }
+                    Log(LogSeverity.Info,
+                        $"Set roll interval to every '{_config.RollInterval?.ToString() ?? "<null>"}' minutes.");
 
+                    break;
+
+                case "claimdelay" when double.TryParse(argument, out var claimDelay):
+                    _config.ClaimDelay = Math.Max(claimDelay, 0);
+
+                    Log(LogSeverity.Info, $"Set claim delay to `{claimDelay}` seconds.");
                     break;
 
                 case "marry":
                     switch (argument.ToLowerInvariant())
                     {
                         case "waifu":
-                            _config.AutoRollGender = 'w';
+                            _config.RollCommand = 'w';
                             break;
+
                         case "husbando":
-                            _config.AutoRollGender = 'h';
+                            _config.RollCommand = 'h';
                             break;
 
                         default: return;
@@ -236,6 +240,10 @@ namespace MudaeFarm
                 _claimQueue.Remove(reaction.MessageId);
             }
 
+            // claim delay
+            if (_config.ClaimDelay > 0)
+                await Task.Delay(TimeSpan.FromSeconds(_config.ClaimDelay));
+
             await message.AddReactionAsync(reaction.Emote);
         }
 
@@ -261,7 +269,7 @@ namespace MudaeFarm
                 return;
 
             if (_config.WishlistCharacters.Contains(name) ||
-                _config.WishlistAnimes.Contains(anime))
+                _config.WishlistAnime.Contains(anime))
             {
                 Log(LogSeverity.Info, $"Found character '{name}', trying marriage.");
 

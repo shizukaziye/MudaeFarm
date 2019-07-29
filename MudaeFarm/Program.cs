@@ -344,7 +344,7 @@ namespace MudaeFarm
                 return;
 
             var name  = embed.Author.Value.Name.Trim().ToLowerInvariant();
-            var anime = embed.Description.Trim().ToLowerInvariant();
+            var anime = embed.Description.Split('\n')[0].Trim().ToLowerInvariant();
 
             if (anime.Contains('\n'))
                 return;

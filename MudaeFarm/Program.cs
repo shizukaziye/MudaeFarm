@@ -161,7 +161,7 @@ namespace MudaeFarm
 
         // mudamaid username regex
         static readonly Regex _maidUsernameRegex = new Regex(
-            @"^Mudamaid\s\d+$",
+            @"^Mudamaid\s*\d+$",
             RegexOptions.Singleline | RegexOptions.Compiled);
 
         static async Task HandleMessageAsync(SocketMessage message)

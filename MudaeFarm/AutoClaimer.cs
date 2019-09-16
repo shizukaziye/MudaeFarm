@@ -63,9 +63,6 @@ namespace MudaeFarm
             var name  = embed.Author.Value.Name.Trim().ToLowerInvariant();
             var anime = embed.Description.Split('\n')[0].Trim().ToLowerInvariant();
 
-            if (anime.Contains('\n'))
-                return;
-
             if (_config.WishlistCharacters.Contains(name) || _config.WishlistAnime.Contains(anime))
             {
                 Log.Warning($"Found character '{name}', trying marriage.");

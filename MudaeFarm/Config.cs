@@ -5,6 +5,9 @@ using Newtonsoft.Json;
 
 namespace MudaeFarm
 {
+    /// <remarks>
+    /// Always lock collection properties before accessing them!!
+    /// </remarks>
     public class Config
     {
         // store at %LocalAppData%/MudaeFarm/config.json
@@ -14,16 +17,16 @@ namespace MudaeFarm
         public string AuthToken { get; set; } = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
 
         [JsonProperty("roll_interval")]
-        public double? RollInterval { get; set; }
+        public double RollInterval { get; set; }
 
         [JsonProperty("roll_command")]
-        public char RollCommand { get; set; } = 'w';
+        public string RollCommand { get; set; } = "w";
+
+        [JsonProperty("roll_channels")]
+        public HashSet<ulong> RollChannels { get; set; } = new HashSet<ulong>();
 
         [JsonProperty("claim_delay")]
         public double ClaimDelay { get; set; }
-
-        [JsonProperty("bot_channels")]
-        public HashSet<ulong> BotChannels { get; set; } = new HashSet<ulong>();
 
         [JsonProperty("wish_chars")]
         public HashSet<string> WishlistCharacters { get; set; } = new HashSet<string>();

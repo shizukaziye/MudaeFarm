@@ -54,7 +54,7 @@ namespace MudaeFarm
                     }
 
                 // don't spam the api
-                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
             }
         }
     }

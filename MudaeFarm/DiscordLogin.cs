@@ -21,13 +21,13 @@ namespace MudaeFarm
         {
             var completionSource = new TaskCompletionSource<object>();
 
-            Task handleConnect()
+            Task handleReady()
             {
                 completionSource.SetResult(null);
                 return Task.CompletedTask;
             }
 
-            _client.Connected += handleConnect;
+            _client.Ready += handleReady;
 
             try
             {
@@ -50,7 +50,7 @@ namespace MudaeFarm
             }
             finally
             {
-                _client.Connected -= handleConnect;
+                _client.Ready -= handleReady;
             }
 
             Log.Warning($"Logged in as: {_client.CurrentUser.Username} ({_client.CurrentUser.Id})");

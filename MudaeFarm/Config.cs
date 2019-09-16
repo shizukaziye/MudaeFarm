@@ -8,7 +8,7 @@ namespace MudaeFarm
     /// <remarks>
     /// Always lock collection properties before accessing them!!
     /// </remarks>
-    public class Config
+    public class Config : ICloneable
     {
         // store at %LocalAppData%/MudaeFarm/config.json
         static readonly string _configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MudaeFarm", "config.json");
@@ -34,6 +34,17 @@ namespace MudaeFarm
         [JsonProperty("wish_anime")]
         public HashSet<string> WishlistAnime { get; set; } = new HashSet<string>();
 
+        public object Clone() => new Config
+        {
+            AuthToken          = AuthToken,
+            RollInterval       = RollInterval,
+            RollCommand        = RollCommand,
+            RollChannels       = RollChannels.Lock(x => new HashSet<ulong>(x)),
+            ClaimDelay         = ClaimDelay,
+            WishlistCharacters = WishlistCharacters.Lock(x => new HashSet<string>(x)),
+            WishlistAnime      = WishlistAnime.Lock(x => new HashSet<string>(x))
+        };
+
         public static Config Load()
         {
             try
@@ -42,10 +53,12 @@ namespace MudaeFarm
             }
             catch (FileNotFoundException)
             {
+                Log.Warning($"Initializing new configuration not found at: {_configPath}");
                 return new Config();
             }
             catch (DirectoryNotFoundException)
             {
+                Log.Warning($"Initializing new configuration not found at: {_configPath}");
                 return new Config();
             }
         }
@@ -54,7 +67,12 @@ namespace MudaeFarm
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_configPath));
 
-            File.WriteAllText(_configPath, JsonConvert.SerializeObject(this, Formatting.Indented));
+            // clone first for thread safety
+            var config = Clone();
+
+            File.WriteAllText(_configPath, JsonConvert.SerializeObject(config, Formatting.Indented));
+
+            Log.Debug($"Configuration saved at: {_configPath}");
         }
     }
 }

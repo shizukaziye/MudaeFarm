@@ -20,7 +20,7 @@ namespace MudaeFarm
                 catch (Exception e)
                 {
                     // fatal error recovery
-                    Log.Error("A fatal error had occurred.", e);
+                    Log.Error(null, e);
                 }
 
                 Log.Info("Restarting in 10 seconds...");

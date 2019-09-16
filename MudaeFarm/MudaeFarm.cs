@@ -29,17 +29,24 @@ namespace MudaeFarm
             // discord login
             await new DiscordLogin(_config, _client).RunAsync(cancellationToken);
 
-            // command handling
-            new CommandListener(_config, _client).Initialize();
+            try
+            {
+                // command handling
+                new CommandListener(_config, _client).Initialize();
 
-            // auto-claiming
-            new AutoClaimer(_config, _client).Initialize();
+                // auto-claiming
+                new AutoClaimer(_config, _client).Initialize();
 
-            // auto-rolling
-            var roller = new AutoRoller(_config, _client).RunAsync(cancellationToken);
+                // auto-rolling
+                var roller = new AutoRoller(_config, _client).RunAsync(cancellationToken);
 
-            // keep the bot running
-            await Task.WhenAll(roller, Task.Delay(-1, cancellationToken));
+                // keep the bot running
+                await Task.WhenAll(roller, Task.Delay(-1, cancellationToken));
+            }
+            finally
+            {
+                await _client.StopAsync();
+            }
         }
 
         public void Dispose()

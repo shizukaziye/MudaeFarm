@@ -17,6 +17,7 @@ namespace MudaeFarm
                 try
                 {
                     await RunAsync();
+                    return;
                 }
                 catch (Exception e)
                 {

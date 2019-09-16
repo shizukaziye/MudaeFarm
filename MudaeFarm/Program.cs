@@ -367,12 +367,13 @@ namespace MudaeFarm
         }
 
         static Config _config;
+        static readonly string _configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MudaeFarm", "config.json");
 
         static async Task LoadConfigAsync()
         {
             try
             {
-                _config = JsonConvert.DeserializeObject<Config>(await File.ReadAllTextAsync("config.json"));
+                _config = JsonConvert.DeserializeObject<Config>(await File.ReadAllTextAsync(_configPath));
             }
             catch (FileNotFoundException)
             {
@@ -380,7 +381,7 @@ namespace MudaeFarm
             }
         }
 
-        static Task SaveConfigAsync() => File.WriteAllTextAsync("config.json", JsonConvert.SerializeObject(_config));
+        static Task SaveConfigAsync() => File.WriteAllTextAsync(_configPath, JsonConvert.SerializeObject(_config));
 
         static readonly object _logLock = new object();
 

@@ -53,12 +53,12 @@ namespace MudaeFarm
             }
             catch (FileNotFoundException)
             {
-                Log.Warning($"Initializing new configuration not found at: {_configPath}");
+                Log.Debug($"Initializing new configuration not found at: {_configPath}");
                 return new Config();
             }
             catch (DirectoryNotFoundException)
             {
-                Log.Warning($"Initializing new configuration not found at: {_configPath}");
+                Log.Debug($"Initializing new configuration not found at: {_configPath}");
                 return new Config();
             }
         }

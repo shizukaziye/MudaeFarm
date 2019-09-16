@@ -47,7 +47,7 @@ namespace MudaeFarm
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_configPath));
 
-            File.WriteAllText(_configPath, JsonConvert.SerializeObject(this));
+            File.WriteAllText(_configPath, JsonConvert.SerializeObject(this, Formatting.Indented));
         }
     }
 }

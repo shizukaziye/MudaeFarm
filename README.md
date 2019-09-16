@@ -6,20 +6,20 @@ This is a simple bot that automatically rolls and claims Mudae waifus/husbandoes
 
 ## Setup
 
-1. Install [.NET Core SDK](https://dotnet.microsoft.com/download).
+1. Download and extract the [latest release](https://github.com/chiyadev/MudaeFarm/releases/latest/download/MudaeFarm.zip).
 
-2. Download this repository [as a zip](https://github.com/chiyadev/MudaeFarm/archive/master.zip).
+2. Run `MudaeFarm.exe`. 'Windows protected your PC' popup will appear which can be bypassed by clicking 'More info'.
 
-3. Open terminal or CMD in the folder and run these commands: `dotnet build`, `dotnet run`
+Alternatively, to avoid bypassing security, you may build this project yourself using the .NET Framework SDK. (I cannot afford a code signing certificate.)
 
-4. Enter your user token. [How?](https://github.com/chiyadev/MudaeFarm/blob/master/User%20tokens.md)
+3. Enter your user token. [How?](https://github.com/chiyadev/MudaeFarm/blob/master/User%20tokens.md)
 
 ## Commands
 
 Autorolling:
 
 - `/rollinterval {minutes}` — Sets the roll interval in minutes. Setting this to `0` disables autorolling. Autorolling is disabled by default.
-- `/roll` — Sets the channel in which you use this command as a bot channel, where MudaeFarm will automatically issue roll commands. You can do this in as many channels as you like.
+- `/roll` — Sets the channel in which you use this command as a channel MudaeFarm will automatically issue roll commands. You can do this in as many channels as you like.
 - `/roll disable` — Stops autorolling in the channel where you send this command.
 - `/marry waifu` — Sets the marry command to waifus (`$w`). This is the default.
 - `/marry husbando` — Sets the marry command to husbandoes (`$h`).

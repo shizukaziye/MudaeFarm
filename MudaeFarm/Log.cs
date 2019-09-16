@@ -25,11 +25,18 @@ namespace MudaeFarm
                 foreach (var line in SplitLines(e.ToString()))
                     builder.AppendLine(prefix + line);
 
+            var text = builder.ToString();
+
             lock (_logLock)
             {
                 Console.ForegroundColor = color;
 
-                Console.Write(builder.ToString());
+                Console.Write(text);
+
+                if (text.Length > 100)
+                    text = text.Substring(0, 100);
+
+                Console.Title = "MudaeFarm — " + text;
             }
         }
 

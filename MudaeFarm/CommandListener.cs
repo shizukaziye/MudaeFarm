@@ -113,28 +113,45 @@ namespace MudaeFarm
         [Command("wishlist")]
         public async Task WishlistAsync(IUserMessage message)
         {
-            string characterWishlist;
+            var characterWishlist = null as string;
 
             lock (_config.WishlistCharacters)
             {
-                if (_config.WishlistCharacters.Count == 0)
-                    characterWishlist = "No characters in wishlist.";
-                else
-                    characterWishlist = "Wished characters: " + string.Join(", ", _config.WishlistCharacters);
+                if (_config.WishlistCharacters.Count != 0)
+                    characterWishlist = $"Wished characters: `{string.Join("`, `", _config.WishlistCharacters)}`";
             }
 
-            string animeWishlist;
+            var animeWishlist = null as string;
 
             lock (_config.WishlistAnime)
             {
-                if (_config.WishlistAnime.Count == 0)
-                    animeWishlist = "No anime in wishlist.";
-                else
-                    animeWishlist = "Wished anime: " + string.Join(", ", _config.WishlistAnime);
+                if (_config.WishlistAnime.Count != 0)
+                    animeWishlist = $"Wished characters: `{string.Join("`, `", _config.WishlistAnime)}`";
             }
 
-            await message.ModifyAsync(m => m.Content = characterWishlist);
-            await message.Channel.SendMessageAsync(animeWishlist);
+            var channel = message.Channel;
+
+            async Task showResult(string str)
+            {
+                if (str == null)
+                    return;
+
+                if (message == null)
+                {
+                    await channel.SendMessageAsync(str);
+                }
+                else
+                {
+                    await message.ModifyAsync(m => m.Content = str);
+                    message = null;
+                }
+            }
+
+            await showResult(characterWishlist);
+            await showResult(animeWishlist);
+
+            if (message != null)
+                await message.DeleteAsync();
         }
 
         [Command("wish")]

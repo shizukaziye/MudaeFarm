@@ -39,10 +39,7 @@ namespace MudaeFarm
 
         async Task SendRollsAsync(CancellationToken cancellationToken = default)
         {
-            ulong[] channels;
-
-            lock (_config.RollChannels)
-                channels = _config.RollChannels.ToArray();
+            var channels = _config.RollChannels.Lock(x => x.ToArray());
 
             foreach (var channelId in channels)
             {

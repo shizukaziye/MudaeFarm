@@ -115,19 +115,19 @@ namespace MudaeFarm
         {
             var characterWishlist = null as string;
 
-            lock (_config.WishlistCharacters)
+            _config.WishlistCharacters.Lock(set =>
             {
-                if (_config.WishlistCharacters.Count != 0)
-                    characterWishlist = $"Wished characters: `{string.Join("`, `", _config.WishlistCharacters)}`";
-            }
+                if (set.Count != 0)
+                    characterWishlist = $"Wished characters: `{string.Join("`, `", set)}`";
+            });
 
             var animeWishlist = null as string;
 
-            lock (_config.WishlistAnime)
+            _config.WishlistAnime.Lock(set =>
             {
-                if (_config.WishlistAnime.Count != 0)
-                    animeWishlist = $"Wished characters: `{string.Join("`, `", _config.WishlistAnime)}`";
-            }
+                if (set.Count != 0)
+                    animeWishlist = $"Wished characters: `{string.Join("`, `", set)}`";
+            });
 
             var channel = message.Channel;
 
@@ -157,11 +157,13 @@ namespace MudaeFarm
         [Command("wish")]
         public async Task WishCharacterAsync(IUserMessage message, string character)
         {
-            lock (_config.WishlistCharacters)
+            _config.WishlistCharacters.Lock(set =>
             {
-                if (_config.WishlistCharacters.Add(character.ToLowerInvariant()))
+                if (set.Add(character.ToLowerInvariant()))
                     Log.Info($"Added character '{character}' to the wishlist.");
-            }
+            });
+
+            _config.Save();
 
             await message.DeleteAsync();
         }
@@ -169,11 +171,13 @@ namespace MudaeFarm
         [Command("unwish")]
         public async Task UnwishCharacterAsync(IUserMessage message, string character)
         {
-            lock (_config.WishlistCharacters)
+            _config.WishlistCharacters.Lock(set =>
             {
-                if (_config.WishlistCharacters.Remove(character.ToLowerInvariant()))
+                if (set.Remove(character.ToLowerInvariant()))
                     Log.Info($"Removed character '{character}' from the wishlist.");
-            }
+            });
+
+            _config.Save();
 
             await message.DeleteAsync();
         }
@@ -181,11 +185,13 @@ namespace MudaeFarm
         [Command("wishani")]
         public async Task WishAnimeAsync(IUserMessage message, string anime)
         {
-            lock (_config.WishlistAnime)
+            _config.WishlistAnime.Lock(set =>
             {
-                if (_config.WishlistAnime.Add(anime.ToLowerInvariant()))
+                if (set.Add(anime.ToLowerInvariant()))
                     Log.Info($"Added anime '{anime}' to the wishlist.");
-            }
+            });
+
+            _config.Save();
 
             await message.DeleteAsync();
         }
@@ -193,11 +199,13 @@ namespace MudaeFarm
         [Command("unwishani")]
         public async Task UnwishAnimeAsync(IUserMessage message, string anime)
         {
-            lock (_config.WishlistAnime)
+            _config.WishlistAnime.Lock(set =>
             {
-                if (_config.WishlistAnime.Remove(anime.ToLowerInvariant()))
+                if (set.Remove(anime.ToLowerInvariant()))
                     Log.Info($"Removed anime '{anime}' from the wishlist.");
-            }
+            });
+
+            _config.Save();
 
             await message.DeleteAsync();
         }
@@ -215,6 +223,8 @@ namespace MudaeFarm
                 ClearWishlistInternal(category);
             }
 
+            _config.Save();
+
             await message.DeleteAsync();
         }
 
@@ -223,20 +233,20 @@ namespace MudaeFarm
             switch (category.ToLowerInvariant())
             {
                 case "characters":
-                    lock (_config.WishlistCharacters)
+                    _config.WishlistCharacters.Lock(set =>
                     {
-                        _config.WishlistCharacters.Clear();
+                        set.Clear();
                         Log.Info("Cleared character wishlist.");
-                    }
+                    });
 
                     break;
 
                 case "anime":
-                    lock (_config.WishlistAnime)
+                    _config.WishlistAnime.Lock(set =>
                     {
-                        _config.WishlistAnime.Clear();
+                        set.Clear();
                         Log.Info("Cleared anime wishlist.");
-                    }
+                    });
 
                     break;
             }
@@ -248,8 +258,8 @@ namespace MudaeFarm
             if (!double.TryParse(arg, out var delay))
                 return;
 
-            // ReSharper disable once InconsistentlySynchronizedField
             _config.ClaimDelay = delay;
+            _config.Save();
 
             Log.Info(delay <= 0
                          ? "Claiming delay disabled."
@@ -264,8 +274,8 @@ namespace MudaeFarm
             if (!double.TryParse(arg, out var interval))
                 return;
 
-            // ReSharper disable once InconsistentlySynchronizedField
             _config.RollInterval = interval;
+            _config.Save();
 
             Log.Info(interval <= 0
                          ? "Rolling is disabled."
@@ -277,23 +287,25 @@ namespace MudaeFarm
         [Command("roll")]
         public async Task RollChannelAsync(IUserMessage message, string action)
         {
-            lock (_config.RollChannels)
+            _config.RollChannels.Lock(set =>
             {
                 switch (action.ToLowerInvariant())
                 {
                     default:
-                        if (_config.RollChannels.Add(message.Channel.Id))
+                        if (set.Add(message.Channel.Id))
                             Log.Info($"Added roll channel '{message.Channel}'");
 
                         break;
 
                     case "disable":
-                        if (_config.RollChannels.Remove(message.Channel.Id))
+                        if (set.Remove(message.Channel.Id))
                             Log.Info($"Removed roll channel '{message.Channel}'");
 
                         break;
                 }
-            }
+            });
+
+            _config.Save();
 
             // edit message first so the command is not saved in logs
             await message.ModifyAsync(m => m.Content = Utilities.RandString(3));
@@ -314,8 +326,8 @@ namespace MudaeFarm
                     break;
             }
 
-            // ReSharper disable once InconsistentlySynchronizedField
             _config.RollCommand = command;
+            _config.Save();
 
             Log.Info($"Roll command set to '${command}'.");
 

@@ -16,5 +16,17 @@ namespace MudaeFarm
 
             return new string(buffer);
         }
+
+        public static void Lock<T>(this T value, Action<T> action)
+        {
+            lock (value)
+                action(value);
+        }
+
+        public static TReturn Lock<T, TReturn>(this T value, Func<T, TReturn> func)
+        {
+            lock (value)
+                return func(value);
+        }
     }
 }

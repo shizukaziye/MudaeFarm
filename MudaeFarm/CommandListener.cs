@@ -283,7 +283,7 @@ namespace MudaeFarm
         {
             _config.RollChannels.Lock(set =>
             {
-                switch (action.ToLowerInvariant())
+                switch (action?.ToLowerInvariant())
                 {
                     default:
                         if (set.Add(message.Channel.Id))

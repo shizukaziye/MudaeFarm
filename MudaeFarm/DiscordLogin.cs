@@ -52,6 +52,8 @@ namespace MudaeFarm
             {
                 _client.Connected -= handleConnect;
             }
+
+            Log.Warning($"Logged in as {_client.CurrentUser.Username} ({_client.CurrentUser.Id}).");
         }
     }
 }

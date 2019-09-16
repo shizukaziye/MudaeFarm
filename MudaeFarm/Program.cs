@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Newtonsoft.Json;
 
 namespace MudaeFarm
 {
@@ -31,6 +29,8 @@ namespace MudaeFarm
             }
         }
 
+        static Config _config = Config.Load();
+
         static DiscordSocketClient _discord;
 
         static async Task RunAsync()
@@ -42,9 +42,6 @@ namespace MudaeFarm
                 LogLevel         = LogSeverity.Info,
                 MessageCacheSize = 5
             });
-
-            // load config
-            await LoadConfigAsync();
 
             // ask for token if not set
             if (string.IsNullOrEmpty(_config.AuthToken))
@@ -73,7 +70,7 @@ namespace MudaeFarm
 
                 Console.Clear();
 
-                await SaveConfigAsync();
+                _config.Save();
             }
 
             // events
@@ -101,7 +98,7 @@ namespace MudaeFarm
                 Log(LogSeverity.Error, e.ToString());
 
                 _config.AuthToken = null;
-                await SaveConfigAsync();
+                _config.Save();
 
                 Log(LogSeverity.Warning,
                     "User token has been forgotten due to an error while authenticating to Discord.");
@@ -185,7 +182,7 @@ namespace MudaeFarm
         {
             var content = message.Content;
 
-            if (!content.StartsWith('/'))
+            if (!content.StartsWith("/"))
                 return;
 
             content = content.Substring(1);
@@ -302,7 +299,7 @@ namespace MudaeFarm
             }
 
             await message.DeleteAsync();
-            await SaveConfigAsync();
+            _config.Save();
         }
 
         static readonly Dictionary<ulong, IUserMessage> _claimQueue = new Dictionary<ulong, IUserMessage>();
@@ -365,23 +362,6 @@ namespace MudaeFarm
                 Log(LogSeverity.Info, $"Ignored character '{name}', not wished.");
             }
         }
-
-        static Config _config;
-        static readonly string _configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MudaeFarm", "config.json");
-
-        static async Task LoadConfigAsync()
-        {
-            try
-            {
-                _config = JsonConvert.DeserializeObject<Config>(await File.ReadAllTextAsync(_configPath));
-            }
-            catch (FileNotFoundException)
-            {
-                _config = new Config();
-            }
-        }
-
-        static Task SaveConfigAsync() => File.WriteAllTextAsync(_configPath, JsonConvert.SerializeObject(_config));
 
         static readonly object _logLock = new object();
 

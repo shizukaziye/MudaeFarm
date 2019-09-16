@@ -12,6 +12,29 @@ namespace MudaeFarm
 {
     public class AutoClaimer
     {
+        // https://emojipedia.org/hearts/
+        static readonly IEmote[] _heartEmotes =
+        {
+            new Emoji("\uD83D\uDC98"), // cupid
+            new Emoji("\uD83D\uDC9D"), // gift_heart
+            new Emoji("\uD83D\uDC96"), // sparkling_heart
+            new Emoji("\uD83D\uDC97"), // heartpulse
+            new Emoji("\uD83D\uDC93"), // heartbeat
+            new Emoji("\uD83D\uDC9E"), // revolving_hearts
+            new Emoji("\uD83D\uDC95"), // two_hearts
+            new Emoji("\uD83D\uDC9F"), // heart_decoration
+            new Emoji("\u2764"),       // heart
+            new Emoji("\uD83E\uDDE1"), // heart (orange)
+            new Emoji("\uD83D\uDC9B"), // yellow_heart
+            new Emoji("\uD83D\uDC9A"), // green_heart
+            new Emoji("\uD83D\uDC99"), // blue_heart
+            new Emoji("\uD83D\uDC9C"), // purple_heart
+            new Emoji("\uD83E\uDD0E"), // heart (brown)
+            new Emoji("\uD83D\uDDA4"), // heart (black)
+            new Emoji("\uD83E\uDD0D"), // heart (white)
+            new Emoji("\u2665")        // hearts
+        };
+
         readonly Config _config;
         readonly DiscordSocketClient _client;
 
@@ -91,6 +114,10 @@ namespace MudaeFarm
 
                 _claimQueue.Remove(reaction.MessageId);
             }
+
+            // reaction must be a heart emote
+            if (Array.IndexOf(_heartEmotes, reaction.Emote) == -1)
+                return;
 
             // claim delay
             var delay = _config.ClaimDelay;

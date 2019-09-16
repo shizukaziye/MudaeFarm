@@ -30,12 +30,14 @@ namespace MudaeFarm
             }
         }
 
-        static Config _config = Config.Load();
+        static Config _config;
 
         static DiscordSocketClient _discord;
 
         static async Task RunAsync()
         {
+            _config = Config.Load();
+
             // reinitialize Discord client
             _discord?.Dispose();
             _discord = new DiscordSocketClient(new DiscordSocketConfig

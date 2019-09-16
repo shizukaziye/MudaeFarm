@@ -41,6 +41,10 @@ namespace MudaeFarm
             {
                 return new Config();
             }
+            catch (DirectoryNotFoundException)
+            {
+                return new Config();
+            }
         }
 
         public void Save()

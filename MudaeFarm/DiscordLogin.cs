@@ -53,7 +53,7 @@ namespace MudaeFarm
                 _client.Connected -= handleConnect;
             }
 
-            Log.Warning($"Logged in as: {_client.CurrentUser.Username} ({_client.CurrentUser.Id}).");
+            Log.Warning($"Logged in as: {_client.CurrentUser.Username} ({_client.CurrentUser.Id})");
 
             foreach (var guild in _client.Guilds)
                 Log.Info($"Found server: {guild.Name} ({guild.Id})");

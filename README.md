@@ -8,7 +8,9 @@ This is a simple bot that automatically rolls and claims Mudae waifus/husbandoes
 
 1. Download and extract the [latest release](https://github.com/chiyadev/MudaeFarm/releases/latest/download/MudaeFarm.zip).
 
-2. Run `MudaeFarm.exe`. "Windows protected your PC" popup will appear which can be bypassed by clicking "More info". Alternatively, to avoid bypassing security, you may build this project yourself using the .NET Framework SDK. (I cannot afford a code signing certificate.)
+2. Run `MudaeFarm.exe`.
+
+You can bypass the "Windows protected your PC" popup by clicking "More info". Alternatively, you may build this project yourself using the .NET Framework SDK. (I cannot afford a code signing certificate.)
 
 3. Enter your user token. [How?](https://github.com/chiyadev/MudaeFarm/blob/master/User%20tokens.md)
 

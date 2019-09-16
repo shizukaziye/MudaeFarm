@@ -11,32 +11,33 @@ namespace MudaeFarm
 
         public async Task RunAsync()
         {
-            var currentVersion = typeof(Program).Assembly.GetName().Version;
-
-            Log.Warning($"MudaeFarm v{currentVersion.ToString(2)} by chiya.dev");
-            Log.Info("Checking for updates...");
-
-            var latestRelease = await _client.Repository.Release.GetLatest("chiyadev", "MudaeFarm");
-
-            if (!Version.TryParse(latestRelease.Name.TrimStart('v'), out var latestVersion))
-            {
-                Log.Warning($"Unable to parse version number: {latestRelease.Name}");
-                return;
-            }
-
-            if (currentVersion.CompareTo(latestVersion) >= 0)
-                return;
-
-            // newer version available
-            Log.Warning($"Version v{latestVersion.ToString(2)} available: {latestRelease.HtmlUrl}");
-
             try
             {
-                Process.Start(latestRelease.HtmlUrl);
+                var currentVersion = typeof(Program).Assembly.GetName().Version;
+
+                Log.Warning($"MudaeFarm v{currentVersion.ToString(2)} by chiya.dev");
+
+                var latestRelease = await _client.Repository.Release.GetLatest("chiyadev", "MudaeFarm");
+                var latestVersion = Version.Parse(latestRelease.Name.TrimStart('v'));
+
+                if (currentVersion.CompareTo(latestVersion) >= 0)
+                    return;
+
+                // newer version available
+                Log.Warning($"Version v{latestVersion.ToString(2)} available: {latestRelease.HtmlUrl}");
+
+                try
+                {
+                    Process.Start(latestRelease.HtmlUrl);
+                }
+                catch
+                {
+                    // ignored
+                }
             }
             catch
             {
-                // ignored
+                Log.Info("Could not check for updates.");
             }
         }
     }

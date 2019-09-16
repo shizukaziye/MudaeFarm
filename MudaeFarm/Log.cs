@@ -16,14 +16,15 @@ namespace MudaeFarm
         static void Write(ConsoleColor color, string prefix, string message, Exception e)
         {
             var builder = new StringBuilder();
+            var title   = null as string;
 
             if (message != null)
                 foreach (var line in SplitLines(message.Trim()))
-                    builder.AppendLine(prefix + line);
+                    builder.AppendLine(title = prefix + line);
 
             if (e != null)
                 foreach (var line in SplitLines(e.ToString()))
-                    builder.AppendLine(prefix + line);
+                    builder.AppendLine(title = prefix + line);
 
             var text = builder.ToString();
 
@@ -33,10 +34,13 @@ namespace MudaeFarm
 
                 Console.Write(text);
 
-                if (text.Length > 100)
-                    text = text.Substring(0, 100);
+                if (title != null)
+                {
+                    if (title.Length > 100)
+                        title = title.Substring(0, 97) + "...";
 
-                Console.Title = "MudaeFarm — " + text;
+                    Console.Title = "MudaeFarm — " + title;
+                }
             }
         }
 

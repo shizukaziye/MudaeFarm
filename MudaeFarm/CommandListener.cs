@@ -115,12 +115,12 @@ namespace MudaeFarm
         {
             var characterWishlist = _config.WishlistCharacters.Lock(
                 set => set.Count != 0
-                    ? $"Wished characters: `{string.Join("`, `", set)}`"
+                    ? $"Wished characters: `{string.Join("`, `", set.OrderBy(x => x))}`"
                     : null);
 
             var animeWishlist = _config.WishlistAnime.Lock(
                 set => set.Count != 0
-                    ? $"Wished characters: `{string.Join("`, `", set)}`"
+                    ? $"Wished characters: `{string.Join("`, `", set.OrderBy(x => x))}`"
                     : null);
 
             var channel = message.Channel;

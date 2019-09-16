@@ -4,7 +4,7 @@
         <OutputType>exe</OutputType>
         <TargetFramework>net46</TargetFramework>
         <LangVersion>latest</LangVersion>
-        <PackageVersion>2.0</PackageVersion>
+        <Version>2.0</Version>
         <Title>MudaeFarm</Title>
         <Authors>chiya.dev</Authors>
         <Copyright>Copyright (C) chiya.dev 2018-2019</Copyright>

@@ -32,7 +32,7 @@ namespace MudaeFarm
                             {
                                 var parameters = m.GetParameters();
 
-                                if (m.ReturnType.IsSubclassOf(typeof(Task)))
+                                if (m.ReturnType.IsAssignableFrom(typeof(Task)))
                                 {
                                     if (parameters.Length == 0)
                                         return (msg, args) => (Task) m.Invoke(this, new object[0]);

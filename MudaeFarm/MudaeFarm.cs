@@ -29,6 +29,9 @@ namespace MudaeFarm
             // discord login
             await new DiscordLogin(_config, _client).RunAsync(cancellationToken);
 
+            // command handling
+            new CommandListener(_config, _client).Initialize();
+
             // auto-claiming
             new AutoClaimer(_config, _client).Initialize();
 

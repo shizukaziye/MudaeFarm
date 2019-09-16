@@ -23,6 +23,9 @@ namespace MudaeFarm
 
         public async Task RunAsync(CancellationToken cancellationToken = default)
         {
+            // check version
+            await new UpdateChecker().RunAsync();
+
             // ask user for their auth token
             new AuthToken(_config).EnsureInitialized();
 

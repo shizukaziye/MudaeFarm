@@ -12,7 +12,7 @@ This is a simple bot that automatically rolls and claims Mudae waifus/husbandoes
 
 3. Open terminal or CMD in the folder and run these commands: `dotnet build`, `dotnet run`
 
-4. Enter your user token ([how?](User tokens.md).
+4. Enter your user token. [How?](https://github.com/chiyadev/MudaeFarm/blob/master/User%20tokens.md)
 
 ## Commands
 

@@ -113,21 +113,15 @@ namespace MudaeFarm
         [Command("wishlist")]
         public async Task WishlistAsync(IUserMessage message)
         {
-            var characterWishlist = null as string;
+            var characterWishlist = _config.WishlistCharacters.Lock(
+                set => set.Count != 0
+                    ? $"Wished characters: `{string.Join("`, `", set)}`"
+                    : null);
 
-            _config.WishlistCharacters.Lock(set =>
-            {
-                if (set.Count != 0)
-                    characterWishlist = $"Wished characters: `{string.Join("`, `", set)}`";
-            });
-
-            var animeWishlist = null as string;
-
-            _config.WishlistAnime.Lock(set =>
-            {
-                if (set.Count != 0)
-                    animeWishlist = $"Wished characters: `{string.Join("`, `", set)}`";
-            });
+            var animeWishlist = _config.WishlistAnime.Lock(
+                set => set.Count != 0
+                    ? $"Wished characters: `{string.Join("`, `", set)}`"
+                    : null);
 
             var channel = message.Channel;
 

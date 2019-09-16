@@ -11,7 +11,7 @@ namespace MudaeFarm
         public static void Debug(string message, Exception exception = null) => Write(ConsoleColor.DarkGray, "[dbug] ", message, exception);
         public static void Info(string message, Exception exception = null) => Write(ConsoleColor.Gray, "[info] ", message, exception);
         public static void Warning(string message, Exception exception = null) => Write(ConsoleColor.Yellow, "[warn] ", message, exception);
-        public static void Error(string message, Exception exception = null) => Write(ConsoleColor.Red, "[eror] ", message, exception);
+        public static void Error(string message, Exception exception = null) => Write(ConsoleColor.Red, "[erro] ", message, exception);
 
         static void Write(ConsoleColor color, string prefix, string message, Exception e)
         {

@@ -15,7 +15,7 @@ namespace MudaeFarm
             {
                 var currentVersion = typeof(Program).Assembly.GetName().Version;
 
-                Log.Warning($"MudaeFarm v{currentVersion.ToString(2)} by chiya.dev");
+                Log.Warning($"MudaeFarm v{currentVersion.ToString(3)} by chiya.dev");
 
                 var latestRelease = await _client.Repository.Release.GetLatest("chiyadev", "MudaeFarm");
                 var latestVersion = Version.Parse(latestRelease.Name.TrimStart('v'));
@@ -24,7 +24,7 @@ namespace MudaeFarm
                     return;
 
                 // newer version available
-                Log.Warning($"Version v{latestVersion.ToString(2)} available: {latestRelease.HtmlUrl}");
+                Log.Warning($"Version v{latestVersion.ToString(3)} available: {latestRelease.HtmlUrl}");
 
                 try
                 {

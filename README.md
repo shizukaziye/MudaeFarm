@@ -33,3 +33,7 @@ Autoclaiming:
 - `/wishlist` — Shows the list of your wished characters and anime.
 - `/wishclear` — Clears the wishlist entirely.
 - `/claimdelay {seconds}` — Sets the number of seconds to wait before automatically claiming a character. This can be used to give a *human-like* feeling at the expense of time spent waiting. The default is `0`.
+
+Miscellaneous:
+
+- `/status {online|idle|dnd|offline}` — Sets your fallback status **when your primary Discord client is not logged in**. Default is `Idle`. For example, when your Discord is `Online` and the bot is set to `Idle`, you will appear `Online` to others. When your Discord is changed to `Offline` afterwards, you will appear `Idle` to others.

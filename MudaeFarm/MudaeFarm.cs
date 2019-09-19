@@ -60,6 +60,12 @@ namespace MudaeFarm
 
         static Task HandleLogAsync(LogMessage message)
         {
+            // these errors occur from using an old version of Discord.Net
+            // they should not affect any functionality
+            if (message.Message.Contains("Error handling Dispatch (TYPING_START)") ||
+                message.Message.Contains("Unknown Dispatch (SESSIONS_REPLACE)"))
+                return Task.CompletedTask;
+
             var text = message.Exception == null
                 ? message.Message
                 : $"{message.Message}: {message.Exception}";

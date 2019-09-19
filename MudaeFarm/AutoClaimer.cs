@@ -58,6 +58,14 @@ namespace MudaeFarm
             if (!MudaeInfo.IsMudae(message.Author))
                 return;
 
+            if (message.Channel is IGuildChannel guildChannel)
+            {
+                var guildBlacklist = _config.ClaimServersBlacklist.Lock(x => x.ToArray());
+
+                if (guildBlacklist.Contains(guildChannel.GuildId))
+                    return;
+            }
+
             try
             {
                 HandleMudaeMessage(userMessage);

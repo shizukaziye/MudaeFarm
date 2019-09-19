@@ -262,6 +262,38 @@ namespace MudaeFarm
             await message.DeleteAsync();
         }
 
+        [Command("claimserver")]
+        public async Task ClaimServerAsync(IUserMessage message, string state)
+        {
+            var guild = (message.Channel as IGuildChannel)?.Guild;
+
+            if (guild == null)
+                return;
+
+            _config.ClaimServersBlacklist.Lock(set =>
+            {
+                switch (state?.ToLowerInvariant())
+                {
+                    default:
+                        if (set.Remove(guild.Id))
+                            Log.Info($"Enabled autoclaiming in server '{guild.Name}'.");
+
+                        break;
+
+                    case "disable":
+                        if (set.Add(guild.Id))
+                            Log.Info($"Disabled autoclaiming in server '{guild.Name}'.");
+
+                        break;
+                }
+            });
+
+            _config.Save();
+
+            await message.ModifyAsync(m => m.Content = Utilities.RandString(3));
+            await message.DeleteAsync();
+        }
+
         [Command("rollinterval")]
         public async Task RollIntervalAsync(IUserMessage message, string arg)
         {
@@ -301,7 +333,6 @@ namespace MudaeFarm
 
             _config.Save();
 
-            // edit message first so the command is not saved in logs
             await message.ModifyAsync(m => m.Content = Utilities.RandString(3));
             await message.DeleteAsync();
         }

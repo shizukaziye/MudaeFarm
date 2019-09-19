@@ -29,6 +29,9 @@ namespace MudaeFarm
         [JsonProperty("claim_delay")]
         public double ClaimDelay { get; set; }
 
+        [JsonProperty("claim_servers_blacklist")]
+        public HashSet<ulong> ClaimServersBlacklist { get; set; } = new HashSet<ulong>();
+
         [JsonProperty("wish_chars")]
         public HashSet<string> WishlistCharacters { get; set; } = new HashSet<string>();
 
@@ -40,13 +43,15 @@ namespace MudaeFarm
 
         public object Clone() => new Config
         {
-            AuthToken          = AuthToken,
-            RollInterval       = RollInterval,
-            RollCommand        = RollCommand,
-            RollChannels       = RollChannels.Lock(x => new HashSet<ulong>(x)),
-            ClaimDelay         = ClaimDelay,
-            WishlistCharacters = WishlistCharacters.Lock(x => new HashSet<string>(x)),
-            WishlistAnime      = WishlistAnime.Lock(x => new HashSet<string>(x))
+            AuthToken             = AuthToken,
+            RollInterval          = RollInterval,
+            RollCommand           = RollCommand,
+            RollChannels          = RollChannels.Lock(x => new HashSet<ulong>(x)),
+            ClaimDelay            = ClaimDelay,
+            ClaimServersBlacklist = ClaimServersBlacklist,
+            WishlistCharacters    = WishlistCharacters.Lock(x => new HashSet<string>(x)),
+            WishlistAnime         = WishlistAnime.Lock(x => new HashSet<string>(x)),
+            UserStatus            = UserStatus
         };
 
         public static Config Load()

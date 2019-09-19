@@ -86,9 +86,12 @@ namespace MudaeFarm
             var name  = embed.Author.Value.Name.Trim().ToLowerInvariant();
             var anime = embed.Description.Split('\n')[0].Trim().ToLowerInvariant();
 
+            var channel = message.Channel;
+            var guild   = (channel as IGuildChannel)?.Guild;
+
             if (_config.WishlistCharacters.Contains(name) || _config.WishlistAnime.Contains(anime))
             {
-                Log.Warning($"Found character '{name}', trying marriage.");
+                Log.Warning($"{guild?.Name ?? "DM"} #{channel.Name}: Found character '{name}', trying marriage.");
 
                 // reactions may not have been attached when we received this message
                 // remember this message so we can attach an appropriate reaction later when we receive it
@@ -97,7 +100,7 @@ namespace MudaeFarm
             }
             else
             {
-                Log.Info($"Ignored character '{name}', not wished.");
+                Log.Info($"{guild?.Name ?? "DM"} #{channel.Name}: Ignored character '{name}', not wished.");
             }
         }
 

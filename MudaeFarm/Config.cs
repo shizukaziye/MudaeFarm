@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Discord;
 using Newtonsoft.Json;
 
 namespace MudaeFarm
@@ -33,6 +34,9 @@ namespace MudaeFarm
 
         [JsonProperty("wish_anime")]
         public HashSet<string> WishlistAnime { get; set; } = new HashSet<string>();
+
+        [JsonProperty("user_status")]
+        public UserStatus UserStatus { get; set; } = UserStatus.Idle;
 
         public object Clone() => new Config
         {

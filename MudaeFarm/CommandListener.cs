@@ -359,6 +359,9 @@ namespace MudaeFarm
                 default: return;
             }
 
+            _config.UserStatus = statusValue;
+            _config.Save();
+
             await _client.SetStatusAsync(statusValue);
             await message.DeleteAsync();
         }

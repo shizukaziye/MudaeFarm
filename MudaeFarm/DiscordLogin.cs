@@ -34,6 +34,8 @@ namespace MudaeFarm
                 await _client.LoginAsync(TokenType.User, _config.AuthToken);
                 await _client.StartAsync();
 
+                await _client.SetStatusAsync(_config.UserStatus);
+
                 using (cancellationToken.Register(completionSource.SetCanceled))
                     await completionSource.Task;
             }

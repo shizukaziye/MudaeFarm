@@ -327,5 +327,43 @@ namespace MudaeFarm
 
             await message.DeleteAsync();
         }
+
+        [Command("status")]
+        public async Task StatusAsync(IUserMessage message, string status)
+        {
+            UserStatus statusValue;
+
+            switch (status.ToLowerInvariant())
+            {
+                case "on":
+                case "online":
+                    statusValue = UserStatus.Online;
+                    break;
+
+                case "i":
+                case "idle":
+                    statusValue = UserStatus.Idle;
+                    break;
+
+                case "d":
+                case "dnd":
+                case "do not disturb":
+                    statusValue = UserStatus.DoNotDisturb;
+                    break;
+
+                case "off":
+                case "offline":
+                    statusValue = UserStatus.Invisible;
+                    break;
+
+                default: return;
+            }
+
+            _config.UserStatus = statusValue;
+            _config.Save();
+
+            await _client.SetStatusAsync(statusValue);
+            await message.DeleteAsync();
+        }
     }
 }

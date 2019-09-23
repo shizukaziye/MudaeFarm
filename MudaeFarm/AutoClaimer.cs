@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -97,7 +98,11 @@ namespace MudaeFarm
             var channel = message.Channel;
             var guild   = (channel as IGuildChannel)?.Guild;
 
-            if (_config.WishlistCharacters.Contains(name) || _config.WishlistAnime.Contains(anime))
+            // could optimize this with RegexOptions.Compiled and caching
+            var nameRegex  = _config.WishlistCharacters.Lock(x => x.Select(c => new Regex($"^{c}$", RegexOptions.Singleline | RegexOptions.IgnoreCase)));
+            var animeRegex = _config.WishlistAnime.Lock(x => x.Select(c => new Regex($"^{c}$", RegexOptions.Singleline | RegexOptions.IgnoreCase)));
+
+            if (nameRegex.Any(r => r.IsMatch(name)) || animeRegex.Any(r => r.IsMatch(anime)))
             {
                 Log.Warning($"{guild?.Name ?? "DM"} #{channel.Name}: Found character '{name}', trying marriage.");
 

@@ -151,6 +151,9 @@ namespace MudaeFarm
         [Command("wish")]
         public async Task WishCharacterAsync(IUserMessage message, string character)
         {
+            if (string.IsNullOrWhiteSpace(character))
+                return;
+
             _config.WishlistCharacters.Lock(set =>
             {
                 if (set.Add(character.ToLowerInvariant()))
@@ -165,6 +168,9 @@ namespace MudaeFarm
         [Command("unwish")]
         public async Task UnwishCharacterAsync(IUserMessage message, string character)
         {
+            if (string.IsNullOrWhiteSpace(character))
+                return;
+
             _config.WishlistCharacters.Lock(set =>
             {
                 if (set.Remove(character.ToLowerInvariant()))
@@ -179,6 +185,9 @@ namespace MudaeFarm
         [Command("wishani")]
         public async Task WishAnimeAsync(IUserMessage message, string anime)
         {
+            if (string.IsNullOrWhiteSpace(anime))
+                return;
+
             _config.WishlistAnime.Lock(set =>
             {
                 if (set.Add(anime.ToLowerInvariant()))
@@ -193,6 +202,9 @@ namespace MudaeFarm
         [Command("unwishani")]
         public async Task UnwishAnimeAsync(IUserMessage message, string anime)
         {
+            if (string.IsNullOrWhiteSpace(anime))
+                return;
+
             _config.WishlistAnime.Lock(set =>
             {
                 if (set.Remove(anime.ToLowerInvariant()))

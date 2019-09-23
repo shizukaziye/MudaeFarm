@@ -99,8 +99,8 @@ namespace MudaeFarm
             var guild   = (channel as IGuildChannel)?.Guild;
 
             // could optimize this with RegexOptions.Compiled and caching
-            var nameRegex  = _config.WishlistCharacters.Lock(x => x.Select(c => new Regex($"^{c}$", RegexOptions.Singleline | RegexOptions.IgnoreCase)));
-            var animeRegex = _config.WishlistAnime.Lock(x => x.Select(c => new Regex($"^{c}$", RegexOptions.Singleline | RegexOptions.IgnoreCase)));
+            var nameRegex  = _config.WishlistCharacters.Lock(x => x.Select(c => new Regex(RegexToGlob(c), RegexOptions.Singleline | RegexOptions.IgnoreCase)));
+            var animeRegex = _config.WishlistAnime.Lock(x => x.Select(c => new Regex(RegexToGlob(c), RegexOptions.Singleline | RegexOptions.IgnoreCase)));
 
             if (nameRegex.Any(r => r.IsMatch(name)) || animeRegex.Any(r => r.IsMatch(anime)))
             {
@@ -116,6 +116,8 @@ namespace MudaeFarm
                 Log.Info($"{guild?.Name ?? "DM"} #{channel.Name}: Ignored character '{name}', not wished.");
             }
         }
+
+        static string RegexToGlob(string s) => $"^{Regex.Escape(s).Replace("\\*", ".*").Replace("\\?", ".")}$";
 
         static readonly Dictionary<ulong, IUserMessage> _claimQueue = new Dictionary<ulong, IUserMessage>();
 

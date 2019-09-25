@@ -274,6 +274,10 @@ namespace MudaeFarm
 
                 RollChannelIds = channelIds;
             }
+            else
+            {
+                return;
+            }
 
             Log.Debug($"Configuration channel '${channel.Name}' reloaded.");
         }

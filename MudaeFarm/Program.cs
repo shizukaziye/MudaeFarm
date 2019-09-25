@@ -9,6 +9,8 @@ namespace MudaeFarm
         {
             while (true)
             {
+                Console.Clear();
+
                 try
                 {
                     using (var mudaeFarm = new MudaeFarm())

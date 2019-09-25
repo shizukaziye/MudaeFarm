@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -9,20 +8,20 @@ namespace MudaeFarm
 {
     public class AutoRoller
     {
-        readonly Config _config;
         readonly DiscordSocketClient _client;
+        readonly ConfigManager _config;
 
-        public AutoRoller(Config config, DiscordSocketClient client)
+        public AutoRoller(DiscordSocketClient client, ConfigManager config)
         {
-            _config = config;
             _client = client;
+            _config = config;
         }
 
         public async Task RunAsync(CancellationToken cancellationToken = default)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var interval = _config.RollInterval;
+                var interval = 60; // todo: with kakera update
 
                 if (interval <= 0)
                 {
@@ -39,21 +38,19 @@ namespace MudaeFarm
 
         async Task SendRollsAsync()
         {
-            var channels = _config.RollChannels.Lock(x => x.ToArray());
-
-            foreach (var channelId in channels)
+            foreach (var channelId in _config.RollChannelIds)
             {
                 if (_client.GetChannel(channelId) is ITextChannel channel)
                     try
                     {
-                        await channel.SendMessageAsync("$" + _config.RollCommand);
+                        await channel.SendMessageAsync(_config.RollCommand);
                     }
                     catch (Exception e)
                     {
                         Log.Warning($"Could not send roll to channel '#{channel.Name}' in server '{channel.Guild.Name}'.", e);
                     }
 
-                // don't spam the api
+                // don't spam
                 await Task.Delay(TimeSpan.FromSeconds(2));
             }
         }

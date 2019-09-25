@@ -7,13 +7,13 @@ namespace MudaeFarm
 {
     public class DiscordLogin
     {
-        readonly Config _config;
         readonly DiscordSocketClient _client;
+        readonly AuthTokenManager _token;
 
-        public DiscordLogin(Config config, DiscordSocketClient client)
+        public DiscordLogin(DiscordSocketClient client, AuthTokenManager token)
         {
-            _config = config;
             _client = client;
+            _token  = token;
         }
 
         public async Task RunAsync()
@@ -30,10 +30,8 @@ namespace MudaeFarm
 
             try
             {
-                await _client.LoginAsync(TokenType.User, _config.AuthToken);
+                await _client.LoginAsync(TokenType.User, _token.Value);
                 await _client.StartAsync();
-
-                await _client.SetStatusAsync(_config.UserStatus);
 
                 await completionSource.Task;
             }
@@ -41,12 +39,7 @@ namespace MudaeFarm
             {
                 Log.Error("Error while authenticating to Discord.", e);
 
-                _config.AuthToken = null;
-                _config.Save();
-
-                Log.Info("User token has been erased due to an error while authenticating to Discord.");
-
-                throw new DummyRestartException();
+                _token.Reset();
             }
             finally
             {

@@ -8,8 +8,6 @@ namespace MudaeFarm
 {
     public class MudaeFarm : IDisposable
     {
-        readonly Config _config = Config.Load();
-
         readonly DiscordSocketClient _client = new DiscordSocketClient(new DiscordSocketConfig
         {
             LogLevel         = LogSeverity.Info,
@@ -26,25 +24,26 @@ namespace MudaeFarm
             // check version
             await new UpdateChecker().RunAsync();
 
-            // ask user for their auth token
-            new AuthToken(_config).EnsureInitialized();
+            // retrieve auth token
+            var token = new AuthTokenManager();
 
             // discord login
-            await new DiscordLogin(_config, _client).RunAsync();
+            await new DiscordLogin(_client, token).RunAsync();
 
             try
             {
-                // command server
-                await new CommandServer(_config, _client).EnsureCreatedAsync();
+                // configuration manager
+                var config = new ConfigManager(_client);
 
-                // command handling
-                new CommandListener(_config, _client).Initialize();
+                await config.InitializeAsync();
 
                 // auto-claiming
-                new AutoClaimer(_config, _client).Initialize();
+                new AutoClaimer(_client, config).Initialize();
+
+                Log.Warning("Ready!!");
 
                 // auto-rolling
-                var roller = new AutoRoller(_config, _client).RunAsync(cancellationToken);
+                var roller = new AutoRoller(_client, config).RunAsync(cancellationToken);
 
                 // keep the bot running
                 await Task.WhenAll(roller, Task.Delay(-1, cancellationToken));
@@ -55,11 +54,7 @@ namespace MudaeFarm
             }
         }
 
-        public void Dispose()
-        {
-            _config.Save();
-            _client.Dispose();
-        }
+        public void Dispose() => _client.Dispose();
 
         static Task HandleLogAsync(LogMessage message)
         {

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -36,13 +35,13 @@ namespace MudaeFarm
             new Emoji("\u2665")        // hearts
         };
 
-        readonly Config _config;
         readonly DiscordSocketClient _client;
+        readonly ConfigManager _config;
 
-        public AutoClaimer(Config config, DiscordSocketClient client)
+        public AutoClaimer(DiscordSocketClient client, ConfigManager config)
         {
-            _config = config;
             _client = client;
+            _config = config;
         }
 
         public void Initialize()
@@ -59,13 +58,8 @@ namespace MudaeFarm
             if (!MudaeInfo.IsMudae(message.Author))
                 return;
 
-            if (message.Channel is IGuildChannel guildChannel)
-            {
-                var guildBlacklist = _config.ClaimServersBlacklist.Lock(x => x.ToArray());
-
-                if (guildBlacklist.Contains(guildChannel.GuildId))
-                    return;
-            }
+            if (message.Channel is IGuildChannel guildChannel && !_config.ClaimGuildIds.Contains(guildChannel.Id))
+                return;
 
             try
             {
@@ -98,11 +92,13 @@ namespace MudaeFarm
             var channel = message.Channel;
             var guild   = (channel as IGuildChannel)?.Guild;
 
-            // could optimize this with RegexOptions.Compiled and caching
-            var nameRegex  = _config.WishlistCharacters.Lock(x => x.Select(c => new Regex(RegexToGlob(c), RegexOptions.Singleline | RegexOptions.IgnoreCase)));
-            var animeRegex = _config.WishlistAnime.Lock(x => x.Select(c => new Regex(RegexToGlob(c), RegexOptions.Singleline | RegexOptions.IgnoreCase)));
+            // matching
+            var matched = false;
 
-            if (nameRegex.Any(r => r.IsMatch(name)) || animeRegex.Any(r => r.IsMatch(anime)))
+            matched |= _config.WishedCharacterRegex?.IsMatch(name) ?? false;
+            matched |= _config.WishedAnimeRegex?.IsMatch(anime) ?? false;
+
+            if (matched)
             {
                 Log.Warning($"{guild?.Name ?? "DM"} #{channel.Name}: Found character '{name}', trying marriage.");
 
@@ -116,8 +112,6 @@ namespace MudaeFarm
                 Log.Info($"{guild?.Name ?? "DM"} #{channel.Name}: Ignored character '{name}', not wished.");
             }
         }
-
-        static string RegexToGlob(string s) => $"^{Regex.Escape(s).Replace("\\*", ".*").Replace("\\?", ".")}$";
 
         static readonly Dictionary<ulong, IUserMessage> _claimQueue = new Dictionary<ulong, IUserMessage>();
 
@@ -138,10 +132,7 @@ namespace MudaeFarm
                 return;
 
             // claim delay
-            var delay = _config.ClaimDelay;
-
-            if (delay > 0)
-                await Task.Delay(TimeSpan.FromSeconds(delay));
+            await Task.Delay(_config.ClaimDelay);
 
             await message.AddReactionAsync(reaction.Emote);
         }

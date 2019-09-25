@@ -26,4 +26,4 @@ MudaeFarm wishlists are entirely separate from Mudae the wishlist and will not s
 
 **Autorolling is disabled by default.** You must copy the ID of the channel you want to enable autorolling in, and send that ID in `#roll-channels`.
 
-For JSON-based configuration messages, you can simply edit the contents.
+For JSON-based configuration messages, you can simply edit the contents and the bot will reload the changes automatically.

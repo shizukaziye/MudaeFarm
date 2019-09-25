@@ -14,29 +14,16 @@ You can bypass the "Windows protected your PC" popup by clicking "More info". Al
 
 3. Enter your user token. [How?](https://github.com/chiyadev/MudaeFarm/blob/master/User%20tokens.md)
 
-## Commands
+## Usage
 
-### Autorolling
+On initial run, MudaeFarm will create a dedicated server named `MudaeFarm` for bot configuration. You can edit your wishlists, claiming, rolling and other miscellaneous settings there. It may take a while for this server to be created.
 
-- `/rollinterval {minutes}` — Sets the roll interval in minutes. Setting this to `0` disables autorolling. Autorolling is disabled by default.
-- `/roll` — Sets the channel in which you use this command as a channel where MudaeFarm will automatically issue roll commands. You can do this in as many channels as you like.
-- `/roll disable` — Stops autorolling in the channel where you send this command.
-- `/marry waifu` — Sets the marry command to waifus (`$w`). This is the default.
-- `/marry husbando` — Sets the marry command to husbandoes (`$h`).
+To configure character/anime wishlists, you can simply send the name of the character/anime in the wishlist channel, separated by individual messages. Names are *case insensitive* and support basic glob expressions like `?` and `*`.
 
-### Autoclaiming
+MudaeFarm wishlists are entirely separate from Mudae the wishlist and will not synchronize against each other.
 
-- `/wish {character}` — Adds a character to your wishlist.
-- `/unwish {character}` — Removes a character from your wishlist.
-- `/wishani {anime}` — Adds an anime to your wishlist. This is akin to wishing every character from that anime.
-- `/unwishani {anime}` — Removes an anime from your wishlist.
-- `/wishlist` — Shows the list of your wished characters and anime.
-- `/wishclear` — Clears the wishlist entirely.
-- `/claimdelay {seconds}` — Sets the number of seconds to wait before automatically claiming a character. This can be used to give a *human-like* feeling at the expense of time spent waiting. The default is `0`.
-- `/claimserver {enable|disable}` — Enables or disables autoclaiming in the server where you send this command. This is a blacklist and all servers are enabled for autoclaiming by default.
+**Autoclaiming is disabled by default.** You must copy the ID of the server you want to enable autoclaiming in, and send that ID in `#claim-servers`.
 
-Character and anime wishlists support basic glob patterns. Use `?` to match any single character and `*` to match any zero-or-more characters.
+**Autorolling is disabled by default.** You must copy the ID of the channel you want to enable autorolling in, and send that ID in `#roll-channels`.
 
-### Miscellaneous
-
-- `/status {online|idle|dnd|offline}` — Sets your fallback status **when your primary Discord client is not logged in**. Default is `Idle`. For example, when your Discord is `Online` and the bot is set to `Idle`, you will appear `Online` to others. When your Discord is changed to `Offline` afterwards, you will appear `Idle` to others.
+For JSON-based configuration messages, you can simply edit the contents.

@@ -6,10 +6,10 @@ using Newtonsoft.Json;
 
 namespace MudaeFarm
 {
-    /// <remarks>
-    /// Always lock collection properties before accessing them!!
-    /// </remarks>
-    public class Config : ICloneable
+    /// <summary>
+    /// Deprecated in v2.1: Configuration is entirely stored on Discord itself. This class exists to import existing configuration onto the configuration server.
+    /// </summary>
+    public class LegacyConfig
     {
         // store at %LocalAppData%/MudaeFarm/config.json
         static readonly string _configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MudaeFarm", "config.json");
@@ -41,47 +41,22 @@ namespace MudaeFarm
         [JsonProperty("user_status")]
         public UserStatus UserStatus { get; set; } = UserStatus.Idle;
 
-        public object Clone() => new Config
-        {
-            AuthToken             = AuthToken,
-            RollInterval          = RollInterval,
-            RollCommand           = RollCommand,
-            RollChannels          = RollChannels.Lock(x => new HashSet<ulong>(x)),
-            ClaimDelay            = ClaimDelay,
-            ClaimServersBlacklist = ClaimServersBlacklist,
-            WishlistCharacters    = WishlistCharacters.Lock(x => new HashSet<string>(x)),
-            WishlistAnime         = WishlistAnime.Lock(x => new HashSet<string>(x)),
-            UserStatus            = UserStatus
-        };
-
-        public static Config Load()
+        public static LegacyConfig Load()
         {
             try
             {
-                return JsonConvert.DeserializeObject<Config>(File.ReadAllText(_configPath));
+                return JsonConvert.DeserializeObject<LegacyConfig>(File.ReadAllText(_configPath));
             }
             catch (FileNotFoundException)
             {
-                Log.Debug($"Initializing new configuration not found at: {_configPath}");
-                return new Config();
+                return null;
             }
             catch (DirectoryNotFoundException)
             {
-                Log.Debug($"Initializing new configuration not found at: {_configPath}");
-                return new Config();
+                return null;
             }
         }
 
-        public void Save()
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(_configPath));
-
-            // clone first for thread safety
-            var config = Clone();
-
-            File.WriteAllText(_configPath, JsonConvert.SerializeObject(config, Formatting.Indented));
-
-            Log.Debug($"Configuration saved at: {_configPath}");
-        }
+        public static void Delete() => File.Delete(_configPath);
     }
 }

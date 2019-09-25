@@ -34,6 +34,9 @@ namespace MudaeFarm
 
             try
             {
+                // command server
+                await new CommandServer(_config, _client).EnsureCreatedAsync();
+
                 // command handling
                 new CommandListener(_config, _client).Initialize();
 

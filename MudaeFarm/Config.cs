@@ -14,6 +14,9 @@ namespace MudaeFarm
         // store at %LocalAppData%/MudaeFarm/config.json
         static readonly string _configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MudaeFarm", "config.json");
 
+        [JsonProperty("cmd_server_id")]
+        public ulong CommandServerId { get; set; }
+
         [JsonProperty("auth_token")]
         public string AuthToken { get; set; } = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
 
@@ -43,6 +46,7 @@ namespace MudaeFarm
 
         public object Clone() => new Config
         {
+            CommandServerId       = CommandServerId,
             AuthToken             = AuthToken,
             RollInterval          = RollInterval,
             RollCommand           = RollCommand,

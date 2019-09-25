@@ -58,7 +58,7 @@ namespace MudaeFarm
             if (!MudaeInfo.IsMudae(message.Author))
                 return;
 
-            if (message.Channel is IGuildChannel guildChannel && !_config.ClaimGuildIds.Contains(guildChannel.Id))
+            if (message.Channel is IGuildChannel guildChannel && !_config.ClaimGuildIds.Contains(guildChannel.GuildId))
                 return;
 
             try

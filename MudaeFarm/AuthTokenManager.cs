@@ -14,6 +14,12 @@ namespace MudaeFarm
             if (File.Exists(_path))
                 Value = File.ReadAllText(_path);
 
+            // legacy token
+            var legacyCfg = LegacyConfig.Load();
+
+            if (legacyCfg != null)
+                Value = legacyCfg.AuthToken;
+
             if (string.IsNullOrWhiteSpace(Value))
             {
                 Log.Info("MudaeFarm requires your user token in order to proceed.\n" +

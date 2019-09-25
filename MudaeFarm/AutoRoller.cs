@@ -31,13 +31,13 @@ namespace MudaeFarm
                     continue;
                 }
 
-                await SendRollsAsync(cancellationToken);
+                await SendRollsAsync();
 
                 await Task.Delay(TimeSpan.FromMinutes(interval), cancellationToken);
             }
         }
 
-        async Task SendRollsAsync(CancellationToken cancellationToken = default)
+        async Task SendRollsAsync()
         {
             var channels = _config.RollChannels.Lock(x => x.ToArray());
 
@@ -46,7 +46,7 @@ namespace MudaeFarm
                 if (_client.GetChannel(channelId) is ITextChannel channel)
                     try
                     {
-                        await channel.SendMessageAsync("$" + _config.RollCommand, options: new RequestOptions { CancelToken = cancellationToken });
+                        await channel.SendMessageAsync("$" + _config.RollCommand);
                     }
                     catch (Exception e)
                     {
@@ -54,7 +54,7 @@ namespace MudaeFarm
                     }
 
                 // don't spam the api
-                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(2));
             }
         }
     }

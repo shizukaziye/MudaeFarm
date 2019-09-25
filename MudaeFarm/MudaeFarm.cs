@@ -30,7 +30,7 @@ namespace MudaeFarm
             new AuthToken(_config).EnsureInitialized();
 
             // discord login
-            await new DiscordLogin(_config, _client).RunAsync(cancellationToken);
+            await new DiscordLogin(_config, _client).RunAsync();
 
             try
             {

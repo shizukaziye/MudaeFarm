@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -17,7 +16,7 @@ namespace MudaeFarm
             _client = client;
         }
 
-        public async Task RunAsync(CancellationToken cancellationToken = default)
+        public async Task RunAsync()
         {
             var completionSource = new TaskCompletionSource<object>();
 
@@ -36,8 +35,7 @@ namespace MudaeFarm
 
                 await _client.SetStatusAsync(_config.UserStatus);
 
-                using (cancellationToken.Register(completionSource.SetCanceled))
-                    await completionSource.Task;
+                await completionSource.Task;
             }
             catch (Exception e)
             {

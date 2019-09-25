@@ -187,6 +187,14 @@ namespace MudaeFarm
                     var key   = lines[0].Substring(2).Trim().ToLowerInvariant();
                     var value = string.Join("\n", lines.Skip(1).Where(l => !l.StartsWith("```")));
 
+                    if (dict.ContainsKey(key))
+                    {
+                        if (message.Reactions.Count == 0)
+                            await message.AddReactionAsync(new Emoji("\u0032\u20E3"));
+
+                        continue;
+                    }
+
                     dict[key] = new ConfigPart(message, value);
                 }
 

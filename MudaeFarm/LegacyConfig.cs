@@ -56,5 +56,7 @@ namespace MudaeFarm
                 return null;
             }
         }
+
+        public static void Delete() => File.Delete(_configPath);
     }
 }

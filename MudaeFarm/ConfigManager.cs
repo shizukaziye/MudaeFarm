@@ -112,6 +112,24 @@ namespace MudaeFarm
 
             Log.Info("Configuration loaded.");
 
+            // import old configuration (config.json)
+            var legacyCfg = LegacyConfig.Load();
+
+            if (legacyCfg != null)
+            {
+                Log.Warning("Importing legacy wishlist configuration. This may take a while...");
+
+                if (legacyCfg.WishlistCharacters != null)
+                    foreach (var character in legacyCfg.WishlistCharacters)
+                        await _wishedCharacterChannel.SendMessageAsync(character);
+
+                if (legacyCfg.WishlistAnime != null)
+                    foreach (var anime in legacyCfg.WishlistAnime)
+                        await _wishedAnimeChannel.SendMessageAsync(anime);
+
+                LegacyConfig.Delete();
+            }
+
             // events
             _client.MessageReceived += message => ReloadChannelAsync(message.Channel);
             _client.MessageDeleted  += (cacheable, channel) => ReloadChannelAsync(channel);

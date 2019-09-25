@@ -43,7 +43,13 @@ namespace MudaeFarm
                 if (_client.GetChannel(channelId) is ITextChannel channel)
                     try
                     {
-                        await channel.SendMessageAsync(_config.RollCommand);
+                        using (channel.EnterTypingState())
+                        {
+                            // make it more human like
+                            await Task.Delay(TimeSpan.FromSeconds(0.5));
+
+                            await channel.SendMessageAsync(_config.RollCommand);
+                        }
                     }
                     catch (Exception e)
                     {

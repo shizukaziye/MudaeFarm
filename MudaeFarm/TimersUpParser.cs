@@ -117,12 +117,7 @@ namespace MudaeFarm
                 }
             }
 
-            var success = failed < lines.Length / 2;
-
-            if (success)
-                state.LastUpdatedTime = now;
-
-            return success;
+            return failed < lines.Length / 2;
         }
     }
 }

@@ -38,7 +38,7 @@ namespace MudaeFarm
 #region Meta
 
         [JsonIgnore]
-        public DateTime LastUpdatedTime { get; set; }
+        public bool ForceNextRefresh { get; set; }
 
 #endregion
     }

@@ -28,10 +28,6 @@ namespace MudaeFarm
         {
             _client.MessageReceived += HandleMessage;
 
-            // initial refresh
-            foreach (var guild in _client.Guilds)
-                await RefreshAsync(guild);
-
             while (!cancellationToken.IsCancellationRequested)
             {
                 var now = DateTime.Now;
@@ -51,8 +47,13 @@ namespace MudaeFarm
                     if (!state.CanKakeraDailyReset)
                         Min(ref updateTime, state.KakeraDailyReset);
 
-                    if (now >= updateTime)
-                        await RefreshAsync(guild);
+                    if (now >= updateTime || state.ForceNextRefresh)
+                    {
+                        var refreshed = await RefreshAsync(guild);
+
+                        if (refreshed)
+                            state.ForceNextRefresh = false;
+                    }
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
@@ -84,22 +85,23 @@ namespace MudaeFarm
         public MudaeState Get(ulong guildId)
             => _states.TryGetValue(guildId, out var state)
                 ? state
-                : _states[guildId] = new MudaeState();
+                : _states[guildId] = new MudaeState
+                {
+                    ForceNextRefresh = true
+                };
 
-        async Task<MudaeState> RefreshAsync(SocketGuild guild)
+        async Task<bool> RefreshAsync(SocketGuild guild)
         {
             await _semaphore.WaitAsync();
             try
             {
-                var state = Get(guild.Id);
-
-                state.LastUpdatedTime = DateTime.Now;
+                MudaeState newState;
 
                 // select a bot channel to send command in
                 var channel = guild.TextChannels.FirstOrDefault(c => _config.BotChannelIds.Contains(c.Id));
 
                 if (channel == null)
-                    return state;
+                    return false;
 
                 var completionSource = new TaskCompletionSource<MudaeState>();
 
@@ -113,31 +115,30 @@ namespace MudaeFarm
                     // wait with timeout
                     using (var cancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
                     using (cancellationSource.Token.Register(completionSource.SetCanceled))
-                        state = await completionSource.Task;
+                        newState = await completionSource.Task;
                 }
                 catch (TaskCanceledException)
                 {
                     Log.Warning("Expected Mudae `$tu` response but received nothing.");
 
-                    return state;
+                    return false;
                 }
                 finally
                 {
                     _stateSources.TryRemove(channel.Id, out _);
                 }
 
-                Log.Debug($"Guild '{guild}' state updated: {JsonConvert.SerializeObject(state)}");
+                _states[guild.Id] = newState;
 
-                // update cache
-                _states[guild.Id] = state;
+                Log.Debug($"Guild '{guild}' state updated: {JsonConvert.SerializeObject(newState)}");
 
-                return state;
+                return true;
             }
             catch (Exception e)
             {
                 Log.Warning($"Could not refresh state for guild '{guild}'.", e);
 
-                return Get(guild.Id);
+                return false;
             }
             finally
             {

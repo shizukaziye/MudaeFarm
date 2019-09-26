@@ -66,7 +66,8 @@ namespace MudaeFarm
             // these errors occur from using an old version of Discord.Net
             // they should not affect any functionality
             if (message.Message.Contains("Error handling Dispatch (TYPING_START)") ||
-                message.Message.Contains("Unknown Dispatch (SESSIONS_REPLACE)"))
+                message.Message.Contains("Unknown Dispatch (SESSIONS_REPLACE)") ||
+                message.Message.Contains("Preemptive Rate limit"))
                 return Task.CompletedTask;
 
             var text = message.Exception == null

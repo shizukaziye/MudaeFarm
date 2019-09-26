@@ -100,7 +100,7 @@ namespace MudaeFarm
 
             if (matched)
             {
-                Log.Warning($"{guild?.Name ?? "DM"} #{channel.Name}: Found character '{name}', trying marriage.");
+                Log.Warning($"{guild?.Name ?? "<DM>"} {channel}: Found character '{name}', trying marriage.");
 
                 // reactions may not have been attached when we received this message
                 // remember this message so we can attach an appropriate reaction later when we receive it
@@ -109,7 +109,7 @@ namespace MudaeFarm
             }
             else
             {
-                Log.Info($"{guild?.Name ?? "DM"} #{channel.Name}: Ignored character '{name}', not wished.");
+                Log.Info($"{guild?.Name ?? "<DM>"} {channel}: Ignored character '{name}', not wished.");
             }
         }
 

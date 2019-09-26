@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Newtonsoft.Json;
 
 namespace MudaeFarm
 {
@@ -75,9 +76,16 @@ namespace MudaeFarm
                 using (cancellationSource.Token.Register(completionSource.SetCanceled))
                     state = await completionSource.Task;
 
+                Log.Debug($"Guild '{guild}' state updated: {JsonConvert.SerializeObject(state)}");
+
                 // update cache
                 _states[guild.Id] = state;
 
+                return state;
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"Could not refresh state for guild '{guild}'.", e);
                 return state;
             }
             finally

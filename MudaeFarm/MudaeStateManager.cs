@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 
@@ -25,7 +24,46 @@ namespace MudaeFarm
             _config = config;
         }
 
-        public void Initialize() => _client.MessageReceived += HandleMessage;
+        public async Task RunAsync(CancellationToken cancellationToken = default)
+        {
+            _client.MessageReceived += HandleMessage;
+
+            // initial refresh
+            foreach (var guild in _client.Guilds)
+                await RefreshAsync(guild);
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var now = DateTime.Now;
+
+                foreach (var guild in _client.Guilds)
+                {
+                    var state = Get(guild.Id);
+
+                    var updateTime = DateTime.MaxValue;
+
+                    if (!state.CanClaim)
+                        Min(ref updateTime, state.ClaimReset);
+
+                    if (state.KakeraPower - state.KakeraConsumption < 0)
+                        Min(ref updateTime, state.KakeraReset);
+
+                    if (!state.CanKakeraDailyReset)
+                        Min(ref updateTime, state.KakeraDailyReset);
+
+                    if (now >= updateTime)
+                        await RefreshAsync(guild);
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+            }
+        }
+
+        static void Min(ref DateTime a, DateTime? b)
+        {
+            if (b != null)
+                a = a < b.Value ? a : b.Value;
+        }
 
         // channelId - completionSource
         readonly ConcurrentDictionary<ulong, TaskCompletionSource<MudaeState>> _stateSources
@@ -43,19 +81,19 @@ namespace MudaeFarm
             return Task.CompletedTask;
         }
 
-        public MudaeState Get(IGuild guild) => _states.TryGetValue(guild.Id, out var state) ? state : new MudaeState();
+        public MudaeState Get(ulong guildId)
+            => _states.TryGetValue(guildId, out var state)
+                ? state
+                : _states[guildId] = new MudaeState();
 
-        public async Task<MudaeState> RefreshAsync(SocketGuild guild)
+        async Task<MudaeState> RefreshAsync(SocketGuild guild)
         {
             await _semaphore.WaitAsync();
             try
             {
-                var now   = DateTime.Now;
-                var state = Get(guild);
+                var state = Get(guild.Id);
 
-                // disallow too frequent refreshes
-                if (now < state.LastUpdatedTime + _config.MinStateRefresh)
-                    return state;
+                state.LastUpdatedTime = DateTime.Now;
 
                 // select a bot channel to send command in
                 var channel = guild.TextChannels.FirstOrDefault(c => _config.BotChannelIds.Contains(c.Id));
@@ -99,7 +137,7 @@ namespace MudaeFarm
             {
                 Log.Warning($"Could not refresh state for guild '{guild}'.", e);
 
-                return Get(guild);
+                return Get(guild.Id);
             }
             finally
             {

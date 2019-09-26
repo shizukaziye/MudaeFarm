@@ -29,10 +29,12 @@ namespace MudaeFarm
         public TimeSpan MinStateRefresh;
         public string StateUpdateCommand;
 
+        public bool ClaimEnabled;
         public TimeSpan ClaimDelay;
         public TimeSpan KakeraClaimDelay;
         public HashSet<KakeraType> KakeraTargets;
 
+        public bool RollEnabled;
         public string RollCommand;
         public TimeSpan RollTypingDelay;
         public HashSet<ulong> BotChannelIds;
@@ -207,6 +209,7 @@ namespace MudaeFarm
                 // claiming
                 var claim = await LoadConfigPartAsync<ClaimConfig>(channel, "Claiming", dict);
 
+                ClaimEnabled     = claim.Enabled;
                 ClaimDelay       = TimeSpan.FromSeconds(claim.Delay);
                 KakeraClaimDelay = TimeSpan.FromSeconds(claim.KakeraDelay);
                 KakeraTargets    = claim.KakeraTargets;
@@ -214,6 +217,7 @@ namespace MudaeFarm
                 // rolling
                 var roll = await LoadConfigPartAsync<RollConfig>(channel, "Rolling", dict);
 
+                RollEnabled     = roll.Enabled;
                 RollCommand     = roll.Command;
                 RollTypingDelay = TimeSpan.FromSeconds(roll.TypingDelay);
             }
@@ -358,6 +362,9 @@ namespace MudaeFarm
 
         public class ClaimConfig
         {
+            [JsonProperty("enabled")]
+            public bool Enabled { get; set; } = true;
+
             [JsonProperty("delay_seconds")]
             public double Delay { get; set; } = 0.2;
 
@@ -370,6 +377,9 @@ namespace MudaeFarm
 
         public class RollConfig
         {
+            [JsonProperty("enabled")]
+            public bool Enabled { get; set; } = true;
+
             [JsonProperty("command")]
             public string Command { get; set; } = "$w";
 

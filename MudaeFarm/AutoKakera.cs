@@ -71,7 +71,10 @@ namespace MudaeFarm
 
         async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
         {
-            if (!(channel is SocketGuildChannel guildChannel))
+            if (!_config.ClaimEnabled)
+                return;
+
+            if (!(channel is IGuildChannel guildChannel))
                 return;
 
             // channel must be enabled for claiming
@@ -97,20 +100,18 @@ namespace MudaeFarm
                 return;
 
             // must have enough kakera power to claim this kakera
-            var state = _state.Get(guildChannel.Guild);
+            var state = _state.Get(guildChannel.GuildId);
 
-            if (state.KakeraReset == null || state.KakeraReset <= DateTime.Now)
-                state = await _state.RefreshAsync(guildChannel.Guild);
-
-            if (state.KakeraPower - state.KakeraPowerConsumption < 0)
+            if (state.KakeraPower - state.KakeraConsumption < 0)
                 return;
-
-            state.KakeraPower -= state.KakeraPowerConsumption;
 
             // claim kakera
             await Task.Delay(_config.KakeraClaimDelay);
 
             await message.AddReactionAsync(reaction.Emote);
+
+            // update state
+            state.KakeraPower -= state.KakeraConsumption;
         }
     }
 }

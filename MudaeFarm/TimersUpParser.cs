@@ -53,11 +53,10 @@ namespace MudaeFarm
 
                 if (line.Contains("claim"))
                 {
-                    if (line.Contains("now"))
-                        state.ClaimReset = DateTime.Now;
-
-                    else if (TryParseTime(line, out var time))
+                    if (TryParseTime(line, out var time))
                         state.ClaimReset = now + time;
+
+                    state.CanClaim = line.Contains("now");
                 }
 
                 else if (line.Contains("rolls") && line.Contains("left"))
@@ -76,9 +75,6 @@ namespace MudaeFarm
                 {
                     if (TryParseTime(line, out var time))
                         state.KakeraReset = now + time;
-
-                    else if (line.Contains("now"))
-                        state.KakeraReset = now;
                 }
 
                 else if (line.Contains("power") && line.Contains("kakera"))
@@ -90,7 +86,7 @@ namespace MudaeFarm
                         if (part.Contains("consume"))
                         {
                             if (TryParseInt(part, out var value))
-                                state.KakeraPowerConsumption = value / 100.0;
+                                state.KakeraConsumption = value / 100.0;
                         }
 
                         else if (part.Contains("power"))
@@ -112,8 +108,7 @@ namespace MudaeFarm
                     if (TryParseTime(line, out var time))
                         state.KakeraDailyReset = now + time;
 
-                    else if (line.Contains("ready"))
-                        state.KakeraDailyReset = now;
+                    state.CanKakeraDailyReset = line.Contains("ready");
                 }
 
                 else
@@ -121,33 +116,6 @@ namespace MudaeFarm
                     ++failed;
                 }
             }
-
-            if (state.ClaimReset == null)
-            {
-                Log.Warning("Could not parse claim reset time! Disabling indefinitely.");
-                state.ClaimReset = DateTime.MaxValue;
-            }
-
-            if (state.RollsReset == null)
-            {
-                Log.Warning("Could not parse roll reset time! Disabling indefinitely.");
-                state.RollsReset = DateTime.MaxValue;
-            }
-
-            if (state.KakeraReset == null)
-            {
-                Log.Warning("Could not parse kakera reset time! Disabling indefinitely.");
-                state.KakeraReset = DateTime.MaxValue;
-            }
-
-            if (state.KakeraDailyReset == null)
-            {
-                Log.Warning("Could not parse daily kakera reset time! Disabling indefinitely.");
-                state.KakeraDailyReset = DateTime.MaxValue;
-            }
-
-            if (state.RollsLeft != 0 && state.RollsReset != null)
-                state.AverageRollInterval = new TimeSpan((state.RollsReset.Value - now).Ticks / state.RollsLeft);
 
             var success = failed < lines.Length / 2;
 

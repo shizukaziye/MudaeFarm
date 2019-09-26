@@ -54,6 +54,9 @@ namespace MudaeFarm
 
         async Task HandleMessageAsync(SocketMessage message)
         {
+            if (!_config.ClaimEnabled)
+                return;
+
             if (!(message is SocketUserMessage userMessage))
                 return;
 
@@ -64,20 +67,9 @@ namespace MudaeFarm
             if (!_config.BotChannelIds.Contains(message.Channel.Id))
                 return;
 
-            var guild = (message.Channel as SocketGuildChannel)?.Guild;
-
-            // must be able to claim right now
-            var state = _state.Get(guild);
-
-            if (state.ClaimReset == null || state.ClaimReset <= DateTime.Now)
-                state = await _state.RefreshAsync(guild);
-
-            if (state.ClaimReset == null || DateTime.Now < state.ClaimReset)
-                return;
-
             try
             {
-                HandleMudaeMessage(guild, userMessage);
+                await HandleMudaeMessageAsync(userMessage);
             }
             catch (Exception e)
             {
@@ -85,11 +77,12 @@ namespace MudaeFarm
             }
         }
 
-        void HandleMudaeMessage(IGuild guild, SocketUserMessage message)
+        async Task HandleMudaeMessageAsync(SocketUserMessage message)
         {
             if (!message.Embeds.Any())
                 return;
 
+            var guild = ((IGuildChannel) message.Channel).Guild;
             var embed = message.Embeds.First();
 
             // character must not belong to another user
@@ -108,6 +101,18 @@ namespace MudaeFarm
 
             matched |= _config.WishedCharacterRegex?.IsMatch(character) ?? false;
             matched |= _config.WishedAnimeRegex?.IsMatch(anime) ?? false;
+
+            // ensure we can claim right now
+            if (matched)
+            {
+                var state = _state.Get(guild.Id);
+
+                if (!state.CanClaim && DateTime.Now < state.ClaimReset)
+                {
+                    Log.Warning($"{guild} {message.Channel}: Found character '{character}' but cannot claim it due to cooldown.");
+                    return;
+                }
+            }
 
             if (matched)
             {
@@ -139,9 +144,8 @@ namespace MudaeFarm
 
             await message.AddReactionAsync(reaction.Emote);
 
-            // refresh state
-            if (channel is SocketGuildChannel guildChannel)
-                await _state.RefreshAsync(guildChannel.Guild);
+            // update state
+            _state.Get(((IGuildChannel) message.Channel).GuildId).CanClaim = false;
         }
     }
 }

@@ -40,8 +40,6 @@ namespace MudaeFarm
                 // state management
                 var state = new MudaeStateManager(_client, config);
 
-                state.Initialize();
-
                 // auto-claiming
                 new AutoClaimer(_client, config, state).Initialize();
 
@@ -54,7 +52,8 @@ namespace MudaeFarm
                 Log.Warning("Ready!!");
 
                 // keep the bot running
-                await Task.Delay(-1, cancellationToken);
+                await Task.WhenAll(state.RunAsync(cancellationToken),
+                                   Task.Delay(-1, cancellationToken));
             }
             finally
             {

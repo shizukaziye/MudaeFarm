@@ -95,12 +95,9 @@ namespace MudaeFarm
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                var state = _state.Get(guild);
+                var state = _state.Get(guild.Id);
 
-                if (state.RollsReset == null || state.RollsReset <= DateTime.Now)
-                    state = await _state.RefreshAsync(guild);
-
-                if (state.AverageRollInterval == null)
+                if (!_config.RollEnabled || state.RollsLeft == 0)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                     continue;
@@ -119,6 +116,8 @@ namespace MudaeFarm
                         {
                             await channel.SendMessageAsync(_config.RollCommand);
 
+                            --state.RollsLeft;
+
                             Log.Debug($"{channel.Guild} {channel}: Rolled '{_config.RollCommand}'.");
                         }
                         catch (Exception e)
@@ -130,7 +129,13 @@ namespace MudaeFarm
                     break;
                 }
 
-                await Task.Delay(state.AverageRollInterval.Value, cancellationToken);
+                var now = DateTime.Now;
+
+                if (now > state.RollsReset || state.RollsLeft == 0)
+                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+
+                else
+                    await Task.Delay(new TimeSpan((state.RollsReset - now).Ticks / state.RollsLeft), cancellationToken);
             }
         }
     }

@@ -28,15 +28,17 @@ namespace MudaeFarm
         public void Initialize() => _client.MessageReceived += HandleMessage;
 
         // channelId - completionSource
-        readonly ConcurrentDictionary<ulong, TaskCompletionSource<MudaeState>> _stateCompletionSources
+        readonly ConcurrentDictionary<ulong, TaskCompletionSource<MudaeState>> _stateSources
             = new ConcurrentDictionary<ulong, TaskCompletionSource<MudaeState>>();
 
         Task HandleMessage(SocketMessage message)
         {
-            if (MudaeInfo.IsMudae(message.Author) &&
-                TimersUpParser.TryParse(_client, message, out var state) &&
-                _stateCompletionSources.TryRemove(message.Channel.Id, out var completionSource))
-                completionSource.TrySetResult(state);
+            // ReSharper disable once RemoveRedundantBraces
+            if (MudaeInfo.IsMudae(message.Author) && _stateSources.ContainsKey(message.Channel.Id))
+            {
+                if (TimersUpParser.TryParse(_client, message, out var state) && _stateSources.TryRemove(message.Channel.Id, out var completionSource))
+                    completionSource.TrySetResult(state);
+            }
 
             return Task.CompletedTask;
         }
@@ -63,7 +65,7 @@ namespace MudaeFarm
 
                 var completionSource = new TaskCompletionSource<MudaeState>();
 
-                _stateCompletionSources[channel.Id] = completionSource;
+                _stateSources[channel.Id] = completionSource;
 
                 try
                 {
@@ -77,7 +79,7 @@ namespace MudaeFarm
                 }
                 finally
                 {
-                    _stateCompletionSources.TryRemove(channel.Id, out _);
+                    _stateSources.TryRemove(channel.Id, out _);
                 }
 
                 Log.Debug($"Guild '{guild}' state updated: {JsonConvert.SerializeObject(state)}");

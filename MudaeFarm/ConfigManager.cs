@@ -47,8 +47,7 @@ namespace MudaeFarm
 
             foreach (var guild in _client.Guilds)
             {
-                if (guild.Name == "MudaeFarm" &&
-                    guild.OwnerId == userId &&
+                if (guild.OwnerId == userId &&
                     guild.TextChannels.Any(c => c.Name == "information" && c.Topic.StartsWith($"MudaeFarm Configuration Server {userId}")))
                 {
                     _guild = guild;

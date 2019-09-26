@@ -148,8 +148,6 @@ namespace MudaeFarm
 
             if (state.RollsLeft != 0 && state.RollsReset != null)
                 state.AverageRollInterval = new TimeSpan((state.RollsReset.Value - now).Ticks / state.RollsLeft);
-            else
-                state.AverageRollInterval = TimeSpan.MaxValue;
 
             var success = failed < lines.Length / 2;
 

@@ -66,6 +66,8 @@ namespace MudaeFarm
                             catch (Exception e)
                             {
                                 Log.Warning($"Error while rolling in guild '{guild}'.", e);
+
+                                await Task.Delay(TimeSpan.FromSeconds(1), token);
                             }
                         }
                     },
@@ -95,7 +97,7 @@ namespace MudaeFarm
             {
                 var state = _state.Get(guild);
 
-                if (state.AverageRollInterval == null)
+                if (state.RollsReset == null || state.RollsReset <= DateTime.Now)
                     state = await _state.RefreshAsync(guild);
 
                 if (state.AverageRollInterval == null)

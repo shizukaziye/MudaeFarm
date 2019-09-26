@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -115,8 +115,7 @@ namespace MudaeFarm
 
                 // reactions may not have been attached when we received this message
                 // remember this message so we can attach an appropriate reaction later when we receive it
-                lock (_claimQueue)
-                    _claimQueue.Add(message.Id, message);
+                _claimQueue[message.Id] = message;
             }
             else
             {
@@ -124,19 +123,12 @@ namespace MudaeFarm
             }
         }
 
-        static readonly Dictionary<ulong, IUserMessage> _claimQueue = new Dictionary<ulong, IUserMessage>();
+        static readonly ConcurrentDictionary<ulong, IUserMessage> _claimQueue = new ConcurrentDictionary<ulong, IUserMessage>();
 
         async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
         {
-            IUserMessage message;
-
-            lock (_claimQueue)
-            {
-                if (!_claimQueue.TryGetValue(reaction.MessageId, out message))
-                    return;
-
-                _claimQueue.Remove(reaction.MessageId);
-            }
+            if (!_claimQueue.TryRemove(reaction.MessageId, out var message))
+                return;
 
             // reaction must be a heart emote
             if (Array.IndexOf(_heartEmotes, reaction.Emote) == -1)

@@ -37,11 +37,13 @@ namespace MudaeFarm
 
         readonly DiscordSocketClient _client;
         readonly ConfigManager _config;
+        readonly MudaeStateManager _state;
 
-        public AutoClaimer(DiscordSocketClient client, ConfigManager config)
+        public AutoClaimer(DiscordSocketClient client, ConfigManager config, MudaeStateManager state)
         {
             _client = client;
             _config = config;
+            _state  = state;
         }
 
         public void Initialize()
@@ -58,12 +60,21 @@ namespace MudaeFarm
             if (!MudaeInfo.IsMudae(message.Author))
                 return;
 
-            if (message.Channel is IGuildChannel guildChannel && !_config.ClaimGuildIds.Contains(guildChannel.GuildId))
+            var guild = (message.Channel as IGuildChannel)?.Guild;
+
+            // guild must be enabled for claiming
+            if (guild == null || !_config.ClaimGuildIds.Contains(guild.Id))
+                return;
+
+            // must be able to claim right now
+            var state = _state.Get(guild);
+
+            if (state.ClaimReset == null || DateTime.Now < state.ClaimReset)
                 return;
 
             try
             {
-                HandleMudaeMessage(userMessage);
+                HandleMudaeMessage(guild, userMessage);
             }
             catch (Exception e)
             {
@@ -71,7 +82,7 @@ namespace MudaeFarm
             }
         }
 
-        void HandleMudaeMessage(SocketUserMessage message)
+        void HandleMudaeMessage(IGuild guild, SocketUserMessage message)
         {
             if (!message.Embeds.Any())
                 return;
@@ -86,21 +97,18 @@ namespace MudaeFarm
             if (!embed.Author.HasValue || embed.Author.Value.IconUrl != null)
                 return;
 
-            var name  = embed.Author.Value.Name.Trim().ToLowerInvariant();
-            var anime = embed.Description.Split('\n')[0].Trim().ToLowerInvariant();
-
-            var channel = message.Channel;
-            var guild   = (channel as IGuildChannel)?.Guild;
+            var character = embed.Author.Value.Name.Trim().ToLowerInvariant();
+            var anime     = embed.Description.Split('\n')[0].Trim().ToLowerInvariant();
 
             // matching
             var matched = false;
 
-            matched |= _config.WishedCharacterRegex?.IsMatch(name) ?? false;
+            matched |= _config.WishedCharacterRegex?.IsMatch(character) ?? false;
             matched |= _config.WishedAnimeRegex?.IsMatch(anime) ?? false;
 
             if (matched)
             {
-                Log.Warning($"{guild?.Name ?? "<DM>"} {channel}: Found character '{name}', trying marriage.");
+                Log.Warning($"{guild} {message.Channel}: Found character '{character}', trying marriage.");
 
                 // reactions may not have been attached when we received this message
                 // remember this message so we can attach an appropriate reaction later when we receive it
@@ -109,7 +117,7 @@ namespace MudaeFarm
             }
             else
             {
-                Log.Info($"{guild?.Name ?? "<DM>"} {channel}: Ignored character '{name}', not wished.");
+                Log.Info($"{guild} {message.Channel}: Ignored character '{character}', not wished.");
             }
         }
 
@@ -131,10 +139,14 @@ namespace MudaeFarm
             if (Array.IndexOf(_heartEmotes, reaction.Emote) == -1)
                 return;
 
-            // claim delay
+            // claim the roll
             await Task.Delay(_config.ClaimDelay);
 
             await message.AddReactionAsync(reaction.Emote);
+
+            // refresh state
+            if (channel is SocketGuildChannel guildChannel)
+                await _state.RefreshAsync(guildChannel.Guild);
         }
     }
 }

@@ -43,7 +43,7 @@ namespace MudaeFarm
                 state.Initialize();
 
                 // auto-claiming
-                new AutoClaimer(_client, config).Initialize();
+                new AutoClaimer(_client, config, state).Initialize();
 
                 // auto-rolling
                 await new AutoRoller(_client, config, state).InitializeAsync();

@@ -25,7 +25,7 @@ namespace MudaeFarm
         ITextChannel _claimGuildChannel;
         ITextChannel _wishedCharacterChannel;
         ITextChannel _wishedAnimeChannel;
-        ITextChannel _rollChannelChannel;
+        ITextChannel _botChannelChannel;
 
         public TimeSpan MinStateRefresh;
         public string StateUpdateCommand;
@@ -34,7 +34,7 @@ namespace MudaeFarm
         public HashSet<ulong> ClaimGuildIds;
 
         public string RollCommand;
-        public HashSet<ulong> RollChannelIds;
+        public HashSet<ulong> BotChannelIds;
 
         public Regex WishedCharacterRegex;
         public Regex WishedAnimeRegex;
@@ -95,14 +95,14 @@ namespace MudaeFarm
                 set("claim-servers", ref _claimGuildChannel);
                 set("wished-characters", ref _wishedCharacterChannel);
                 set("wished-anime", ref _wishedAnimeChannel);
-                set("roll-channels", ref _rollChannelChannel);
+                set("bot-channels", ref _botChannelChannel);
             }
 
             // create channel if not created already
             _claimGuildChannel      = _claimGuildChannel ?? await CreateChannelAsync("claim-servers", "Configure servers to enable autoclaiming using the server ID.");
             _wishedCharacterChannel = _wishedCharacterChannel ?? await CreateChannelAsync("wished-characters", "Configure your character wishlist here. Wildcards characters are supported.");
             _wishedAnimeChannel     = _wishedAnimeChannel ?? await CreateChannelAsync("wished-anime", "Configure your anime wishlist here. Wildcards characters are supported.");
-            _rollChannelChannel     = _rollChannelChannel ?? await CreateChannelAsync("roll-channels", "Configure channels to enable autorolling using the channel ID.");
+            _botChannelChannel      = _botChannelChannel ?? await CreateChannelAsync("bot-channels", "Configure channels to send commands (autorolling, kakera, etc.) by sending the channel ID.");
 
             // initial load
             Log.Info("Loading configuration.");
@@ -111,7 +111,7 @@ namespace MudaeFarm
             await ReloadChannelAsync(_claimGuildChannel);
             await ReloadChannelAsync(_wishedCharacterChannel);
             await ReloadChannelAsync(_wishedAnimeChannel);
-            await ReloadChannelAsync(_rollChannelChannel);
+            await ReloadChannelAsync(_botChannelChannel);
 
             Log.Info("Configuration loaded.");
 
@@ -268,7 +268,7 @@ namespace MudaeFarm
                 WishedAnimeRegex = CreateWishRegex(await LoadMessagesAsync(channel));
             }
 
-            else if (channel.Id == _rollChannelChannel.Id)
+            else if (channel.Id == _botChannelChannel.Id)
             {
                 var messages   = await LoadMessagesAsync(channel);
                 var channelIds = new HashSet<ulong>();
@@ -304,7 +304,7 @@ namespace MudaeFarm
                         await message.ModifyAsync(m => m.Content = $"<#{chan.Id}> - **{chan.Guild.Name}**");
                 }
 
-                RollChannelIds = channelIds;
+                BotChannelIds = channelIds;
             }
             else
             {

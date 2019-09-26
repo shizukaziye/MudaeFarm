@@ -55,7 +55,7 @@ namespace MudaeFarm
                 return state;
 
             // select a bot channel to send command in
-            var channel = guild.TextChannels.FirstOrDefault(c => _config.RollChannelIds.Contains(c.Id));
+            var channel = guild.TextChannels.FirstOrDefault(c => _config.BotChannelIds.Contains(c.Id));
 
             if (channel == null)
                 return state;

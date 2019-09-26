@@ -26,7 +26,6 @@ namespace MudaeFarm
         ITextChannel _wishedAnimeChannel;
         ITextChannel _botChannelChannel;
 
-        public TimeSpan MinStateRefresh;
         public string StateUpdateCommand;
 
         public bool ClaimEnabled;
@@ -36,6 +35,7 @@ namespace MudaeFarm
 
         public bool RollEnabled;
         public string RollCommand;
+        public string DailyKakeraCommand;
         public TimeSpan RollTypingDelay;
         public HashSet<ulong> BotChannelIds;
 
@@ -203,7 +203,6 @@ namespace MudaeFarm
 
                 await _client.SetStatusAsync(general.FallbackStatus);
 
-                MinStateRefresh    = TimeSpan.FromMinutes(general.MinStateRefresh);
                 StateUpdateCommand = general.StateUpdateCommand;
 
                 // claiming
@@ -217,9 +216,10 @@ namespace MudaeFarm
                 // rolling
                 var roll = await LoadConfigPartAsync<RollConfig>(channel, "Rolling", dict);
 
-                RollEnabled     = roll.Enabled;
-                RollCommand     = roll.Command;
-                RollTypingDelay = TimeSpan.FromSeconds(roll.TypingDelay);
+                RollEnabled        = roll.Enabled;
+                RollCommand        = roll.Command;
+                DailyKakeraCommand = roll.KakeraCommand;
+                RollTypingDelay    = TimeSpan.FromSeconds(roll.TypingDelay);
             }
 
             else if (channel.Id == _wishedCharacterChannel.Id)
@@ -353,9 +353,6 @@ namespace MudaeFarm
             [JsonProperty("fallback_status")]
             public UserStatus FallbackStatus { get; set; } = UserStatus.Idle;
 
-            [JsonProperty("min_state_refresh_minutes")]
-            public double MinStateRefresh { get; set; } = 1;
-
             [JsonProperty("state_update_command")]
             public string StateUpdateCommand { get; set; } = "$tu";
         }
@@ -382,6 +379,9 @@ namespace MudaeFarm
 
             [JsonProperty("command")]
             public string Command { get; set; } = "$w";
+
+            [JsonProperty("kakera_command")]
+            public string KakeraCommand { get; set; } = "$dk";
 
             [JsonProperty("typing_delay_seconds")]
             public double TypingDelay { get; set; } = 0.3;

@@ -91,7 +91,7 @@ namespace MudaeFarm
 
         async Task RunAsync(SocketGuild guild, CancellationToken cancellationToken = default)
         {
-            Log.Debug($"Entering rolling loop for guild '{guild}'.");
+            Log.Debug($"Entered rolling loop for guild '{guild}'.");
 
             while (!cancellationToken.IsCancellationRequested)
             {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -11,7 +12,7 @@ using Discord.WebSocket;
 
 namespace MudaeFarm
 {
-    public class AutoKakera
+    public class AutoKakera : IModule
     {
         readonly DiscordSocketClient _client;
         readonly ConfigManager _config;
@@ -41,6 +42,8 @@ namespace MudaeFarm
             _client.MessageReceived += HandleMessageAsync;
             _client.ReactionAdded   += HandleReactionAsync;
         }
+
+        Task IModule.RunAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
         async Task HandleMessageAsync(SocketMessage message)
         {

@@ -7,7 +7,7 @@ using Discord.WebSocket;
 
 namespace MudaeFarm
 {
-    public class AutoRoller
+    public class AutoRoller : IModule
     {
         readonly DiscordSocketClient _client;
         readonly ConfigManager _config;
@@ -24,15 +24,15 @@ namespace MudaeFarm
         readonly ConcurrentDictionary<ulong, CancellationTokenSource> _cancellations
             = new ConcurrentDictionary<ulong, CancellationTokenSource>();
 
-        public async Task InitializeAsync()
+        public void Initialize()
         {
-            await ReloadWorkers();
-
             _client.JoinedGuild      += guild => ReloadWorkers();
             _client.LeftGuild        += guild => ReloadWorkers();
             _client.GuildAvailable   += guild => ReloadWorkers();
             _client.GuildUnavailable += guild => ReloadWorkers();
         }
+
+        public Task RunAsync(CancellationToken cancellationToken = default) => ReloadWorkers();
 
         Task ReloadWorkers()
         {
@@ -91,7 +91,7 @@ namespace MudaeFarm
 
         async Task RunAsync(SocketGuild guild, CancellationToken cancellationToken = default)
         {
-            Log.Debug($"Entering rolling loop for guild '{guild}'.");
+            Log.Debug($"Entered rolling loop for guild '{guild}'.");
 
             while (!cancellationToken.IsCancellationRequested)
             {

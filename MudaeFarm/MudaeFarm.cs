@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -22,13 +24,17 @@ namespace MudaeFarm
         public async Task RunAsync(CancellationToken cancellationToken = default)
         {
             // check version
-            await new UpdateChecker().RunAsync();
+            var update = new UpdateChecker();
+
+            await update.RunAsync();
 
             // retrieve auth token
             var token = new AuthTokenManager();
 
             // discord login
-            await new DiscordLogin(_client, token).RunAsync();
+            var login = new DiscordLogin(_client, token);
+
+            await login.RunAsync();
 
             try
             {
@@ -40,24 +46,76 @@ namespace MudaeFarm
                 // state management
                 var state = new MudaeStateManager(_client, config);
 
-                // auto-claiming
-                new AutoClaimer(_client, config, state).Initialize();
+                // module initialization
+                var dependencies = new object[]
+                {
+                    _client,
+                    update,
+                    token,
+                    login,
+                    config,
+                    state
+                };
 
-                // auto-claiming kakera
-                new AutoKakera(_client, config, state).Initialize();
+                var modules = EnumerateModules(dependencies).ToArray();
 
-                // auto-rolling
-                await new AutoRoller(_client, config, state).InitializeAsync();
+                foreach (var module in modules)
+                    module.Initialize();
 
-                Log.Warning("Ready!!");
+                Log.Warning("Ready!");
 
-                // keep the bot running
-                await Task.WhenAll(state.RunAsync(cancellationToken),
-                                   Task.Delay(-1, cancellationToken));
+                // keep running
+                var tasks = modules.Select(m => (name: m.GetType().Name, task: m.RunAsync(cancellationToken))).ToList();
+
+                tasks.Add((state.GetType().Name, state.RunAsync(cancellationToken)));
+
+                await Task.WhenAll(tasks.Select(async x =>
+                {
+                    var (name, task) = x;
+
+                    try
+                    {
+                        await task;
+                    }
+                    catch (TaskCanceledException) { }
+                    catch (Exception e)
+                    {
+                        Log.Warning($"Module '{name}' failed.", e);
+                    }
+                }));
             }
             finally
             {
                 await _client.StopAsync();
+            }
+        }
+
+        IEnumerable<IModule> EnumerateModules(IEnumerable<object> dependencies)
+        {
+            var deps = dependencies.ToDictionary(x => x.GetType());
+
+            foreach (var type in GetType().Assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && typeof(IModule).IsAssignableFrom(t)))
+            {
+                IModule module;
+
+                try
+                {
+                    var ctor = type.GetConstructors().FirstOrDefault();
+
+                    if (ctor == null)
+                        continue;
+
+                    var args = ctor.GetParameters().Select(param => deps.FirstOrDefault(x => x.Key.IsAssignableFrom(param.ParameterType)).Value).ToArray();
+
+                    module = (IModule) ctor.Invoke(args);
+                }
+                catch (Exception e)
+                {
+                    Log.Warning($"Could not initialize module '{type}'.", e);
+                    continue;
+                }
+
+                yield return module;
             }
         }
 

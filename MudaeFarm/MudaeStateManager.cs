@@ -33,13 +33,10 @@ namespace MudaeFarm
 
         Task HandleMessage(SocketMessage message)
         {
-            if (MudaeInfo.IsMudae(message.Author))
-            {
-                var state = new MudaeState();
-
-                if (TimersUpParser.TryParse(_client, message, state) && _stateCompletionSources.TryRemove(message.Channel.Id, out var completionSource))
-                    completionSource.TrySetResult(state);
-            }
+            if (MudaeInfo.IsMudae(message.Author) &&
+                TimersUpParser.TryParse(_client, message, out var state) &&
+                _stateCompletionSources.TryRemove(message.Channel.Id, out var completionSource))
+                completionSource.TrySetResult(state);
 
             return Task.CompletedTask;
         }
@@ -48,22 +45,22 @@ namespace MudaeFarm
 
         public async Task<MudaeState> RefreshAsync(SocketGuild guild)
         {
-            var now   = DateTime.Now;
-            var state = Get(guild);
-
-            // disallow too frequent refreshes
-            if (now < state.LastUpdatedTime + _config.MinStateRefresh)
-                return state;
-
-            // select a bot channel to send command in
-            var channel = guild.TextChannels.FirstOrDefault(c => _config.BotChannelIds.Contains(c.Id));
-
-            if (channel == null)
-                return state;
-
             await _semaphore.WaitAsync();
             try
             {
+                var now   = DateTime.Now;
+                var state = Get(guild);
+
+                // disallow too frequent refreshes
+                if (now < state.LastUpdatedTime + _config.MinStateRefresh)
+                    return state;
+
+                // select a bot channel to send command in
+                var channel = guild.TextChannels.FirstOrDefault(c => _config.BotChannelIds.Contains(c.Id));
+
+                if (channel == null)
+                    return state;
+
                 var completionSource = new TaskCompletionSource<MudaeState>();
 
                 _stateCompletionSources[channel.Id] = completionSource;
@@ -86,7 +83,8 @@ namespace MudaeFarm
             catch (Exception e)
             {
                 Log.Warning($"Could not refresh state for guild '{guild}'.", e);
-                return state;
+
+                return Get(guild);
             }
             finally
             {

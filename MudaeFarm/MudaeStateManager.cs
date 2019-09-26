@@ -65,13 +65,20 @@ namespace MudaeFarm
 
                 _stateCompletionSources[channel.Id] = completionSource;
 
-                // send command
-                await channel.SendMessageAsync(_config.StateUpdateCommand);
+                try
+                {
+                    // send command
+                    await channel.SendMessageAsync(_config.StateUpdateCommand);
 
-                // wait with timeout
-                using (var cancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
-                using (cancellationSource.Token.Register(completionSource.SetCanceled))
-                    state = await completionSource.Task;
+                    // wait with timeout
+                    using (var cancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+                    using (cancellationSource.Token.Register(completionSource.SetCanceled))
+                        state = await completionSource.Task;
+                }
+                finally
+                {
+                    _stateCompletionSources.TryRemove(channel.Id, out _);
+                }
 
                 Log.Debug($"Guild '{guild}' state updated: {JsonConvert.SerializeObject(state)}");
 

@@ -32,7 +32,9 @@ namespace MudaeFarm
 
         public static bool TryParse(IDiscordClient client, IMessage message, out MudaeState state)
         {
-            if (!message.Content.StartsWith($"**{client.CurrentUser.Username}**"))
+            if (!message.Content.StartsWith($"**{client.CurrentUser.Username}**") ||
+                message.Embeds.Count != 0 ||
+                message.Attachments.Count != 0)
             {
                 state = null;
                 return false;

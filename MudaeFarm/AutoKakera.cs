@@ -72,7 +72,7 @@ namespace MudaeFarm
 
             try
             {
-                message = reaction.Message.IsSpecified ? reaction.Message.Value : await channel.GetMessageAsync(reaction.MessageId) as IUserMessage;
+                message = await channel.GetMessageAsync(reaction.MessageId) as IUserMessage;
 
                 if (message == null)
                     return;

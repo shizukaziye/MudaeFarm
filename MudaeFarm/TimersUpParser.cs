@@ -51,7 +51,7 @@ namespace MudaeFarm
             {
                 var line = line1.ToLowerInvariant();
 
-                if (line.Contains("claim"))
+                if (line.Contains(client.CurrentUser.Username) && line.Contains("claim"))
                 {
                     if (TryParseTime(line, out var time))
                         state.ClaimReset = now + time;
@@ -73,6 +73,16 @@ namespace MudaeFarm
                 {
                     if (TryParseTime(line, out var time))
                         state.RollsReset = now + time;
+
+                    ++parsed;
+                }
+
+                else if (line.Contains("$daily"))
+                {
+                    if (TryParseTime(line, out var time))
+                        state.DailyReset = now + time;
+
+                    state.CanDaily = line.Contains("available");
 
                     ++parsed;
                 }
@@ -117,6 +127,17 @@ namespace MudaeFarm
                     ++parsed;
                 }
 
+                else if (line.Contains("$rt"))
+                {
+                    /*
+                                        if (TryParseTime(line, out var time))
+                                            state.ResetClaimTimerReset = now + time;
+
+                                        state.CanResetClaimTimer = line.Contains("available");
+                    */
+                    ++parsed;
+                }
+
                 else if (line.Contains("$dk"))
                 {
                     if (TryParseTime(line, out var time))
@@ -126,14 +147,9 @@ namespace MudaeFarm
 
                     ++parsed;
                 }
-
-                else
-                {
-                    return false;
-                }
             }
 
-            return parsed == 8;
+            return parsed >= 7;
         }
     }
 }

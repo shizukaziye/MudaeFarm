@@ -54,8 +54,7 @@ namespace MudaeFarm
                     {
                         var refreshed = await RefreshAsync(guild);
 
-                        if (refreshed)
-                            state.ForceNextRefresh = false;
+                        state.ForceNextRefresh = !refreshed;
                     }
                 }
 
@@ -122,7 +121,7 @@ namespace MudaeFarm
                 }
                 catch (TaskCanceledException)
                 {
-                    Log.Warning("Expected Mudae `$tu` response but received nothing.");
+                    Log.Warning($"Expected Mudae `{_config.StateUpdateCommand}` response but received nothing.");
 
                     return false;
                 }

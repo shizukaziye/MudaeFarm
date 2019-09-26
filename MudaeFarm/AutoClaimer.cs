@@ -60,7 +60,7 @@ namespace MudaeFarm
             if (!MudaeInfo.IsMudae(message.Author))
                 return;
 
-            var guild = (message.Channel as IGuildChannel)?.Guild;
+            var guild = (message.Channel as SocketGuildChannel)?.Guild;
 
             // guild must be enabled for claiming
             if (guild == null || !_config.ClaimGuildIds.Contains(guild.Id))
@@ -68,6 +68,9 @@ namespace MudaeFarm
 
             // must be able to claim right now
             var state = _state.Get(guild);
+
+            if (state.ClaimReset == null || state.ClaimReset <= DateTime.Now)
+                state = await _state.RefreshAsync(guild);
 
             if (state.ClaimReset == null || DateTime.Now < state.ClaimReset)
                 return;

@@ -11,6 +11,8 @@ namespace MudaeFarm
 
         public AuthTokenManager()
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(_path));
+
             if (File.Exists(_path))
                 Value = File.ReadAllText(_path);
 

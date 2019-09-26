@@ -106,8 +106,6 @@ namespace MudaeFarm
             _botChannelChannel      = _botChannelChannel ?? await CreateChannelAsync("bot-channels", "Configure channels to send commands (autorolling, kakera, etc.) by sending the channel ID.");
 
             // initial load
-            Log.Info("Loading configuration.");
-
             await ReloadChannelAsync(_generalConfigChannel);
             await ReloadChannelAsync(_claimGuildChannel);
             await ReloadChannelAsync(_wishedCharacterChannel);

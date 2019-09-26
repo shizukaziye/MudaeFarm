@@ -36,7 +36,7 @@ namespace MudaeFarm
                 {
                     var state = Get(guild.Id);
 
-                    var updateTime = DateTime.MaxValue;
+                    var updateTime = DateTime.Now.AddHours(12);
 
                     if (!state.CanClaim)
                         Min(ref updateTime, state.ClaimReset);

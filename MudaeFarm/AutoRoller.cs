@@ -7,7 +7,7 @@ using Discord.WebSocket;
 
 namespace MudaeFarm
 {
-    public class AutoRoller
+    public class AutoRoller : IModule
     {
         readonly DiscordSocketClient _client;
         readonly ConfigManager _config;
@@ -24,7 +24,7 @@ namespace MudaeFarm
         readonly ConcurrentDictionary<ulong, CancellationTokenSource> _cancellations
             = new ConcurrentDictionary<ulong, CancellationTokenSource>();
 
-        public async Task InitializeAsync()
+        public async Task RunAsync(CancellationToken cancellationToken = default)
         {
             await ReloadWorkers();
 

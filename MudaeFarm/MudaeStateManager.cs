@@ -41,6 +41,9 @@ namespace MudaeFarm
                     if (!state.CanClaim)
                         Min(ref updateTime, state.ClaimReset);
 
+                    if (state.RollsLeft == 0)
+                        Min(ref updateTime, state.RollsReset);
+
                     if (state.KakeraPower - state.KakeraConsumption < 0)
                         Min(ref updateTime, state.KakeraReset);
 

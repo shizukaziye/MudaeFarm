@@ -53,7 +53,10 @@ namespace MudaeFarm
 
                 if (line.Contains("claim"))
                 {
-                    if (TryParseTime(line, out var time))
+                    if (line.Contains("now"))
+                        state.ClaimReset = DateTime.Now;
+
+                    else if (TryParseTime(line, out var time))
                         state.ClaimReset = now + time;
                 }
 

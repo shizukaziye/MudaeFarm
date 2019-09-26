@@ -350,7 +350,7 @@ namespace MudaeFarm
             public UserStatus FallbackStatus { get; set; } = UserStatus.Idle;
 
             [JsonProperty("min_state_refresh_minutes")]
-            public double MinStateRefresh { get; set; } = 30;
+            public double MinStateRefresh { get; set; } = 1;
 
             [JsonProperty("state_update_command")]
             public string StateUpdateCommand { get; set; } = "$tu";

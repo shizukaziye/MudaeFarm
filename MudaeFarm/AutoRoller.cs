@@ -121,13 +121,13 @@ namespace MudaeFarm
                             Log.Debug($"{channel.Guild} {channel}: Rolled '{_config.RollCommand}'.");
 
                             // also roll $dk if we can
-                            if (state.CanKakeraDailyReset)
+                            if (state.CanKakeraDaily)
                             {
                                 await Task.Delay(_config.RollTypingDelay, cancellationToken);
 
                                 await channel.SendMessageAsync(_config.DailyKakeraCommand);
 
-                                state.CanKakeraDailyReset = false;
+                                state.CanKakeraDaily = false;
 
                                 Log.Debug($"{channel.Guild} {channel}: Sent '{_config.DailyKakeraCommand}'.");
                             }

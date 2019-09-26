@@ -43,7 +43,7 @@ namespace MudaeFarm
             state = new MudaeState();
 
             var now    = DateTime.Now;
-            var failed = 0;
+            var parsed = 0;
 
             var lines = message.Content.Trim().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -57,24 +57,32 @@ namespace MudaeFarm
                         state.ClaimReset = now + time;
 
                     state.CanClaim = line.Contains("now");
+
+                    ++parsed;
                 }
 
                 else if (line.Contains("rolls") && line.Contains("left"))
                 {
                     if (TryParseInt(line, out var value))
                         state.RollsLeft = value;
+
+                    ++parsed;
                 }
 
                 else if (line.Contains("rolls") && line.Contains("reset"))
                 {
                     if (TryParseTime(line, out var time))
                         state.RollsReset = now + time;
+
+                    ++parsed;
                 }
 
                 else if (!line.Contains("power") && line.Contains("react") && line.Contains("kakera"))
                 {
                     if (TryParseTime(line, out var time))
                         state.KakeraReset = now + time;
+
+                    ++parsed;
                 }
 
                 else if (line.Contains("power") && line.Contains("kakera"))
@@ -87,12 +95,16 @@ namespace MudaeFarm
                         {
                             if (TryParseInt(part, out var value))
                                 state.KakeraConsumption = value / 100.0;
+
+                            ++parsed;
                         }
 
                         else if (part.Contains("power"))
                         {
                             if (TryParseInt(part, out var value))
                                 state.KakeraPower = value / 100.0;
+
+                            ++parsed;
                         }
                     }
                 }
@@ -101,6 +113,8 @@ namespace MudaeFarm
                 {
                     if (TryParseInt(line, out var value))
                         state.KakeraStock = value;
+
+                    ++parsed;
                 }
 
                 else if (line.Contains("$dk"))
@@ -108,16 +122,18 @@ namespace MudaeFarm
                     if (TryParseTime(line, out var time))
                         state.KakeraDailyReset = now + time;
 
-                    state.CanKakeraDailyReset = line.Contains("ready");
+                    state.CanKakeraDaily = line.Contains("ready");
+
+                    ++parsed;
                 }
 
                 else
                 {
-                    ++failed;
+                    return false;
                 }
             }
 
-            return failed < lines.Length / 2;
+            return parsed == 8;
         }
     }
 }

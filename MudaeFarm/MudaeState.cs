@@ -26,6 +26,9 @@ namespace MudaeFarm
         [JsonProperty("kakera_consumption")]
         public double KakeraConsumption { get; set; }
 
+        [JsonProperty("kakera_can")]
+        public bool CanKakera => KakeraPower - KakeraConsumption >= 0;
+
         [JsonProperty("kakera_stock")]
         public int KakeraStock { get; set; }
 
@@ -33,7 +36,7 @@ namespace MudaeFarm
         public DateTime KakeraDailyReset { get; set; } = DateTime.MaxValue;
 
         [JsonProperty("kakera_reset_daily_can")]
-        public bool CanKakeraDailyReset { get; set; }
+        public bool CanKakeraDaily { get; set; }
 
 #region Meta
 

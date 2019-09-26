@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Discord;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 
@@ -12,8 +13,6 @@ namespace MudaeFarm
     {
         // guildId - state
         readonly ConcurrentDictionary<ulong, MudaeState> _states = new ConcurrentDictionary<ulong, MudaeState>();
-
-        readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
 
         readonly DiscordSocketClient _client;
         readonly ConfigManager _config;
@@ -36,29 +35,37 @@ namespace MudaeFarm
                 {
                     var state = Get(guild.Id);
 
+                    // enforce refresh every 12 hours
                     var updateTime = DateTime.Now.AddHours(12);
 
+                    // refresh at the earliest reset time
                     if (!state.CanClaim)
                         Min(ref updateTime, state.ClaimReset);
 
                     if (state.RollsLeft == 0)
                         Min(ref updateTime, state.RollsReset);
 
-                    if (state.KakeraPower - state.KakeraConsumption < 0)
+                    if (!state.CanKakera)
                         Min(ref updateTime, state.KakeraReset);
 
-                    if (!state.CanKakeraDailyReset)
+                    if (!state.CanKakeraDaily)
                         Min(ref updateTime, state.KakeraDailyReset);
 
-                    if (now >= updateTime || state.ForceNextRefresh)
-                    {
-                        var refreshed = await RefreshAsync(guild);
+                    // can we refresh?
+                    if (now <= updateTime && !state.ForceNextRefresh)
+                        continue;
 
-                        state.ForceNextRefresh = !refreshed;
-                    }
+                    // select a bot channel to send command in
+                    var channel = guild.TextChannels.FirstOrDefault(c => _config.BotChannelIds.Contains(c.Id));
+
+                    if (channel == null)
+                        continue;
+
+                    // send command
+                    await channel.SendMessageAsync(_config.StateUpdateCommand);
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
             }
         }
 
@@ -68,84 +75,33 @@ namespace MudaeFarm
                 a = a < b.Value ? a : b.Value;
         }
 
-        // channelId - completionSource
-        readonly ConcurrentDictionary<ulong, TaskCompletionSource<MudaeState>> _stateSources
-            = new ConcurrentDictionary<ulong, TaskCompletionSource<MudaeState>>();
+        // async with no await
+#pragma warning disable 1998
 
-        Task HandleMessage(SocketMessage message)
+        async Task HandleMessage(SocketMessage message)
         {
-            // ReSharper disable once RemoveRedundantBraces
-            if (MudaeInfo.IsMudae(message.Author) && _stateSources.ContainsKey(message.Channel.Id))
-            {
-                if (TimersUpParser.TryParse(_client, message, out var state) && _stateSources.TryRemove(message.Channel.Id, out var completionSource))
-                    completionSource.TrySetResult(state);
-            }
+            if (!(message.Channel is IGuildChannel guildChannel))
+                return;
 
-            return Task.CompletedTask;
+            if (!MudaeInfo.IsMudae(message.Author))
+                return;
+
+            if (!_config.BotChannelIds.Contains(message.Channel.Id))
+                return;
+
+            if (!TimersUpParser.TryParse(_client, message, out var state))
+                return;
+
+            _states[guildChannel.GuildId] = state;
+
+            Log.Debug($"Guild '{guildChannel.Guild}' state updated: {JsonConvert.SerializeObject(state)}");
         }
 
-        public MudaeState Get(ulong guildId)
-            => _states.TryGetValue(guildId, out var state)
-                ? state
-                : _states[guildId] = new MudaeState
-                {
-                    ForceNextRefresh = true
-                };
-
-        async Task<bool> RefreshAsync(SocketGuild guild)
-        {
-            await _semaphore.WaitAsync();
-            try
+        public MudaeState Get(ulong guildId) => _states.TryGetValue(guildId, out var state)
+            ? state
+            : _states[guildId] = new MudaeState
             {
-                MudaeState newState;
-
-                // select a bot channel to send command in
-                var channel = guild.TextChannels.FirstOrDefault(c => _config.BotChannelIds.Contains(c.Id));
-
-                if (channel == null)
-                    return false;
-
-                var completionSource = new TaskCompletionSource<MudaeState>();
-
-                _stateSources[channel.Id] = completionSource;
-
-                try
-                {
-                    // send command
-                    await channel.SendMessageAsync(_config.StateUpdateCommand);
-
-                    // wait with timeout
-                    using (var cancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
-                    using (cancellationSource.Token.Register(completionSource.SetCanceled))
-                        newState = await completionSource.Task;
-                }
-                catch (TaskCanceledException)
-                {
-                    Log.Warning($"Expected Mudae `{_config.StateUpdateCommand}` response but received nothing.");
-
-                    return false;
-                }
-                finally
-                {
-                    _stateSources.TryRemove(channel.Id, out _);
-                }
-
-                _states[guild.Id] = newState;
-
-                Log.Debug($"Guild '{guild}' state updated: {JsonConvert.SerializeObject(newState)}");
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                Log.Warning($"Could not refresh state for guild '{guild}'.", e);
-
-                return false;
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
-        }
+                ForceNextRefresh = true
+            };
     }
 }

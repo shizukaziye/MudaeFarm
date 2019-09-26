@@ -14,11 +14,8 @@ namespace MudaeFarm
         [JsonProperty("rolls_reset")]
         public DateTime? RollsReset { get; set; }
 
-        /// <summary>
-        /// This is at best an estimate.
-        /// </summary>
         [JsonProperty("roll_interval_avg")]
-        public TimeSpan AverageRollInterval { get; set; }
+        public TimeSpan? AverageRollInterval { get; set; }
 
         [JsonProperty("kakera_reset")]
         public DateTime? KakeraReset { get; set; }

@@ -43,12 +43,12 @@ namespace MudaeFarm
             return Task.CompletedTask;
         }
 
-        public MudaeState GetState(IGuild guild) => _states.TryGetValue(guild.Id, out var state) ? state : new MudaeState();
+        public MudaeState Get(IGuild guild) => _states.TryGetValue(guild.Id, out var state) ? state : new MudaeState();
 
-        public async Task<MudaeState> RefreshStateAsync(SocketGuild guild)
+        public async Task<MudaeState> RefreshAsync(SocketGuild guild)
         {
             var now   = DateTime.Now;
-            var state = GetState(guild);
+            var state = Get(guild);
 
             // disallow too frequent refreshes
             if (now < state.LastUpdatedTime + _config.MinStateRefresh)

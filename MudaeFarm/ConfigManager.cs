@@ -34,6 +34,7 @@ namespace MudaeFarm
         public HashSet<ulong> ClaimGuildIds;
 
         public string RollCommand;
+        public TimeSpan RollTypingDelay;
         public HashSet<ulong> BotChannelIds;
 
         public Regex WishedCharacterRegex;
@@ -217,7 +218,8 @@ namespace MudaeFarm
                 // rolling
                 var roll = await LoadConfigPartAsync<RollConfig>(channel, "Rolling", dict);
 
-                RollCommand = roll.Command;
+                RollCommand     = roll.Command;
+                RollTypingDelay = TimeSpan.FromSeconds(roll.TypingDelay);
             }
 
             else if (channel.Id == _claimGuildChannel.Id)
@@ -406,6 +408,9 @@ namespace MudaeFarm
         {
             [JsonProperty("command")]
             public string Command { get; set; } = "$w";
+
+            [JsonProperty("typing_delay_seconds")]
+            public double TypingDelay { get; set; } = 0.3;
         }
 
 #endregion

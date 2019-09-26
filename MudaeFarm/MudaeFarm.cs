@@ -45,13 +45,13 @@ namespace MudaeFarm
                 // auto-claiming
                 new AutoClaimer(_client, config).Initialize();
 
+                // auto-rolling
+                await new AutoRoller(_client, config, state).InitializeAsync();
+
                 Log.Warning("Ready!!");
 
-                // auto-rolling
-                var roller = new AutoRoller(_client, config).RunAsync(cancellationToken);
-
                 // keep the bot running
-                await Task.WhenAll(roller, Task.Delay(-1, cancellationToken));
+                await Task.Delay(-1, cancellationToken);
             }
             finally
             {

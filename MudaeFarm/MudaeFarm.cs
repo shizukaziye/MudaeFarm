@@ -37,16 +37,23 @@ namespace MudaeFarm
 
                 await config.InitializeAsync();
 
+                // state management
+                var state = new MudaeStateManager(_client, config);
+
                 // auto-claiming
-                new AutoClaimer(_client, config).Initialize();
+                new AutoClaimer(_client, config, state).Initialize();
+
+                // auto-claiming kakera
+                new AutoKakera(_client, config, state).Initialize();
+
+                // auto-rolling
+                await new AutoRoller(_client, config, state).InitializeAsync();
 
                 Log.Warning("Ready!!");
 
-                // auto-rolling
-                var roller = new AutoRoller(_client, config).RunAsync(cancellationToken);
-
                 // keep the bot running
-                await Task.WhenAll(roller, Task.Delay(-1, cancellationToken));
+                await Task.WhenAll(state.RunAsync(cancellationToken),
+                                   Task.Delay(-1, cancellationToken));
             }
             finally
             {
@@ -61,7 +68,8 @@ namespace MudaeFarm
             // these errors occur from using an old version of Discord.Net
             // they should not affect any functionality
             if (message.Message.Contains("Error handling Dispatch (TYPING_START)") ||
-                message.Message.Contains("Unknown Dispatch (SESSIONS_REPLACE)"))
+                message.Message.Contains("Unknown Dispatch (SESSIONS_REPLACE)") ||
+                message.Message.Contains("Preemptive Rate limit"))
                 return Task.CompletedTask;
 
             var text = message.Exception == null

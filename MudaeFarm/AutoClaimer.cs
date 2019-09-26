@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -37,11 +37,13 @@ namespace MudaeFarm
 
         readonly DiscordSocketClient _client;
         readonly ConfigManager _config;
+        readonly MudaeStateManager _state;
 
-        public AutoClaimer(DiscordSocketClient client, ConfigManager config)
+        public AutoClaimer(DiscordSocketClient client, ConfigManager config, MudaeStateManager state)
         {
             _client = client;
             _config = config;
+            _state  = state;
         }
 
         public void Initialize()
@@ -52,18 +54,22 @@ namespace MudaeFarm
 
         async Task HandleMessageAsync(SocketMessage message)
         {
+            if (!_config.ClaimEnabled)
+                return;
+
             if (!(message is SocketUserMessage userMessage))
                 return;
 
             if (!MudaeInfo.IsMudae(message.Author))
                 return;
 
-            if (message.Channel is IGuildChannel guildChannel && !_config.ClaimGuildIds.Contains(guildChannel.GuildId))
+            // channel must be enabled for claiming
+            if (!_config.BotChannelIds.Contains(message.Channel.Id))
                 return;
 
             try
             {
-                HandleMudaeMessage(userMessage);
+                await HandleMudaeMessageAsync(userMessage);
             }
             catch (Exception e)
             {
@@ -71,11 +77,12 @@ namespace MudaeFarm
             }
         }
 
-        void HandleMudaeMessage(SocketUserMessage message)
+        async Task HandleMudaeMessageAsync(SocketUserMessage message)
         {
             if (!message.Embeds.Any())
                 return;
 
+            var guild = ((IGuildChannel) message.Channel).Guild;
             var embed = message.Embeds.First();
 
             // character must not belong to another user
@@ -86,55 +93,59 @@ namespace MudaeFarm
             if (!embed.Author.HasValue || embed.Author.Value.IconUrl != null)
                 return;
 
-            var name  = embed.Author.Value.Name.Trim().ToLowerInvariant();
-            var anime = embed.Description.Split('\n')[0].Trim().ToLowerInvariant();
-
-            var channel = message.Channel;
-            var guild   = (channel as IGuildChannel)?.Guild;
+            var character = embed.Author.Value.Name.Trim().ToLowerInvariant();
+            var anime     = embed.Description.Split('\n')[0].Trim().ToLowerInvariant();
 
             // matching
             var matched = false;
 
-            matched |= _config.WishedCharacterRegex?.IsMatch(name) ?? false;
+            matched |= _config.WishedCharacterRegex?.IsMatch(character) ?? false;
             matched |= _config.WishedAnimeRegex?.IsMatch(anime) ?? false;
+
+            // ensure we can claim right now
+            if (matched)
+            {
+                var state = _state.Get(guild.Id);
+
+                if (!state.CanClaim && DateTime.Now < state.ClaimReset)
+                {
+                    Log.Warning($"{guild} {message.Channel}: Found character '{character}' but cannot claim it due to cooldown.");
+                    return;
+                }
+            }
 
             if (matched)
             {
-                Log.Warning($"{guild?.Name ?? "DM"} #{channel.Name}: Found character '{name}', trying marriage.");
+                Log.Warning($"{guild} {message.Channel}: Found character '{character}', trying marriage.");
 
                 // reactions may not have been attached when we received this message
                 // remember this message so we can attach an appropriate reaction later when we receive it
-                lock (_claimQueue)
-                    _claimQueue.Add(message.Id, message);
+                _claimQueue[message.Id] = message;
             }
             else
             {
-                Log.Info($"{guild?.Name ?? "DM"} #{channel.Name}: Ignored character '{name}', not wished.");
+                Log.Info($"{guild} {message.Channel}: Ignored character '{character}', not wished.");
             }
         }
 
-        static readonly Dictionary<ulong, IUserMessage> _claimQueue = new Dictionary<ulong, IUserMessage>();
+        static readonly ConcurrentDictionary<ulong, IUserMessage> _claimQueue = new ConcurrentDictionary<ulong, IUserMessage>();
 
         async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
         {
-            IUserMessage message;
-
-            lock (_claimQueue)
-            {
-                if (!_claimQueue.TryGetValue(reaction.MessageId, out message))
-                    return;
-
-                _claimQueue.Remove(reaction.MessageId);
-            }
+            if (!_claimQueue.TryRemove(reaction.MessageId, out var message))
+                return;
 
             // reaction must be a heart emote
             if (Array.IndexOf(_heartEmotes, reaction.Emote) == -1)
                 return;
 
-            // claim delay
+            // claim the roll
             await Task.Delay(_config.ClaimDelay);
 
             await message.AddReactionAsync(reaction.Emote);
+
+            // update state
+            _state.Get(((IGuildChannel) message.Channel).GuildId).CanClaim = false;
         }
     }
 }

@@ -63,6 +63,8 @@ namespace MudaeFarm
 
                     // send command
                     await channel.SendMessageAsync(_config.StateUpdateCommand);
+
+                    state.ForceNextRefresh = false;
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);

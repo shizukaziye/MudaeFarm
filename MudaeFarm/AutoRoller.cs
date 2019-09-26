@@ -93,12 +93,13 @@ namespace MudaeFarm
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                var state    = _state.Get(guild);
-                var interval = state.AverageRollInterval;
+                var state = _state.Get(guild);
 
-                if (interval == null)
+                if (state.AverageRollInterval == null)
+                    state = await _state.RefreshAsync(guild);
+
+                if (state.AverageRollInterval == null)
                 {
-                    // rolling disabled
                     await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                     continue;
                 }
@@ -127,7 +128,7 @@ namespace MudaeFarm
                     break;
                 }
 
-                await Task.Delay(interval.Value, cancellationToken);
+                await Task.Delay(state.AverageRollInterval.Value, cancellationToken);
             }
         }
     }

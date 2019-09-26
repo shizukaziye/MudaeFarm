@@ -21,14 +21,14 @@ namespace MudaeFarm
 
         static readonly Dictionary<string, KakeraType> _kakeraMap = new Dictionary<string, KakeraType>
         {
-            { ":kakeraP:", KakeraType.Purple },
-            { ":kakera:", KakeraType.Blue },
-            { ":kakeraT:", KakeraType.Teal },
-            { ":kakeraG:", KakeraType.Green },
-            { ":kakeraY:", KakeraType.Yellow },
-            { ":kakeraO:", KakeraType.Orange },
-            { ":KakeraR:", KakeraType.Red },
-            { ":kakeraW:", KakeraType.Rainbow }
+            { "kakeraP", KakeraType.Purple },
+            { "kakera", KakeraType.Blue },
+            { "kakeraT", KakeraType.Teal },
+            { "kakeraG", KakeraType.Green },
+            { "kakeraY", KakeraType.Yellow },
+            { "kakeraO", KakeraType.Orange },
+            { "KakeraR", KakeraType.Red },
+            { "kakeraW", KakeraType.Rainbow }
         };
 
         public void Initialize() => _client.ReactionAdded += HandleReactionAsync;

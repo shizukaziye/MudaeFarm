@@ -22,8 +22,6 @@ To configure character/anime wishlists, you can simply send the name of the char
 
 MudaeFarm wishlists are entirely separate from Mudae the wishlist and will not synchronize against each other.
 
-**Autoclaiming is disabled by default.** You must copy the ID of the server you want to enable autoclaiming in, and send that ID in `#claim-servers`.
-
-**Autorolling is disabled by default.** You must copy the ID of the channel you want to enable autorolling in, and send that ID in `#bot-channels`.
+**MudaeFarm is disabled on all servers by default.** You must copy the ID of the channel in which you want to enable MudaeFarm (usually the bot/spam channel of that server), and send that ID in `#bot-channels`.
 
 For JSON-based configuration messages, you can simply edit the contents and the bot will reload the changes automatically.

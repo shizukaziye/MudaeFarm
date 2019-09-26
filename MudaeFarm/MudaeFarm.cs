@@ -45,6 +45,9 @@ namespace MudaeFarm
                 // auto-claiming
                 new AutoClaimer(_client, config, state).Initialize();
 
+                // auto-claiming kakera
+                new AutoKakera(_client, config, state).Initialize();
+
                 // auto-rolling
                 await new AutoRoller(_client, config, state).InitializeAsync();
 

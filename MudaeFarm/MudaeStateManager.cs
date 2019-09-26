@@ -77,6 +77,12 @@ namespace MudaeFarm
                     using (cancellationSource.Token.Register(completionSource.SetCanceled))
                         state = await completionSource.Task;
                 }
+                catch (TaskCanceledException)
+                {
+                    Log.Warning("Expected Mudae `$tu` response but received nothing.");
+
+                    return state;
+                }
                 finally
                 {
                     _stateSources.TryRemove(channel.Id, out _);

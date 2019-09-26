@@ -18,7 +18,11 @@ namespace MudaeFarm
 
                     return;
                 }
-                catch (DummyRestartException) { }
+                catch (DummyRestartException e)
+                {
+                    if (!e.Delayed)
+                        continue;
+                }
                 catch (Exception e)
                 {
                     // fatal error recovery

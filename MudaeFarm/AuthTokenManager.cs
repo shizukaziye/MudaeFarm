@@ -47,6 +47,8 @@ namespace MudaeFarm
                 Value = Console.ReadLine();
 
                 File.WriteAllText(_path, Value);
+
+                throw new DummyRestartException { Delayed = false };
             }
         }
 

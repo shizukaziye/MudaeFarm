@@ -57,8 +57,6 @@ namespace MudaeFarm
                     state
                 };
 
-                Log.Info("Initializing modules...");
-
                 var tasks = EnumerateModules(dependencies).Select(m => (name: m.GetType().Name, task: m.RunAsync(cancellationToken))).ToList();
 
                 // keep running

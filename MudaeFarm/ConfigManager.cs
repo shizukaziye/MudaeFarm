@@ -22,7 +22,6 @@ namespace MudaeFarm
         IGuild _guild;
 
         ITextChannel _generalConfigChannel;
-        ITextChannel _claimGuildChannel;
         ITextChannel _wishedCharacterChannel;
         ITextChannel _wishedAnimeChannel;
         ITextChannel _botChannelChannel;
@@ -31,7 +30,8 @@ namespace MudaeFarm
         public string StateUpdateCommand;
 
         public TimeSpan ClaimDelay;
-        public HashSet<ulong> ClaimGuildIds;
+        public TimeSpan KakeraClaimDelay;
+        public HashSet<KakeraType> KakeraTargets;
 
         public string RollCommand;
         public TimeSpan RollTypingDelay;
@@ -93,21 +93,18 @@ namespace MudaeFarm
                 }
 
                 set("information", ref _generalConfigChannel);
-                set("claim-servers", ref _claimGuildChannel);
                 set("wished-characters", ref _wishedCharacterChannel);
                 set("wished-anime", ref _wishedAnimeChannel);
                 set("bot-channels", ref _botChannelChannel);
             }
 
             // create channel if not created already
-            _claimGuildChannel      = _claimGuildChannel ?? await CreateChannelAsync("claim-servers", "Configure servers to enable autoclaiming using the server ID.");
             _wishedCharacterChannel = _wishedCharacterChannel ?? await CreateChannelAsync("wished-characters", "Configure your character wishlist here. Wildcards characters are supported.");
             _wishedAnimeChannel     = _wishedAnimeChannel ?? await CreateChannelAsync("wished-anime", "Configure your anime wishlist here. Wildcards characters are supported.");
-            _botChannelChannel      = _botChannelChannel ?? await CreateChannelAsync("bot-channels", "Configure channels to send commands (autorolling, kakera, etc.) by sending the channel ID.");
+            _botChannelChannel      = _botChannelChannel ?? await CreateChannelAsync("bot-channels", "Configure channels to enable MudaeFarm autorolling/claiming by sending the channel ID.");
 
             // initial load
             await ReloadChannelAsync(_generalConfigChannel);
-            await ReloadChannelAsync(_claimGuildChannel);
             await ReloadChannelAsync(_wishedCharacterChannel);
             await ReloadChannelAsync(_wishedAnimeChannel);
             await ReloadChannelAsync(_botChannelChannel);
@@ -211,51 +208,15 @@ namespace MudaeFarm
                 // claiming
                 var claim = await LoadConfigPartAsync<ClaimConfig>(channel, "Claiming", dict);
 
-                ClaimDelay = TimeSpan.FromSeconds(claim.Delay);
+                ClaimDelay       = TimeSpan.FromSeconds(claim.Delay);
+                KakeraClaimDelay = TimeSpan.FromSeconds(claim.KakeraDelay);
+                KakeraTargets    = claim.KakeraTargets;
 
                 // rolling
                 var roll = await LoadConfigPartAsync<RollConfig>(channel, "Rolling", dict);
 
                 RollCommand     = roll.Command;
                 RollTypingDelay = TimeSpan.FromSeconds(roll.TypingDelay);
-            }
-
-            else if (channel.Id == _claimGuildChannel.Id)
-            {
-                var messages = await LoadMessagesAsync(channel);
-                var guildIds = new HashSet<ulong>();
-
-                foreach (var message in messages)
-                {
-                    var parts = message.Content.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    IGuild guild;
-
-                    if (!ulong.TryParse(parts[0], out var id) ||
-                        (guild = _client.GetGuild(id)) == null)
-                    {
-                        if (message.Reactions.Count == 0)
-                            await message.AddReactionAsync(new Emoji("\u274C"));
-
-                        continue;
-                    }
-
-                    if (!guildIds.Add(id))
-                    {
-                        if (message.Reactions.Count == 0)
-                            await message.AddReactionAsync(new Emoji("\u0032\u20E3"));
-
-                        continue;
-                    }
-
-                    if (message.Reactions.Count != 0)
-                        await message.RemoveAllReactionsAsync();
-
-                    if (parts.Length == 1)
-                        await message.ModifyAsync(m => m.Content = $"{guild.Id} - **{guild.Name}**");
-                }
-
-                ClaimGuildIds = guildIds;
             }
 
             else if (channel.Id == _wishedCharacterChannel.Id)
@@ -400,6 +361,12 @@ namespace MudaeFarm
         {
             [JsonProperty("delay_seconds")]
             public double Delay { get; set; } = 0.2;
+
+            [JsonProperty("kakera_delay_seconds")]
+            public double KakeraDelay { get; set; } = 0.2;
+
+            [JsonProperty("kakera_targets")]
+            public HashSet<KakeraType> KakeraTargets { get; set; } = new HashSet<KakeraType>(Enum.GetValues(typeof(KakeraType)).Cast<KakeraType>());
         }
 
         public class RollConfig

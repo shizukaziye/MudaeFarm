@@ -60,11 +60,11 @@ namespace MudaeFarm
             if (!MudaeInfo.IsMudae(message.Author))
                 return;
 
-            var guild = (message.Channel as SocketGuildChannel)?.Guild;
-
-            // guild must be enabled for claiming
-            if (guild == null || !_config.ClaimGuildIds.Contains(guild.Id))
+            // channel must be enabled for claiming
+            if (!_config.BotChannelIds.Contains(message.Channel.Id))
                 return;
+
+            var guild = (message.Channel as SocketGuildChannel)?.Guild;
 
             // must be able to claim right now
             var state = _state.Get(guild);

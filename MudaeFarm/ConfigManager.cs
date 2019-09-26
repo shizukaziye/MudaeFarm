@@ -27,6 +27,9 @@ namespace MudaeFarm
         ITextChannel _wishedAnimeChannel;
         ITextChannel _rollChannelChannel;
 
+        public TimeSpan MinStateRefresh;
+        public string StateUpdateCommand;
+
         public TimeSpan ClaimDelay;
         public HashSet<ulong> ClaimGuildIds;
 
@@ -202,6 +205,9 @@ namespace MudaeFarm
                 var general = await LoadConfigPartAsync<GeneralConfig>(channel, "General", dict);
 
                 await _client.SetStatusAsync(general.FallbackStatus);
+
+                MinStateRefresh    = TimeSpan.FromMinutes(general.MinStateRefresh);
+                StateUpdateCommand = general.StateUpdateCommand;
 
                 // claiming
                 var claim = await LoadConfigPartAsync<ClaimConfig>(channel, "Claiming", dict);
@@ -382,6 +388,12 @@ namespace MudaeFarm
         {
             [JsonProperty("fallback_status")]
             public UserStatus FallbackStatus { get; set; } = UserStatus.Idle;
+
+            [JsonProperty("min_state_refresh_minutes")]
+            public double MinStateRefresh { get; set; } = 30;
+
+            [JsonProperty("state_update_command")]
+            public string StateUpdateCommand { get; set; } = "$tu";
         }
 
         public class ClaimConfig

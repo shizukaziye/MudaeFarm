@@ -37,6 +37,11 @@ namespace MudaeFarm
 
                 await config.InitializeAsync();
 
+                // state management
+                var state = new MudaeStateManager(_client, config);
+
+                state.Initialize();
+
                 // auto-claiming
                 new AutoClaimer(_client, config).Initialize();
 

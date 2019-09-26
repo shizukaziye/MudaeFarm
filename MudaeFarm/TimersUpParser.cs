@@ -48,46 +48,74 @@ namespace MudaeFarm
                 {
                     if (TryParseTime(line, out var time))
                         state.ClaimReset = now + time;
+                    else
+                        state.ClaimReset = null;
                 }
 
                 else if (line.Contains("rolls") && line.Contains("left"))
                 {
-                    if (TryParseInt(line, out var value))
-                        state.RollsLeft = value;
+                    TryParseInt(line, out var value);
+
+                    state.RollsLeft = value;
                 }
 
                 else if (line.Contains("rolls") && line.Contains("reset"))
                 {
                     if (TryParseTime(line, out var time))
                         state.RollsReset = now + time;
+                    else
+                        state.RollsReset = null;
                 }
 
                 else if (line.Contains("react") && line.Contains("kakera"))
                 {
                     if (TryParseTime(line, out var time))
                         state.KakeraReset = now + time;
-                    else
+                    else if (line.Contains("now"))
                         state.KakeraReset = now;
+                    else
+                        state.KakeraReset = null;
                 }
 
                 else if (line.Contains("power") && line.Contains("kakera"))
                 {
-                    if (TryParseInt(line, out var value))
-                        state.KakeraPower = value / 100.0;
+                    var parts = line.Split(new[] { '(' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var part in parts)
+                    {
+                        if (part.Contains("power"))
+                        {
+                            if (TryParseInt(part, out var value))
+                                state.KakeraPower = value / 100.0;
+                            else
+                                state.KakeraPower = 0;
+                        }
+
+                        else if (part.Contains("consume"))
+                        {
+                            if (TryParseInt(part, out var value))
+                                state.KakeraPowerConsumption = value / 100.0;
+                            else
+                                state.KakeraPowerConsumption = 0;
+                        }
+                    }
                 }
 
                 else if (line.Contains("stock") && line.Contains("kakera"))
                 {
-                    if (TryParseInt(line, out var value))
-                        state.KakeraStock = value;
+                    TryParseInt(line, out var value);
+
+                    state.KakeraStock = value;
                 }
 
                 else if (line.Contains("$dk"))
                 {
                     if (TryParseTime(line, out var time))
                         state.KakeraDailyReset = now + time;
-                    else
+                    else if (line.Contains("ready"))
                         state.KakeraDailyReset = now;
+                    else
+                        state.KakeraDailyReset = null;
                 }
 
                 else
@@ -96,7 +124,15 @@ namespace MudaeFarm
                 }
             }
 
-            return failed < lines.Length / 2;
+            if (state.RollsLeft != 0 && state.RollsReset != null)
+                state.AverageRollInterval = new TimeSpan(state.RollsReset.Value.Ticks / state.RollsLeft);
+
+            var success = failed < lines.Length / 2;
+
+            if (success)
+                state.LastUpdatedTime = now;
+
+            return success;
         }
     }
 }

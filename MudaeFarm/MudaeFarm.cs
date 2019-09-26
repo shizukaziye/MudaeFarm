@@ -57,9 +57,16 @@ namespace MudaeFarm
                     state
                 };
 
-                var tasks = EnumerateModules(dependencies).Select(m => (name: m.GetType().Name, task: m.RunAsync(cancellationToken))).ToList();
+                var modules = EnumerateModules(dependencies).ToArray();
+
+                foreach (var module in modules)
+                    module.Initialize();
+
+                Log.Warning("Ready!");
 
                 // keep running
+                var tasks = modules.Select(m => (name: m.GetType().Name, task: m.RunAsync(cancellationToken))).ToList();
+
                 tasks.Add((state.GetType().Name, state.RunAsync(cancellationToken)));
 
                 await Task.WhenAll(tasks.Select(async x =>

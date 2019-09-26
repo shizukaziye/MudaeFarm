@@ -37,11 +37,13 @@ namespace MudaeFarm
             { "kakeraW", KakeraType.Rainbow }
         };
 
-        public async Task RunAsync(CancellationToken cancellationToken = default)
+        public void Initialize()
         {
             _client.MessageReceived += HandleMessageAsync;
             _client.ReactionAdded   += HandleReactionAsync;
         }
+
+        Task IModule.RunAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
         async Task HandleMessageAsync(SocketMessage message)
         {

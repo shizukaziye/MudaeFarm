@@ -24,15 +24,15 @@ namespace MudaeFarm
         readonly ConcurrentDictionary<ulong, CancellationTokenSource> _cancellations
             = new ConcurrentDictionary<ulong, CancellationTokenSource>();
 
-        public async Task RunAsync(CancellationToken cancellationToken = default)
+        public void Initialize()
         {
-            await ReloadWorkers();
-
             _client.JoinedGuild      += guild => ReloadWorkers();
             _client.LeftGuild        += guild => ReloadWorkers();
             _client.GuildAvailable   += guild => ReloadWorkers();
             _client.GuildUnavailable += guild => ReloadWorkers();
         }
+
+        public Task RunAsync(CancellationToken cancellationToken = default) => ReloadWorkers();
 
         Task ReloadWorkers()
         {

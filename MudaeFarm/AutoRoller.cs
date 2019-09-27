@@ -166,6 +166,13 @@ namespace MudaeFarm
                             state.CanKakeraDaily = false;
 
                             Log.Debug($"{channel.Guild} {channel}: Sent daily kakera command '{_config.DailyKakeraCommand}'.");
+
+                            if (_config.DailyKakeraStateUpdate)
+                            {
+                                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+
+                                await channel.SendMessageAsync(_config.StateUpdateCommand);
+                            }
                         }
                         catch (Exception e)
                         {

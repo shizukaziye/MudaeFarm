@@ -206,7 +206,7 @@ namespace MudaeFarm
                 StateUpdateCommand = general.StateUpdateCommand;
 
                 // claiming
-                var claim = await LoadConfigPartAsync<ClaimConfig>(channel, "Claiming", dict);
+                var claim = await LoadConfigPartAsync(channel, "Claiming", dict, ClaimConfig.CreateDefault);
 
                 ClaimEnabled     = claim.Enabled;
                 ClaimDelay       = TimeSpan.FromSeconds(claim.Delay);
@@ -280,7 +280,7 @@ namespace MudaeFarm
 
         static readonly Regex _channelMentionRegex = new Regex(@"^<#(?<id>\d+)>$", RegexOptions.Compiled | RegexOptions.Singleline);
 
-        static async Task<T> LoadConfigPartAsync<T>(IMessageChannel channel, string key, IReadOnlyDictionary<string, ConfigPart> dict)
+        static async Task<T> LoadConfigPartAsync<T>(IMessageChannel channel, string key, IReadOnlyDictionary<string, ConfigPart> dict, Func<T> defaultFactory = null)
             where T : class, new()
         {
             if (dict.TryGetValue(key.ToLowerInvariant(), out var part))
@@ -310,7 +310,7 @@ namespace MudaeFarm
 
             else
             {
-                var config = new T();
+                var config = defaultFactory?.Invoke() ?? new T();
 
                 await channel.SendMessageAsync(formatConfigMessage(config));
 
@@ -359,6 +359,11 @@ namespace MudaeFarm
 
         public class ClaimConfig
         {
+            public static ClaimConfig CreateDefault() => new ClaimConfig
+            {
+                KakeraTargets = new HashSet<KakeraType>(Enum.GetValues(typeof(KakeraType)).Cast<KakeraType>())
+            };
+
             [JsonProperty("enabled")]
             public bool Enabled { get; set; } = true;
 
@@ -369,7 +374,7 @@ namespace MudaeFarm
             public double KakeraDelay { get; set; } = 0.2;
 
             [JsonProperty("kakera_targets")]
-            public HashSet<KakeraType> KakeraTargets { get; set; } = new HashSet<KakeraType>(Enum.GetValues(typeof(KakeraType)).Cast<KakeraType>());
+            public HashSet<KakeraType> KakeraTargets { get; set; }
         }
 
         public class RollConfig

@@ -97,7 +97,7 @@ namespace MudaeFarm
                     });
 
                     Process.GetCurrentProcess().Kill();
-                    return true;
+                    break;
                 }
             }
 

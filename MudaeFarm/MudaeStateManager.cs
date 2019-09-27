@@ -48,9 +48,6 @@ namespace MudaeFarm
                     if (!state.CanKakera)
                         Min(ref updateTime, state.KakeraReset);
 
-                    if (!state.CanKakeraDaily)
-                        Min(ref updateTime, state.KakeraDailyReset);
-
                     // can we refresh?
                     if (now <= updateTime && !state.ForceNextRefresh)
                         continue;

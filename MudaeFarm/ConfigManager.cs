@@ -37,6 +37,7 @@ namespace MudaeFarm
         public string RollCommand;
         public bool DailyKakeraEnabled;
         public string DailyKakeraCommand;
+        public bool DailyKakeraStateUpdate;
         public TimeSpan RollTypingDelay;
         public HashSet<ulong> BotChannelIds;
 
@@ -217,11 +218,12 @@ namespace MudaeFarm
                 // rolling
                 var roll = await LoadConfigPartAsync<RollConfig>(channel, "Rolling", dict);
 
-                RollEnabled        = roll.Enabled;
-                RollCommand        = roll.Command;
-                DailyKakeraEnabled = roll.KakeraEnabled;
-                DailyKakeraCommand = roll.KakeraCommand;
-                RollTypingDelay    = TimeSpan.FromSeconds(roll.TypingDelay);
+                RollEnabled            = roll.Enabled;
+                RollCommand            = roll.Command;
+                DailyKakeraEnabled     = roll.KakeraEnabled;
+                DailyKakeraCommand     = roll.KakeraCommand;
+                DailyKakeraStateUpdate = roll.KakeraStateUpdate;
+                RollTypingDelay        = TimeSpan.FromSeconds(roll.TypingDelay);
             }
 
             else if (channel.Id == _wishedCharacterChannel.Id)
@@ -402,6 +404,9 @@ namespace MudaeFarm
 
             [JsonProperty("daily_kakera_command")]
             public string KakeraCommand { get; set; } = "$dk";
+
+            [JsonProperty("daily_kakera_then_state_update")]
+            public bool KakeraStateUpdate { get; set; } = true;
 
             [JsonProperty("typing_delay_seconds")]
             public double TypingDelay { get; set; } = 0.3;

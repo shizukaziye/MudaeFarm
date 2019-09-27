@@ -35,6 +35,7 @@ namespace MudaeFarm
 
         public bool RollEnabled;
         public string RollCommand;
+        public bool DailyKakeraEnabled;
         public string DailyKakeraCommand;
         public TimeSpan RollTypingDelay;
         public HashSet<ulong> BotChannelIds;
@@ -218,6 +219,7 @@ namespace MudaeFarm
 
                 RollEnabled        = roll.Enabled;
                 RollCommand        = roll.Command;
+                DailyKakeraEnabled = roll.KakeraEnabled;
                 DailyKakeraCommand = roll.KakeraCommand;
                 RollTypingDelay    = TimeSpan.FromSeconds(roll.TypingDelay);
             }
@@ -300,10 +302,20 @@ namespace MudaeFarm
                           ?? new T();
 
                 if (error && part.Message.Reactions.Count == 0)
+                {
                     await part.Message.AddReactionAsync(new Emoji("\u274C"));
+                }
 
-                else if (!error && part.Message.Reactions.Count != 0)
-                    await part.Message.RemoveAllReactionsAsync();
+                else if (!error)
+                {
+                    if (part.Message.Reactions.Count != 0)
+                        await part.Message.RemoveAllReactionsAsync();
+
+                    var content = formatConfigMessage(config);
+
+                    if (part.Message.Content != content)
+                        await part.Message.ModifyAsync(m => m.Content = content);
+                }
 
                 return config;
             }
@@ -380,12 +392,15 @@ namespace MudaeFarm
         public class RollConfig
         {
             [JsonProperty("enabled")]
-            public bool Enabled { get; set; } = true;
+            public bool Enabled { get; set; }
 
             [JsonProperty("command")]
             public string Command { get; set; } = "$w";
 
-            [JsonProperty("kakera_command")]
+            [JsonProperty("daily_kakera_enabled")]
+            public bool KakeraEnabled { get; set; }
+
+            [JsonProperty("daily_kakera_command")]
             public string KakeraCommand { get; set; } = "$dk";
 
             [JsonProperty("typing_delay_seconds")]

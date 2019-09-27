@@ -56,7 +56,10 @@ namespace MudaeFarm
                         {
                             try
                             {
-                                await RunAsync(guild, token);
+                                await Task.WhenAll(
+                                    RunRollAsync(guild, token),
+                                    RunDailyKakeraAsync(guild, token));
+
                                 return;
                             }
                             catch (TaskCanceledException)
@@ -81,18 +84,14 @@ namespace MudaeFarm
                 {
                     source.Cancel();
                     source.Dispose();
-
-                    Log.Debug($"Stopped rolling worker for guild {id}.");
                 }
             }
 
             return Task.CompletedTask;
         }
 
-        async Task RunAsync(SocketGuild guild, CancellationToken cancellationToken = default)
+        async Task RunRollAsync(SocketGuild guild, CancellationToken cancellationToken = default)
         {
-            Log.Debug($"Entered rolling loop for guild '{guild}'.");
-
             while (!cancellationToken.IsCancellationRequested)
             {
                 var state = _state.Get(guild.Id);
@@ -119,22 +118,10 @@ namespace MudaeFarm
                             --state.RollsLeft;
 
                             Log.Debug($"{channel.Guild} {channel}: Rolled '{_config.RollCommand}'.");
-
-                            // also roll $dk if we can
-                            if (state.CanKakeraDaily)
-                            {
-                                await Task.Delay(_config.RollTypingDelay, cancellationToken);
-
-                                await channel.SendMessageAsync(_config.DailyKakeraCommand);
-
-                                state.CanKakeraDaily = false;
-
-                                Log.Debug($"{channel.Guild} {channel}: Sent '{_config.DailyKakeraCommand}'.");
-                            }
                         }
                         catch (Exception e)
                         {
-                            Log.Warning($"{channel.Guild} {channel}: Could not send roll command.", e);
+                            Log.Warning($"{channel.Guild} {channel}: Could not send roll command '{_config.RollCommand}'.", e);
                         }
                     }
 
@@ -148,6 +135,48 @@ namespace MudaeFarm
 
                 else
                     await Task.Delay(new TimeSpan((state.RollsReset - now).Ticks / state.RollsLeft), cancellationToken);
+            }
+        }
+
+        async Task RunDailyKakeraAsync(SocketGuild guild, CancellationToken cancellationToken = default)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var state = _state.Get(guild.Id);
+
+                if (!_config.DailyKakeraEnabled || !state.CanKakeraDaily)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                    continue;
+                }
+
+                foreach (var channel in guild.TextChannels)
+                {
+                    if (!_config.BotChannelIds.Contains(channel.Id))
+                        continue;
+
+                    using (channel.EnterTypingState())
+                    {
+                        await Task.Delay(_config.RollTypingDelay, cancellationToken);
+
+                        try
+                        {
+                            await channel.SendMessageAsync(_config.DailyKakeraCommand);
+
+                            state.CanKakeraDaily = false;
+
+                            Log.Debug($"{channel.Guild} {channel}: Sent daily kakera command '{_config.DailyKakeraCommand}'.");
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Warning($"{channel.Guild} {channel}: Could not send daily kakera command '{_config.DailyKakeraCommand}'.", e);
+                        }
+                    }
+
+                    break;
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
             }
         }
     }

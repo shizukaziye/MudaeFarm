@@ -58,7 +58,7 @@ namespace MudaeFarm
                     // wait for old process to exit
                     await Task.Delay(TimeSpan.FromSeconds(3));
 
-                    var dir = Directory.CreateDirectory(arg.Substring(reinstallPrefix.Length));
+                    var dir = Directory.CreateDirectory(arg.Substring(reinstallPrefix.Length).Trim('"'));
 
                     try
                     {

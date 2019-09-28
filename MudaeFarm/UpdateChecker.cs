@@ -27,6 +27,15 @@ namespace MudaeFarm
                 if (CurrentVersion.CompareTo(latestVersion) >= 0)
                     return;
 
+                try
+                {
+                    Process.Start(latestRelease.HtmlUrl);
+                }
+                catch
+                {
+                    // ignored
+                }
+
                 var asset = latestRelease.Assets.FirstOrDefault(a => a.Name.Contains(".zip"));
 
                 if (asset != null)
@@ -58,15 +67,6 @@ namespace MudaeFarm
 
                         Process.GetCurrentProcess().Kill();
                     }
-                }
-
-                try
-                {
-                    Process.Start(latestRelease.HtmlUrl);
-                }
-                catch
-                {
-                    // ignored
                 }
             }
             catch (Exception e)

@@ -51,7 +51,7 @@ namespace MudaeFarm
             {
                 var line = line1.ToLowerInvariant();
 
-                if (line.Contains(client.CurrentUser.Username) && line.Contains("claim"))
+                if (line.Contains(client.CurrentUser.Username.ToLowerInvariant()) && line.Contains("claim"))
                 {
                     if (TryParseTime(line, out var time))
                         state.ClaimReset = now + time;

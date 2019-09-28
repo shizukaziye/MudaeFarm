@@ -25,3 +25,5 @@ MudaeFarm wishlists are entirely separate from Mudae the wishlist and will not s
 **MudaeFarm is disabled on all servers by default.** You must copy the ID of the channel in which you want to enable MudaeFarm (usually the bot/spam channel of that server), and send that ID in `#bot-channels`.
 
 For JSON-based configuration messages, you can simply edit the contents and the bot will reload the changes automatically.
+
+Please **do not modify** `state_update_command`!!

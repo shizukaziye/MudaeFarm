@@ -4,17 +4,29 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Net.Providers.WS4Net;
 using Discord.WebSocket;
 
 namespace MudaeFarm
 {
     public class MudaeFarm : IDisposable
     {
-        readonly DiscordSocketClient _client = new DiscordSocketClient(new DiscordSocketConfig
+        readonly DiscordSocketClient _client = new DiscordSocketClient(CreateConfig());
+
+        static DiscordSocketConfig CreateConfig()
         {
-            LogLevel         = LogSeverity.Info,
-            MessageCacheSize = 0
-        });
+            var config = new DiscordSocketConfig
+            {
+                LogLevel         = LogSeverity.Info,
+                MessageCacheSize = 0
+            };
+
+            // Windows 7 compatibility
+            if (Environment.OSVersion.Version < new Version(6, 2))
+                config.WebSocketProvider = WS4NetProvider.Instance;
+
+            return config;
+        }
 
         public MudaeFarm()
         {

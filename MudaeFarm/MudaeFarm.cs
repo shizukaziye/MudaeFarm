@@ -90,6 +90,10 @@ namespace MudaeFarm
                         await task;
                     }
                     catch (TaskCanceledException) { }
+                    catch (DummyRestartException)
+                    {
+                        throw;
+                    }
                     catch (Exception e)
                     {
                         Log.Warning($"Module '{name}' failed.", e);

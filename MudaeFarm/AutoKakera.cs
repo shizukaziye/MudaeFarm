@@ -103,22 +103,19 @@ namespace MudaeFarm
                 return;
 
             // enforce always claiming if state update is disabled
-            if (!string.IsNullOrWhiteSpace(_config.StateUpdateCommand))
-            {
-                var state = _state.Get(guildChannel.GuildId);
+            var state = _state.Get(guildChannel.GuildId);
 
-                // must have enough kakera power to claim this kakera
-                if (!state.CanKakera)
-                    return;
-
-                // update state
-                state.KakeraPower -= state.KakeraConsumption;
-            }
+            // must have enough kakera power to claim this kakera
+            if (!state.CanKakera)
+                return;
 
             // claim kakera
             await Task.Delay(_config.KakeraClaimDelay);
 
             await message.AddReactionAsync(reaction.Emote);
+
+            // update state
+            state.KakeraPower -= state.KakeraConsumption;
         }
     }
 }

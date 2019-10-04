@@ -33,13 +33,27 @@ namespace MudaeFarm
 
                 foreach (var guild in _client.Guilds)
                 {
-                    if (string.IsNullOrWhiteSpace(_config.StateUpdateCommand))
-                        continue;
-
                     var state = Get(guild.Id);
 
+                    // if state_update_command is disabled, assume the follow state...
+                    if (string.IsNullOrWhiteSpace(_config.StateUpdateCommand))
+                    {
+                        // assume we can always claim rolls or Kakera at any time
+                        state.CanClaim    = true;
+                        state.KakeraPower = double.MaxValue;
+
+                        // disable rolls unless an overridden interval is specified
+                        if (_config.RollIntervalOverride != null)
+                        {
+                            state.RollsLeft  = 1;
+                            state.RollsReset = now + _config.RollIntervalOverride.Value;
+                        }
+
+                        continue;
+                    }
+
                     // enforce refresh every 12 hours
-                    var updateTime = DateTime.Now.AddHours(12);
+                    var updateTime = now.AddHours(12);
 
                     // refresh at the earliest reset time
                     if (!state.CanClaim)

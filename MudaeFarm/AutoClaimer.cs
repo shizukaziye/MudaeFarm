@@ -107,17 +107,13 @@ namespace MudaeFarm
 
             if (matched)
             {
-                // enforce always claiming if state update is disabled
-                if (!string.IsNullOrWhiteSpace(_config.StateUpdateCommand))
-                {
-                    var state = _state.Get(guild.Id);
+                var state = _state.Get(guild.Id);
 
-                    // ensure we can claim right now
-                    if (!state.CanClaim && DateTime.Now < state.ClaimReset)
-                    {
-                        Log.Warning($"{guild} {message.Channel}: Found character '{character}' but cannot claim it due to cooldown.");
-                        return;
-                    }
+                // ensure we can claim right now
+                if (!state.CanClaim && DateTime.Now < state.ClaimReset)
+                {
+                    Log.Warning($"{guild} {message.Channel}: Found character '{character}' but cannot claim it due to cooldown.");
+                    return;
                 }
 
                 Log.Warning($"{guild} {message.Channel}: Found character '{character}', trying marriage.");

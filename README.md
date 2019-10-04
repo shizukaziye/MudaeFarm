@@ -16,14 +16,29 @@ You can bypass the "Windows protected your PC" popup by clicking "More info". Al
 
 ## Usage
 
-On initial run, MudaeFarm will create a dedicated server named `MudaeFarm` for bot configuration. You can edit your wishlists, claiming, rolling and other miscellaneous settings there. It may take a while for this server to be created.
+### Initialization
 
-To configure character/anime wishlists, you can simply send the name of the character/anime in the wishlist channel, separated by individual messages. Names are *case insensitive* and support basic glob expressions like `?` and `*`.
+On initial run, MudaeFarm will create a dedicated server named `MudaeFarm` for bot configuration. You can edit your wishlists, claiming, rolling and other miscellaneous settings there.
+
+It may take a while for this server to be created.
+
+**MudaeFarm is disabled on all servers by default.** You must copy the *ID of the channel* in which you want to enable MudaeFarm (usually the bot/spam channel of that server), and send that ID in `#bot-channels`.
+
+### Configuration
+
+You can edit JSON configuration messages and the bot will reload the changes automatically.
+
+### Wishlists
+
+To configure character/anime wishlists, you can simply send the name of the character/anime in the wishlist channel, separated by individual messages.
+
+Names are *case insensitive* and support basic glob expressions like `?` and `*`.
+
+To remove a character/anime from the wishlist, delete the message itself.
 
 MudaeFarm wishlists are entirely separate from Mudae the wishlist and will not synchronize against each other.
 
-**MudaeFarm is disabled on all servers by default.** You must copy the ID of the channel in which you want to enable MudaeFarm (usually the bot/spam channel of that server), and send that ID in `#bot-channels`.
+### Miscellaneous
 
-For JSON-based configuration messages, you can simply edit the contents and the bot will reload the changes automatically.
-
-Please **do not modify** `state_update_command`!!
+- MudaeFarm will periodically send `$tu` command to determine the claiming cooldown and rolling interval. To disable this behavior, change `state_update_command` to `""`. MudaeFarm will attempt to claim all subsequent matching rolls regardless of cooldown.
+- Autorolling is adaptive to the reset time determined by `$tu`. Change `interval_override_minutes` to override the interval in *minutes*.

@@ -142,15 +142,22 @@ namespace MudaeFarm
             // these errors occur from using an old version of Discord.Net
             // they should not affect any functionality
             if (message.Message.Contains("Error handling Dispatch (TYPING_START)") ||
-                message.Message.Contains("Unknown Dispatch (SESSIONS_REPLACE)") ||
-                message.Message.Contains("Preemptive Rate limit"))
+                message.Message.Contains("Unknown Dispatch (SESSIONS_REPLACE)"))
                 return Task.CompletedTask;
 
             var text = message.Exception == null
                 ? message.Message
                 : $"{message.Message}: {message.Exception}";
 
-            switch (message.Severity)
+            var severity = message.Severity;
+
+            if (message.Message.Contains("Preemptive Rate limit"))
+            {
+                text     = "Rate limit triggered. Resuming in a few seconds...";
+                severity = LogSeverity.Debug;
+            }
+
+            switch (severity)
             {
                 case LogSeverity.Debug:
                     Log.Debug(text);

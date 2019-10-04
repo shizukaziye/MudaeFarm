@@ -167,7 +167,7 @@ namespace MudaeFarm
 
                             Log.Debug($"{channel.Guild} {channel}: Sent daily kakera command '{_config.DailyKakeraCommand}'.");
 
-                            if (_config.DailyKakeraStateUpdate)
+                            if (_config.DailyKakeraStateUpdate && !string.IsNullOrWhiteSpace(_config.StateUpdateCommand))
                             {
                                 await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
 

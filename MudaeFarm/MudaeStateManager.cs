@@ -33,6 +33,9 @@ namespace MudaeFarm
 
                 foreach (var guild in _client.Guilds)
                 {
+                    if (string.IsNullOrWhiteSpace(_config.StateUpdateCommand))
+                        continue;
+
                     var state = Get(guild.Id);
 
                     // enforce refresh every 12 hours

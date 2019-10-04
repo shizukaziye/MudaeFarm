@@ -15,6 +15,8 @@ namespace MudaeFarm
 
         static void Write(ConsoleColor color, string prefix, string message, Exception e)
         {
+            prefix += $"[{DateTime.Now:hh:mm:ss}] ";
+
             var builder = new StringBuilder();
             var title   = null as string;
 

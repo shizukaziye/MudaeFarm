@@ -105,20 +105,17 @@ namespace MudaeFarm
             matched |= _config.WishedCharacterRegex?.IsMatch(character) ?? false;
             matched |= _config.WishedAnimeRegex?.IsMatch(anime) ?? false;
 
-            // ensure we can claim right now
             if (matched)
             {
                 var state = _state.Get(guild.Id);
 
+                // ensure we can claim right now
                 if (!state.CanClaim && DateTime.Now < state.ClaimReset)
                 {
                     Log.Warning($"{guild} {message.Channel}: Found character '{character}' but cannot claim it due to cooldown.");
                     return;
                 }
-            }
 
-            if (matched)
-            {
                 Log.Warning($"{guild} {message.Channel}: Found character '{character}', trying marriage.");
 
                 // reactions may not have been attached when we received this message

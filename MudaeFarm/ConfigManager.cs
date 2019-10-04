@@ -39,6 +39,7 @@ namespace MudaeFarm
         public string DailyKakeraCommand;
         public bool DailyKakeraStateUpdate;
         public TimeSpan RollTypingDelay;
+        public TimeSpan? RollIntervalOverride;
         public HashSet<ulong> BotChannelIds;
 
         public Regex WishedCharacterRegex;
@@ -224,6 +225,7 @@ namespace MudaeFarm
                 DailyKakeraCommand     = roll.KakeraCommand;
                 DailyKakeraStateUpdate = roll.KakeraStateUpdate;
                 RollTypingDelay        = TimeSpan.FromSeconds(roll.TypingDelay);
+                RollIntervalOverride   = roll.IntervalOverrideMinutes == null ? null as TimeSpan? : TimeSpan.FromMinutes(roll.IntervalOverrideMinutes.Value);
             }
 
             else if (channel.Id == _wishedCharacterChannel.Id)
@@ -410,6 +412,9 @@ namespace MudaeFarm
 
             [JsonProperty("typing_delay_seconds")]
             public double TypingDelay { get; set; } = 0.3;
+
+            [JsonProperty("interval_override_minutes")]
+            public double? IntervalOverrideMinutes { get; set; }
         }
 
 #endregion

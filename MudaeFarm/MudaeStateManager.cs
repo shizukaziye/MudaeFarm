@@ -35,8 +35,18 @@ namespace MudaeFarm
                 {
                     var state = Get(guild.Id);
 
+                    // if state_update_command is disabled, assume...
+                    if (string.IsNullOrWhiteSpace(_config.StateUpdateCommand))
+                    {
+                        // we can always claim rolls or Kakera at any time
+                        state.CanClaim    = true;
+                        state.KakeraPower = double.MaxValue;
+
+                        continue;
+                    }
+
                     // enforce refresh every 12 hours
-                    var updateTime = DateTime.Now.AddHours(12);
+                    var updateTime = now.AddHours(12);
 
                     // refresh at the earliest reset time
                     if (!state.CanClaim)
@@ -64,7 +74,7 @@ namespace MudaeFarm
                     state.ForceNextRefresh = false;
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
             }
         }
 

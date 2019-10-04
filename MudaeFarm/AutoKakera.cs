@@ -102,9 +102,10 @@ namespace MudaeFarm
             if (!_config.KakeraTargets.Contains(kakera))
                 return;
 
-            // must have enough kakera power to claim this kakera
+            // enforce always claiming if state update is disabled
             var state = _state.Get(guildChannel.GuildId);
 
+            // must have enough kakera power to claim this kakera
             if (!state.CanKakera)
                 return;
 

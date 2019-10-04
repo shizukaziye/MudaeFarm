@@ -56,7 +56,7 @@ namespace MudaeFarm
                     Log.Info($"Upgrading to v{UpdateChecker.CurrentVersion.ToString(3)}...");
 
                     // wait for old process to exit
-                    await Task.Delay(TimeSpan.FromSeconds(3));
+                    await Task.Delay(TimeSpan.FromSeconds(1));
 
                     var dir = Directory.CreateDirectory(arg.Substring(reinstallPrefix.Length).Trim('"'));
 

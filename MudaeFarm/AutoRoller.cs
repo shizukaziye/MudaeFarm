@@ -100,7 +100,7 @@ namespace MudaeFarm
 
                 if (interval == null)
                 {
-                    if (!_config.RollEnabled || state.RollsLeft == 0)
+                    if (!_config.RollEnabled || state.RollsLeft <= 0)
                     {
                         await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                         continue;

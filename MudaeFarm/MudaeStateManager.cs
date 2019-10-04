@@ -35,10 +35,10 @@ namespace MudaeFarm
                 {
                     var state = Get(guild.Id);
 
-                    // if state_update_command is disabled, assume the follow state...
+                    // if state_update_command is disabled, assume...
                     if (string.IsNullOrWhiteSpace(_config.StateUpdateCommand))
                     {
-                        // assume we can always claim rolls or Kakera at any time
+                        // we can always claim rolls or Kakera at any time
                         state.CanClaim    = true;
                         state.KakeraPower = double.MaxValue;
 
@@ -74,7 +74,7 @@ namespace MudaeFarm
                     state.ForceNextRefresh = false;
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
             }
         }
 

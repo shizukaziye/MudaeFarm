@@ -21,6 +21,10 @@ namespace MudaeFarm
             {
                 Console.Clear();
 
+                Log.Warning($"MudaeFarm v{UpdateChecker.CurrentVersion.ToString(3)} by chiya.dev");
+
+                await UpdateChecker.CheckAsync();
+
                 try
                 {
                     using (var mudaeFarm = new MudaeFarm())

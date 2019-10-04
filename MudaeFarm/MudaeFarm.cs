@@ -35,11 +35,6 @@ namespace MudaeFarm
 
         public async Task RunAsync(CancellationToken cancellationToken = default)
         {
-            // check version
-            var update = new UpdateChecker();
-
-            await update.RunAsync();
-
             // retrieve auth token
             var token = new AuthTokenManager();
 
@@ -62,7 +57,6 @@ namespace MudaeFarm
                 var dependencies = new object[]
                 {
                     _client,
-                    update,
                     token,
                     login,
                     config,

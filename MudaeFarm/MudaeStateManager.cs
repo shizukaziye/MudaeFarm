@@ -42,13 +42,6 @@ namespace MudaeFarm
                         state.CanClaim    = true;
                         state.KakeraPower = double.MaxValue;
 
-                        // disable rolls unless an overridden interval is specified
-                        if (_config.RollIntervalOverride != null)
-                        {
-                            state.RollsLeft  = 1;
-                            state.RollsReset = now + _config.RollIntervalOverride.Value;
-                        }
-
                         continue;
                     }
 

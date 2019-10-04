@@ -96,10 +96,17 @@ namespace MudaeFarm
             {
                 var state = _state.Get(guild.Id);
 
-                if (!_config.RollEnabled || state.RollsLeft == 0)
+                var interval = _config.RollIntervalOverride;
+
+                if (interval == null)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
-                    continue;
+                    if (!_config.RollEnabled || state.RollsLeft == 0)
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                        continue;
+                    }
+
+                    interval = new TimeSpan((state.RollsReset - DateTime.Now).Ticks / state.RollsLeft);
                 }
 
                 foreach (var channel in guild.TextChannels)
@@ -128,13 +135,10 @@ namespace MudaeFarm
                     break;
                 }
 
-                var now = DateTime.Now;
+                if (interval < TimeSpan.FromSeconds(5))
+                    interval = TimeSpan.FromSeconds(5);
 
-                if (now > state.RollsReset || state.RollsLeft == 0)
-                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
-
-                else
-                    await Task.Delay(new TimeSpan((state.RollsReset - now).Ticks / state.RollsLeft), cancellationToken);
+                await Task.Delay(interval.Value, cancellationToken);
             }
         }
 

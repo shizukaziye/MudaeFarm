@@ -40,5 +40,5 @@ MudaeFarm wishlists are entirely separate from Mudae the wishlist and will not s
 
 ### Miscellaneous
 
-- MudaeFarm will periodically send `$tu` command to determine the claiming cooldown and rolling interval. To disable this behavior, change `state_update_command` to `""`. MudaeFarm will attempt to claim all subsequent matching rolls regardless of cooldown.
+- MudaeFarm will periodically send `$tu` command to determine the claiming cooldown and rolling interval. To disable this behavior, change `state_update_command` to `""`. When disabled, all subsequent matching rolls will be claimed regardless of cooldown.
 - Autorolling is adaptive to the reset time determined by `$tu`. Change `interval_override_minutes` to override the interval in *minutes*.

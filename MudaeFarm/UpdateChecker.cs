@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Octokit;
-using FileMode = System.IO.FileMode;
 
 namespace MudaeFarm
 {
@@ -15,22 +14,22 @@ namespace MudaeFarm
     {
         public static readonly Version CurrentVersion = typeof(Program).Assembly.GetName().Version;
 
-        readonly GitHubClient _client = new GitHubClient(new ProductHeaderValue("MudaeFarm"));
-
         void IModule.Initialize() { }
 
         public async Task RunAsync(CancellationToken cancellationToken = default)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                await CheckAsync();
-
                 // check for updates every hour
                 await Task.Delay(TimeSpan.FromHours(1), cancellationToken);
+
+                await CheckAsync();
             }
         }
 
-        async Task CheckAsync()
+        static readonly GitHubClient _client = new GitHubClient(new ProductHeaderValue("MudaeFarm"));
+
+        public static async Task CheckAsync()
         {
             Release release;
             Version version;
@@ -113,7 +112,7 @@ namespace MudaeFarm
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
                 using (var entryStream = entry.Open())
-                using (var stream = File.Open(filePath, FileMode.Create, FileAccess.Write))
+                using (var stream = File.Open(filePath, System.IO.FileMode.Create, FileAccess.Write))
                     await entryStream.CopyToAsync(stream);
             }
         }

@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace MudaeFarm
 {
     public static class Log
     {
+        static readonly TextWriter _writer = File.CreateText("_log.txt");
+
         static readonly object _logLock = new object();
 
         public static void Debug(string message, Exception exception = null) => Write(ConsoleColor.DarkGray, "[dbug] ", message, exception);
@@ -34,6 +37,7 @@ namespace MudaeFarm
             {
                 Console.ForegroundColor = color;
 
+                _writer.Write(text);
                 Console.Write(text);
 
                 if (title != null)

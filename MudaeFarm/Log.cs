@@ -38,6 +38,8 @@ namespace MudaeFarm
                 Console.ForegroundColor = color;
 
                 _writer.Write(text);
+                _writer.Flush();
+
                 Console.Write(text);
 
                 if (title != null)

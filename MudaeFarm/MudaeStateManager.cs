@@ -58,8 +58,12 @@ namespace MudaeFarm
                     if (!state.CanKakera)
                         Min(ref updateTime, state.KakeraReset);
 
-                    // can we refresh?
-                    if (now <= updateTime && !state.ForceNextRefresh)
+                    // should we refresh?
+                    if (now < updateTime && !state.ForceNextRefresh)
+                        continue;
+
+                    // don't spam refreshes
+                    if (now < state.LastRefresh.AddMinutes(1))
                         continue;
 
                     // select a bot channel to send command in
@@ -72,6 +76,7 @@ namespace MudaeFarm
                     await channel.SendMessageAsync(_config.StateUpdateCommand);
 
                     state.ForceNextRefresh = false;
+                    state.LastRefresh      = now;
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);

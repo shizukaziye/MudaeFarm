@@ -49,6 +49,9 @@ namespace MudaeFarm
         [JsonIgnore]
         public bool ForceNextRefresh { get; set; }
 
+        [JsonIgnore]
+        public DateTime LastRefresh { get; set; }
+
 #endregion
     }
 }

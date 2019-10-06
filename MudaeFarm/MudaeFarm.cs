@@ -70,27 +70,37 @@ namespace MudaeFarm
 
                 Log.Warning("Ready!");
 
-                // keep running
-                var tasks = modules.Select(m => (name: m.GetType().Name, task: m.RunAsync(cancellationToken))).ToList();
+                var tasks = modules.Select(m => new
+                                    {
+                                        name = m.GetType().Name,
+                                        func = (Func<Task>) (() => m.RunAsync(cancellationToken))
+                                    })
+                                   .ToList();
 
-                tasks.Add((state.GetType().Name, state.RunAsync(cancellationToken)));
+                tasks.Add(new
+                {
+                    name = state.GetType().Name,
+                    func = (Func<Task>) (() => state.RunAsync(cancellationToken))
+                });
 
                 await Task.WhenAll(tasks.Select(async x =>
                 {
-                    var (name, task) = x;
-
-                    try
+                    while (true)
                     {
-                        await task;
-                    }
-                    catch (TaskCanceledException) { }
-                    catch (DummyRestartException)
-                    {
-                        throw;
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Warning($"Module '{name}' failed.", e);
+                        try
+                        {
+                            await x.func();
+                            return;
+                        }
+                        catch (TaskCanceledException) { }
+                        catch (DummyRestartException)
+                        {
+                            throw;
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Warning($"Restarting failed module '{x.name}'.", e);
+                        }
                     }
                 }));
             }

@@ -156,6 +156,26 @@ namespace MudaeFarm
 
             // update state
             _state.Get(((IGuildChannel) message.Channel).GuildId).CanClaim = false;
+
+            // automated reply
+            if (_config.ClaimReplies.Count != 0)
+            {
+                var random = new Random();
+                var reply  = _config.ClaimReplies[random.Next(_config.ClaimReplies.Count)];
+
+                if (!string.IsNullOrWhiteSpace(reply))
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(500 + random.NextDouble() * 1000));
+
+                    using (channel.EnterTypingState())
+                    {
+                        // type for the length of the reply
+                        await Task.Delay(TimeSpan.FromMilliseconds(reply.Length * 100));
+
+                        await channel.SendMessageAsync(reply);
+                    }
+                }
+            }
         }
     }
 }

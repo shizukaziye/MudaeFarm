@@ -25,11 +25,13 @@ namespace MudaeFarm
         ITextChannel _wishedCharacterChannel;
         ITextChannel _wishedAnimeChannel;
         ITextChannel _botChannelChannel;
+        ITextChannel _claimReplyChannel;
 
         public string StateUpdateCommand;
 
         public bool ClaimEnabled;
         public TimeSpan ClaimDelay;
+        public List<string> ClaimReplies;
         public TimeSpan KakeraClaimDelay;
         public HashSet<KakeraType> KakeraTargets;
 
@@ -47,6 +49,8 @@ namespace MudaeFarm
 
         public async Task InitializeAsync()
         {
+            var measure = new MeasureContext();
+
             // find config guild
             var userId = _client.CurrentUser.Id;
 
@@ -71,7 +75,7 @@ namespace MudaeFarm
                     foreach (var c in await _guild.GetChannelsAsync())
                         await c.DeleteAsync();
 
-                    var channel = await CreateChannelAsync("information", $"MudaeFarm Configuration Server {userId} - Do not delete this channel!");
+                    var channel = await CreateChannelAsync(null, "information", $"MudaeFarm Configuration Server {userId} - Do not delete this channel!");
 
                     var message = await channel.SendMessageAsync(
                         "This is your MudaeFarm server where you can configure the bot.\n" +
@@ -100,20 +104,23 @@ namespace MudaeFarm
                 set("wished-characters", ref _wishedCharacterChannel);
                 set("wished-anime", ref _wishedAnimeChannel);
                 set("bot-channels", ref _botChannelChannel);
+                set("claim-replies", ref _claimReplyChannel);
             }
 
             // create channel if not created already
-            _wishedCharacterChannel = _wishedCharacterChannel ?? await CreateChannelAsync("wished-characters", "Configure your character wishlist here. Wildcards characters are supported.");
-            _wishedAnimeChannel     = _wishedAnimeChannel ?? await CreateChannelAsync("wished-anime", "Configure your anime wishlist here. Wildcards characters are supported.");
-            _botChannelChannel      = _botChannelChannel ?? await CreateChannelAsync("bot-channels", "Configure channels to enable MudaeFarm autorolling/claiming by sending the channel ID.");
+            _wishedCharacterChannel = await CreateChannelAsync(_wishedCharacterChannel, "wished-characters", "Configure your character wishlist here. Wildcards characters are supported.");
+            _wishedAnimeChannel     = await CreateChannelAsync(_wishedAnimeChannel, "wished-anime", "Configure your anime wishlist here. Wildcards characters are supported.");
+            _botChannelChannel      = await CreateChannelAsync(_botChannelChannel, "bot-channels", "Configure channels to enable MudaeFarm autorolling/claiming by sending the __channel ID__.");
+            _claimReplyChannel      = await CreateChannelAsync(_claimReplyChannel, "claim-replies", "Configure automatic reply messages when you claim a character. One message is randomly selected. Refer to https://github.com/chiyadev/MudaeFarm for reply templating.");
 
             // initial load
             await ReloadChannelAsync(_generalConfigChannel);
             await ReloadChannelAsync(_wishedCharacterChannel);
             await ReloadChannelAsync(_wishedAnimeChannel);
             await ReloadChannelAsync(_botChannelChannel);
+            await ReloadChannelAsync(_claimReplyChannel);
 
-            Log.Info("Configuration loaded.");
+            Log.Info($"Configuration loaded in {measure}.");
 
             // import old configuration (config.json)
             var legacyCfg = LegacyConfig.Load();
@@ -124,11 +131,17 @@ namespace MudaeFarm
 
                 if (legacyCfg.WishlistCharacters != null)
                     foreach (var character in legacyCfg.WishlistCharacters)
+                    {
                         await _wishedCharacterChannel.SendMessageAsync(character);
+                        Log.Debug(character);
+                    }
 
                 if (legacyCfg.WishlistAnime != null)
                     foreach (var anime in legacyCfg.WishlistAnime)
+                    {
                         await _wishedAnimeChannel.SendMessageAsync(anime);
+                        Log.Debug(anime);
+                    }
 
                 LegacyConfig.Delete();
             }
@@ -139,14 +152,17 @@ namespace MudaeFarm
             _client.MessageUpdated  += (cacheable, message, channel) => ReloadChannelAsync(channel);
         }
 
-        async Task<ITextChannel> CreateChannelAsync(string name, string topic)
+        async Task<ITextChannel> CreateChannelAsync(ITextChannel channel, string name, string topic)
         {
-            var channel = await _guild.CreateTextChannelAsync(name);
+            if (channel == null)
+            {
+                channel = await _guild.CreateTextChannelAsync(name);
 
-            if (!string.IsNullOrEmpty(topic))
+                Log.Debug($"Channel created: '#{channel}' - '{topic ?? "<null>"}'");
+            }
+
+            if (channel.Topic != topic)
                 await channel.ModifyAsync(c => c.Topic = topic);
-
-            Log.Debug($"Channel created: '#{name}' - '{topic ?? "<null>"}'");
 
             return channel;
         }
@@ -176,6 +192,8 @@ namespace MudaeFarm
 
         async Task ReloadChannelAsync(IMessageChannel channel)
         {
+            var measure = new MeasureContext();
+
             if (channel.Id == _generalConfigChannel.Id)
             {
                 var messages = await LoadMessagesAsync(channel);
@@ -276,12 +294,29 @@ namespace MudaeFarm
 
                 BotChannelIds = channelIds;
             }
+
+            else if (channel.Id == _claimReplyChannel.Id)
+            {
+                ClaimReplies = (await LoadMessagesAsync(channel))
+                              .Select(m =>
+                               {
+                                   var s = m.Content;
+
+                                   // . character represents not sending anything
+                                   if (s == ".")
+                                       s = null;
+
+                                   return s;
+                               })
+                              .ToList();
+            }
+
             else
             {
                 return;
             }
 
-            Log.Debug($"Configuration channel '${channel.Name}' reloaded.");
+            Log.Debug($"Configuration channel '${channel.Name}' reloaded in {measure}.");
         }
 
         static readonly Regex _channelMentionRegex = new Regex(@"^<#(?<id>\d+)>$", RegexOptions.Compiled | RegexOptions.Singleline);

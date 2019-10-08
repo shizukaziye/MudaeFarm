@@ -106,8 +106,8 @@ namespace MudaeFarm
             if (!embed.Author.HasValue || embed.Author.Value.IconUrl != null)
                 return;
 
-            var character = embed.Author.Value.Name.Trim().ToLowerInvariant();
-            var anime     = embed.Description.Split('\n')[0].Trim().ToLowerInvariant();
+            var character = embed.Author.Value.Name.Trim();
+            var anime     = embed.Description.Split('\n')[0].Trim();
 
             // matching
             var matched = false;
@@ -120,7 +120,7 @@ namespace MudaeFarm
                 var state = _state.Get(guild.Id);
 
                 // ensure we can claim right now
-                if (!state.CanClaim && DateTime.Now < state.ClaimReset)
+                if (!state.CanClaim && DateTime.Now < state.ClaimReset && false)
                 {
                     Log.Warning($"{guild} #{message.Channel}: Found character '{character}' but cannot claim it due to cooldown.");
                     return;
@@ -185,7 +185,9 @@ namespace MudaeFarm
             await SendAutoReplyAsync(channel, character);
         }
 
-        async Task SendAutoReplyAsync(IMessageChannel channel, CharacterInfo character)
+        readonly Regex _bracketRegex = new Regex(@"(\(|\[).*(\)|\])", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+        async Task SendAutoReplyAsync(IMessageChannel channel, CharacterInfo characterInfo)
         {
             if (_config.ClaimReplies.Count == 0)
                 return;
@@ -198,9 +200,18 @@ namespace MudaeFarm
                      .Split(new[] { "\\n" }, StringSplitOptions.None)
                      .Select(s =>
                       {
-                          // templating
-                          s = s.Replace("*character*", character.Name)
-                               .Replace("*anime*", character.Anime);
+                          var character = _bracketRegex.Replace(characterInfo.Name, "").Trim();
+                          var anime     = _bracketRegex.Replace(characterInfo.Anime, "").Trim();
+
+                          // character
+                          s = s.Replace("*character*", character.Split(' ')[0].ToLowerInvariant())
+                               .Replace("*character_full*", character.ToLowerInvariant())
+                               .Replace("*Character*", character.Split(' ')[0])
+                               .Replace("*Character_full*", character);
+
+                          // anime
+                          s = s.Replace("*anime*", anime.ToLowerInvariant())
+                               .Replace("*Anime*", anime);
 
                           return s.Trim();
                       })
@@ -214,7 +225,7 @@ namespace MudaeFarm
                 using (channel.EnterTypingState())
                 {
                     // type for the length of the reply
-                    await Task.Delay(TimeSpan.FromMilliseconds(replies.Length * 100));
+                    await Task.Delay(TimeSpan.FromMilliseconds(reply.Length * 100));
 
                     await channel.SendMessageAsync(reply);
                 }

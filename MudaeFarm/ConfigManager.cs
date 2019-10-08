@@ -108,10 +108,10 @@ namespace MudaeFarm
             }
 
             // create channel if not created already
-            _wishedCharacterChannel = await CreateChannelAsync(_wishedCharacterChannel, "wished-characters", "Configure your character wishlist here. Wildcards characters are supported.");
-            _wishedAnimeChannel     = await CreateChannelAsync(_wishedAnimeChannel, "wished-anime", "Configure your anime wishlist here. Wildcards characters are supported.");
+            _wishedCharacterChannel = await CreateChannelAsync(_wishedCharacterChannel, "wished-characters", "Configure your character wishlist here. Wildcards characters are supported. Names are *case-insensitive*.");
+            _wishedAnimeChannel     = await CreateChannelAsync(_wishedAnimeChannel, "wished-anime", "Configure your anime wishlist here. Wildcards characters are supported. Names are *case-insensitive*.");
             _botChannelChannel      = await CreateChannelAsync(_botChannelChannel, "bot-channels", "Configure channels to enable MudaeFarm autorolling/claiming by sending the __channel ID__.");
-            _claimReplyChannel      = await CreateChannelAsync(_claimReplyChannel, "claim-replies", "Configure automatic reply messages when you claim a character. One message is randomly selected. Refer to https://github.com/chiyadev/MudaeFarm for reply templating.");
+            _claimReplyChannel      = await CreateChannelAsync(_claimReplyChannel, "claim-replies", "Configure automatic reply messages when you claim a character. One message is randomly selected. Refer to https://github.com/chiyadev/MudaeFarm for advanced templating.");
 
             // initial load
             await ReloadChannelAsync(_generalConfigChannel);

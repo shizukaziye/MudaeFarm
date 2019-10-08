@@ -126,11 +126,16 @@ namespace MudaeFarm
                     return;
                 }
 
-                Log.Warning($"{guild} #{message.Channel}: Found character '{character}', trying marriage.");
+                Log.Warning($"{guild} #{message.Channel}: Found character '{character}', trying claim.");
 
-                // reactions may not have been attached when we received this message
+                // reactions are not attached when we received this message
                 // remember this message so we can attach an appropriate reaction later when we receive it
-                _claimQueue[message.Id] = message;
+                _claimQueue[message.Id] = new ClaimQueueItem
+                {
+                    Message   = message,
+                    Character = new CharacterInfo(character, anime),
+                    Measure   = new MeasureContext()
+                };
             }
             else
             {
@@ -138,12 +143,21 @@ namespace MudaeFarm
             }
         }
 
-        static readonly ConcurrentDictionary<ulong, IUserMessage> _claimQueue = new ConcurrentDictionary<ulong, IUserMessage>();
+        static readonly ConcurrentDictionary<ulong, ClaimQueueItem> _claimQueue = new ConcurrentDictionary<ulong, ClaimQueueItem>();
+
+        struct ClaimQueueItem
+        {
+            public IUserMessage Message;
+            public CharacterInfo Character;
+            public MeasureContext Measure;
+        }
 
         async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
         {
-            if (!_claimQueue.TryRemove(reaction.MessageId, out var message))
+            if (!_claimQueue.TryGetValue(reaction.MessageId, out var x))
                 return;
+
+            var (message, character, measure) = (x.Message, x.Character, x.Measure);
 
             // reaction must be a heart emote
             if (Array.IndexOf(_heartEmotes, reaction.Emote) == -1)
@@ -152,7 +166,17 @@ namespace MudaeFarm
             // claim the roll
             await Task.Delay(_config.ClaimDelay);
 
-            await message.AddReactionAsync(reaction.Emote);
+            try
+            {
+                await message.AddReactionAsync(reaction.Emote);
+
+                Log.Warning($"Attempted claim on character '{character.Name}' in {measure}.");
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"Could not react with heart emote on character '{character.Name}'.", e);
+                return;
+            }
 
             // update state
             _state.Get(((IGuildChannel) message.Channel).GuildId).CanClaim = false;

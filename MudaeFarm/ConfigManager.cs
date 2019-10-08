@@ -297,18 +297,7 @@ namespace MudaeFarm
 
             else if (channel.Id == _claimReplyChannel.Id)
             {
-                ClaimReplies = (await LoadMessagesAsync(channel))
-                              .Select(m =>
-                               {
-                                   var s = m.Content;
-
-                                   // . character represents not sending anything
-                                   if (s == ".")
-                                       s = null;
-
-                                   return s;
-                               })
-                              .ToList();
+                ClaimReplies = (await LoadMessagesAsync(channel)).Select(m => m.Content).ToList();
             }
 
             else

@@ -182,22 +182,43 @@ namespace MudaeFarm
             _state.Get(((IGuildChannel) message.Channel).GuildId).CanClaim = false;
 
             // automated reply
-            if (_config.ClaimReplies.Count != 0)
+            await SendAutoReplyAsync(channel, character);
+        }
+
+        async Task SendAutoReplyAsync(IMessageChannel channel, CharacterInfo character)
+        {
+            if (_config.ClaimReplies.Count == 0)
+                return;
+
+            var random  = new Random();
+            var replies = new[] { _config.ClaimReplies[random.Next(_config.ClaimReplies.Count)] };
+
+            // split into separate messages with "\n"
+            replies = replies[0]
+                     .Split(new[] { "\\n" }, StringSplitOptions.None)
+                     .Select(s =>
+                      {
+                          s = s.Trim();
+
+                          // templating
+                          s = s.Replace("*character*", character.Name)
+                               .Replace("*anime*", character.Anime);
+
+                          return s;
+                      })
+                     .Where(s => !string.IsNullOrWhiteSpace(s))
+                     .ToArray();
+
+            foreach (var reply in replies)
             {
-                var random = new Random();
-                var reply  = _config.ClaimReplies[random.Next(_config.ClaimReplies.Count)];
+                await Task.Delay(TimeSpan.FromMilliseconds(200 + random.NextDouble() * 800));
 
-                if (!string.IsNullOrWhiteSpace(reply))
+                using (channel.EnterTypingState())
                 {
-                    await Task.Delay(TimeSpan.FromMilliseconds(500 + random.NextDouble() * 1000));
+                    // type for the length of the reply
+                    await Task.Delay(TimeSpan.FromMilliseconds(replies.Length * 100));
 
-                    using (channel.EnterTypingState())
-                    {
-                        // type for the length of the reply
-                        await Task.Delay(TimeSpan.FromMilliseconds(reply.Length * 100));
-
-                        await channel.SendMessageAsync(reply);
-                    }
+                    await channel.SendMessageAsync(reply);
                 }
             }
         }

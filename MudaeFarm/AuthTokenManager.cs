@@ -13,16 +13,15 @@ namespace MudaeFarm
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_path));
 
+            // legacy import
+            var legacyCfg = LegacyConfig.Load();
+
+            if (legacyCfg != null)
+                File.WriteAllText(_path, legacyCfg.AuthToken);
+
+            // load token from filesystem
             if (File.Exists(_path))
                 Value = File.ReadAllText(_path);
-
-            {
-                // legacy token
-                var legacyCfg = LegacyConfig.Load();
-
-                if (legacyCfg != null)
-                    Value = legacyCfg.AuthToken;
-            }
 
             if (string.IsNullOrWhiteSpace(Value))
             {
@@ -50,6 +49,8 @@ namespace MudaeFarm
 
                 throw new DummyRestartException { Delayed = false };
             }
+
+            Log.Info($"User token loaded from: {_path}");
         }
 
         public void Reset()

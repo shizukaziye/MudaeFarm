@@ -47,7 +47,7 @@ MudaeFarm can optionally send a preconfigured reply message when a character is 
 - `*character*` will be replaced by the claimed character's name (lowercase).
 - `*anime*` will be replaced by the claimed character's anime (lowercase).
 
-e.g. `I love *character* in *anime*!!` produces `I love chino in gochuumon wa usagi desu ka!!`.
+e.g. `I love *character* in *anime*!!` produces `I love chino kafuu in gochuumon wa usagi desu ka!!`.
 
 ### Miscellaneous
 

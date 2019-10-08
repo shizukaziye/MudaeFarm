@@ -72,11 +72,19 @@ namespace MudaeFarm
                     if (channel == null)
                         continue;
 
-                    // send command
-                    await channel.SendMessageAsync(_config.StateUpdateCommand);
+                    try
+                    {
+                        // send command
+                        await channel.SendMessageAsync(_config.StateUpdateCommand);
+
+                        state.LastRefresh = now;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Warning($"Could not send state update command '{_config.StateUpdateCommand}'.", e);
+                    }
 
                     state.ForceNextRefresh = false;
-                    state.LastRefresh      = now;
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);

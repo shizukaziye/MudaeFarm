@@ -7,7 +7,19 @@ namespace MudaeFarm
 {
     public static class Log
     {
-        static readonly TextWriter _writer = File.CreateText("_log.txt");
+        static TextWriter _writer = File.CreateText("_log.txt");
+
+        public static void Close()
+        {
+            lock (_logLock)
+            {
+                if (_writer == null)
+                    return;
+
+                _writer.Dispose();
+                _writer = null;
+            }
+        }
 
         static readonly object _logLock = new object();
 
@@ -37,8 +49,11 @@ namespace MudaeFarm
             {
                 Console.ForegroundColor = color;
 
-                _writer.Write(text);
-                _writer.Flush();
+                if (_writer != null)
+                {
+                    _writer.Write(text);
+                    _writer.Flush();
+                }
 
                 Console.Write(text);
 

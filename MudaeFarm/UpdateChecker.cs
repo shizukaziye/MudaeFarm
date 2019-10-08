@@ -75,6 +75,9 @@ namespace MudaeFarm
                     using (var archive = new ZipArchive(memory, ZipArchiveMode.Read, true))
                         await ExtractToDirectoryAsync(archive, path);
 
+                    // close log so updater can delete it
+                    Log.Close();
+
                     // run new installation in update mode
                     var current = Process.GetCurrentProcess();
 

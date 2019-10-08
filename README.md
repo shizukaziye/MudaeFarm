@@ -38,6 +38,17 @@ To remove a character/anime from the wishlist, delete the message itself.
 
 MudaeFarm wishlists are entirely separate from Mudae the wishlist and will not synchronize against each other.
 
+### Autoreply
+
+MudaeFarm can optionally send a preconfigured reply message when a character is claimed. Selection is random.
+
+- `.` represents *not* sending a reply.
+- `\n` splits one selected message into multiple replies.
+- `*character*` will be replaced by the claimed character's name (lowercase).
+- `*anime*` will be replaced by the claimed character's anime (lowercase).
+
+e.g. `I love *character* in *anime*!!` produces `I love chino in gochuumon wa usagi desu ka!!`.
+
 ### Miscellaneous
 
 - MudaeFarm will periodically send `$tu` command to determine the claiming cooldown and rolling interval. To disable this behavior, change `state_update_command` to `""`. All subsequent matching rolls will be claimed regardless of cooldown and adaptive autorolling will be disabled.

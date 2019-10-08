@@ -44,8 +44,8 @@ MudaeFarm can optionally send a preconfigured reply message when a character is 
 
 - `.` represents *not* sending a reply.
 - `\n` splits one selected reply into multiple messages.
-- `*Character*` is replaced by the character's first name. `*Character_full*` is replaced by the character's full name. Lowercase `*character*` makes the template lowercase.
-- `*Anime*` is replaced by the character's anime. Lowercase `*anime*` makes the template lowercase.
+- `*Character*` is replaced by the character's first name. `*Character_full*` is replaced by the character's full name. Lowercase `character` makes the template lowercase.
+- `*Anime*` is replaced by the character's anime. Lowercase `anime` makes the template lowercase.
 
 e.g. `I love *character_full* in *Anime*` produces `I love chino kafuu in Is the Order a Rabbit?`.
 

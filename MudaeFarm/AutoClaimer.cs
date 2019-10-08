@@ -154,7 +154,7 @@ namespace MudaeFarm
 
         async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
         {
-            if (!_claimQueue.TryGetValue(reaction.MessageId, out var x))
+            if (!_claimQueue.TryRemove(reaction.MessageId, out var x))
                 return;
 
             var (message, character, measure) = (x.Message, x.Character, x.Measure);

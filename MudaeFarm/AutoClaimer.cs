@@ -198,15 +198,13 @@ namespace MudaeFarm
                      .Split(new[] { "\\n" }, StringSplitOptions.None)
                      .Select(s =>
                       {
-                          s = s.Trim();
-
                           // templating
                           s = s.Replace("*character*", character.Name)
                                .Replace("*anime*", character.Anime);
 
-                          return s;
+                          return s.Trim();
                       })
-                     .Where(s => !string.IsNullOrWhiteSpace(s))
+                     .Where(s => !string.IsNullOrEmpty(s) && s != ".")
                      .ToArray();
 
             foreach (var reply in replies)

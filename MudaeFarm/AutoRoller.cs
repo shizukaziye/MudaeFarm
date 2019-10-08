@@ -124,11 +124,11 @@ namespace MudaeFarm
 
                             --state.RollsLeft;
 
-                            Log.Debug($"{channel.Guild} {channel}: Rolled '{_config.RollCommand}'.");
+                            Log.Debug($"{channel.Guild} #{channel}: Rolled '{_config.RollCommand}'.");
                         }
                         catch (Exception e)
                         {
-                            Log.Warning($"{channel.Guild} {channel}: Could not send roll command '{_config.RollCommand}'.", e);
+                            Log.Warning($"{channel.Guild} #{channel}: Could not send roll command '{_config.RollCommand}'.", e);
                         }
                     }
 
@@ -169,7 +169,7 @@ namespace MudaeFarm
 
                             state.CanKakeraDaily = false;
 
-                            Log.Debug($"{channel.Guild} {channel}: Sent daily kakera command '{_config.DailyKakeraCommand}'.");
+                            Log.Debug($"{channel.Guild} #{channel}: Sent daily kakera command '{_config.DailyKakeraCommand}'.");
 
                             if (_config.DailyKakeraStateUpdate && !string.IsNullOrWhiteSpace(_config.StateUpdateCommand))
                             {
@@ -180,7 +180,7 @@ namespace MudaeFarm
                         }
                         catch (Exception e)
                         {
-                            Log.Warning($"{channel.Guild} {channel}: Could not send daily kakera command '{_config.DailyKakeraCommand}'.", e);
+                            Log.Warning($"{channel.Guild} #{channel}: Could not send daily kakera command '{_config.DailyKakeraCommand}'.", e);
                         }
                     }
 

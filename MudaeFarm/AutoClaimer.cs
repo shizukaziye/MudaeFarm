@@ -122,11 +122,11 @@ namespace MudaeFarm
                 // ensure we can claim right now
                 if (!state.CanClaim && DateTime.Now < state.ClaimReset)
                 {
-                    Log.Warning($"{guild} {message.Channel}: Found character '{character}' but cannot claim it due to cooldown.");
+                    Log.Warning($"{guild} #{message.Channel}: Found character '{character}' but cannot claim it due to cooldown.");
                     return;
                 }
 
-                Log.Warning($"{guild} {message.Channel}: Found character '{character}', trying marriage.");
+                Log.Warning($"{guild} #{message.Channel}: Found character '{character}', trying marriage.");
 
                 // reactions may not have been attached when we received this message
                 // remember this message so we can attach an appropriate reaction later when we receive it
@@ -134,7 +134,7 @@ namespace MudaeFarm
             }
             else
             {
-                Log.Info($"{guild} {message.Channel}: Ignored character '{character}', not wished.");
+                Log.Info($"{guild} #{message.Channel}: Ignored character '{character}', not wished.");
             }
         }
 

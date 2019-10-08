@@ -75,10 +75,10 @@ namespace MudaeFarm
                         // ignored
                     }
 
-                    try
+                    // copy ourselves in
+                    foreach (var file in new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).EnumerateFiles())
                     {
-                        // copy ourselves in
-                        foreach (var file in new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).EnumerateFiles())
+                        try
                         {
                             var dest = Path.Combine(dir.FullName, file.Name);
 
@@ -86,11 +86,10 @@ namespace MudaeFarm
 
                             Log.Debug(dest);
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error("Could not copy one of the files.", e);
-                        return false;
+                        catch (Exception e)
+                        {
+                            Log.Error($"Could not copy: {file.Name}", e);
+                        }
                     }
 
                     // run new installation

@@ -43,7 +43,7 @@ MudaeFarm wishlists are entirely separate from Mudae the wishlist and will not s
 MudaeFarm can optionally send a preconfigured reply message when a character is claimed. Selection is random.
 
 - `.` represents *not* sending a reply.
-- `\n` splits one selected message into multiple replies.
+- `\n` splits one selected reply into multiple messages.
 - `*Character*` is replaced by the character's first name. `*Character_full*` is replaced by the character's full name. Lowercase `*character*` makes the template lowercase.
 - `*Anime*` is replaced by the character's anime. Lowercase `*anime*` makes the template lowercase.
 

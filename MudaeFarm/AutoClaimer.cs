@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -80,6 +81,8 @@ namespace MudaeFarm
             }
         }
 
+        static readonly Regex _imFooterRegex = new Regex(@"^\s*\d+\s*\/\s*\d+\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
         async Task HandleMudaeMessageAsync(SocketUserMessage message)
         {
             if (!message.Embeds.Any())
@@ -88,9 +91,16 @@ namespace MudaeFarm
             var guild = ((IGuildChannel) message.Channel).Guild;
             var embed = message.Embeds.First();
 
-            // character must not belong to another user
-            if (embed.Footer.HasValue && embed.Footer.Value.Text.StartsWith("Belongs to", StringComparison.OrdinalIgnoreCase))
-                return;
+            if (embed.Footer.HasValue)
+            {
+                // character must not belong to another user
+                if (embed.Footer.Value.Text.StartsWith("Belongs to", StringComparison.OrdinalIgnoreCase))
+                    return;
+
+                // message must not be $im
+                if (_imFooterRegex.IsMatch(embed.Footer.Value.Text))
+                    return;
+            }
 
             //
             if (!embed.Author.HasValue || embed.Author.Value.IconUrl != null)

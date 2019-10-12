@@ -11,13 +11,15 @@ namespace MudaeFarm
 {
     public class MudaeFarm : IDisposable
     {
+        public static LogSeverity DefaultDiscordLogLevel { get; set; } = LogSeverity.Info;
+
         readonly DiscordSocketClient _client = new DiscordSocketClient(CreateConfig());
 
         static DiscordSocketConfig CreateConfig()
         {
             var config = new DiscordSocketConfig
             {
-                LogLevel         = LogSeverity.Info,
+                LogLevel         = DefaultDiscordLogLevel,
                 MessageCacheSize = 0
             };
 
@@ -143,10 +145,10 @@ namespace MudaeFarm
 
         static Task HandleLogAsync(LogMessage message)
         {
-            // these errors occur from using an old version of Discord.Net
-            // they should not affect any functionality
-            if (message.Message.Contains("Error handling Dispatch (TYPING_START)") ||
-                message.Message.Contains("Unknown Dispatch (SESSIONS_REPLACE)"))
+            // these dispatch handling errors occur from using an old version of Discord.Net
+            // they should not affect functionality
+            if (message.Message.Contains("Error handling Dispatch") ||
+                message.Message.Contains("Unknown Dispatch"))
                 return Task.CompletedTask;
 
             var text = message.Exception == null

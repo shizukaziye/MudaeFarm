@@ -38,9 +38,11 @@ To remove a character/anime from the wishlist, delete the message itself.
 
 MudaeFarm wishlists are entirely separate from Mudae the wishlist and will not synchronize against each other.
 
+- If a server has custom emotes instead of hearts for claiming, change `enable_custom_emotes` to `true` in the claiming configuration.
+
 ### Autoreply
 
-MudaeFarm can optionally send a preconfigured reply message when a character is claimed. Selection is random.
+MudaeFarm can optionally send a reply message when a character is claimed. Selection is random.
 
 - `.` represents *not* sending a reply.
 - `\n` splits one selected reply into multiple messages.

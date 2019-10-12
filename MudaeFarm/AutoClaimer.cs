@@ -159,8 +159,8 @@ namespace MudaeFarm
 
             var (message, character, measure) = (x.Message, x.Character, x.Measure);
 
-            // reaction must be a heart emote
-            if (Array.IndexOf(_heartEmotes, reaction.Emote) == -1)
+            // reaction must be a heart emote (checking is disabled if custom emotes are enabled)
+            if (!_config.ClaimCustomEmotes && Array.IndexOf(_heartEmotes, reaction.Emote) == -1)
                 return;
 
             // claim the roll

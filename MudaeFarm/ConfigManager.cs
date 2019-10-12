@@ -34,6 +34,7 @@ namespace MudaeFarm
         public List<string> ClaimReplies;
         public TimeSpan KakeraClaimDelay;
         public HashSet<KakeraType> KakeraTargets;
+        public bool ClaimCustomEmotes;
 
         public bool RollEnabled;
         public string RollCommand;
@@ -229,10 +230,11 @@ namespace MudaeFarm
                 // claiming
                 var claim = await LoadConfigPartAsync(channel, "Claiming", dict, ClaimConfig.CreateDefault);
 
-                ClaimEnabled     = claim.Enabled;
-                ClaimDelay       = TimeSpan.FromSeconds(claim.Delay);
-                KakeraClaimDelay = TimeSpan.FromSeconds(claim.KakeraDelay);
-                KakeraTargets    = claim.KakeraTargets;
+                ClaimEnabled      = claim.Enabled;
+                ClaimDelay        = TimeSpan.FromSeconds(claim.Delay);
+                KakeraClaimDelay  = TimeSpan.FromSeconds(claim.KakeraDelay);
+                KakeraTargets     = claim.KakeraTargets;
+                ClaimCustomEmotes = claim.CustomEmotes;
 
                 // rolling
                 var roll = await LoadConfigPartAsync<RollConfig>(channel, "Rolling", dict);
@@ -418,6 +420,9 @@ namespace MudaeFarm
 
             [JsonProperty("kakera_targets")]
             public HashSet<KakeraType> KakeraTargets { get; set; }
+
+            [JsonProperty("enable_custom_emotes")]
+            public bool CustomEmotes { get; set; }
         }
 
         public class RollConfig

@@ -24,6 +24,8 @@ It may take a while for this server to be created.
 
 **MudaeFarm is disabled on all servers by default.** You must copy the *ID of the channel* in which you want to enable MudaeFarm (usually the bot/spam channel of that server), and send that ID in `#bot-channels`.
 
+**MudaeFarm requires you to have some kakera beforehand.** If you don't, get some using `$dk`.
+
 ### Configuration
 
 You can edit JSON configuration messages and the bot will reload the changes automatically.

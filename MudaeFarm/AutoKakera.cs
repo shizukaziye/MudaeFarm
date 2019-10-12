@@ -27,14 +27,14 @@ namespace MudaeFarm
 
         static readonly Dictionary<string, KakeraType> _kakeraMap = new Dictionary<string, KakeraType>
         {
-            { "kakeraP", KakeraType.Purple },
+            { "kakerap", KakeraType.Purple },
             { "kakera", KakeraType.Blue },
-            { "kakeraT", KakeraType.Teal },
-            { "kakeraG", KakeraType.Green },
-            { "kakeraY", KakeraType.Yellow },
-            { "kakeraO", KakeraType.Orange },
-            { "KakeraR", KakeraType.Red },
-            { "kakeraW", KakeraType.Rainbow }
+            { "kakerat", KakeraType.Teal },
+            { "kakerag", KakeraType.Green },
+            { "kakeray", KakeraType.Yellow },
+            { "kakerao", KakeraType.Orange },
+            { "kakerar", KakeraType.Red },
+            { "kakeraw", KakeraType.Rainbow }
         };
 
         public void Initialize()
@@ -95,7 +95,7 @@ namespace MudaeFarm
                 return;
 
             // reaction must be kakera
-            if (!_kakeraMap.TryGetValue(reaction.Emote.Name, out var kakera))
+            if (!_kakeraMap.TryGetValue(reaction.Emote.Name.ToLowerInvariant(), out var kakera))
                 return;
 
             // kakera must be configured to be claimed

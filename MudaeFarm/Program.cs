@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Discord;
 
 namespace MudaeFarm
 {
@@ -48,12 +49,16 @@ namespace MudaeFarm
 
         static async Task<bool> HandleArgsAsync(IEnumerable<string> args)
         {
+            const string verbose   = "--verbose";
+            const string reinstall = "--reinstall=";
+
             foreach (var arg in args)
             {
-                const string reinstallPrefix = "--reinstall=";
+                if (arg == verbose)
+                    MudaeFarm.DefaultDiscordLogLevel = LogSeverity.Debug;
 
-                if (arg.StartsWith(reinstallPrefix))
-                    await UpdateChecker.InstallUpdateAsync(arg.Substring(reinstallPrefix.Length).Trim('"'));
+                else if (arg.StartsWith(reinstall))
+                    await UpdateChecker.InstallUpdateAsync(arg.Substring(reinstall.Length).Trim('"'));
             }
 
             return true;

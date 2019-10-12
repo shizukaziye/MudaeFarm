@@ -48,6 +48,8 @@ namespace MudaeFarm
         public Regex WishedCharacterRegex;
         public Regex WishedAnimeRegex;
 
+        public bool AutoUpdate;
+
         public async Task InitializeAsync()
         {
             var measure = new MeasureContext();
@@ -246,6 +248,11 @@ namespace MudaeFarm
                 DailyKakeraStateUpdate = roll.KakeraStateUpdate;
                 RollTypingDelay        = TimeSpan.FromSeconds(roll.TypingDelay);
                 RollIntervalOverride   = roll.IntervalOverrideMinutes == null ? null as TimeSpan? : TimeSpan.FromMinutes(roll.IntervalOverrideMinutes.Value);
+
+                // miscellaneous
+                var miscellaneous = await LoadConfigPartAsync<MiscellaneousConfig>(channel, "Miscellaneous", dict);
+
+                AutoUpdate = miscellaneous.AutoUpdate;
             }
 
             else if (channel.Id == _wishedCharacterChannel.Id)
@@ -447,6 +454,12 @@ namespace MudaeFarm
 
             [JsonProperty("interval_override_minutes")]
             public double? IntervalOverrideMinutes { get; set; }
+        }
+
+        public class MiscellaneousConfig
+        {
+            [JsonProperty("auto_update")]
+            public bool AutoUpdate { get; set; } = true;
         }
 
 #endregion

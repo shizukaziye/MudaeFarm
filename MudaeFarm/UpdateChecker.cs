@@ -14,6 +14,13 @@ namespace MudaeFarm
     {
         public static readonly Version CurrentVersion = typeof(Program).Assembly.GetName().Version;
 
+        readonly ConfigManager _config;
+
+        public UpdateChecker(ConfigManager config)
+        {
+            _config = config;
+        }
+
         void IModule.Initialize() { }
 
         public async Task RunAsync(CancellationToken cancellationToken = default)
@@ -23,7 +30,8 @@ namespace MudaeFarm
                 // check for updates every hour
                 await Task.Delay(TimeSpan.FromHours(1), cancellationToken);
 
-                await CheckAsync();
+                if (_config.AutoUpdate)
+                    await CheckAsync();
             }
         }
 

@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace MudaeFarm
@@ -56,52 +53,7 @@ namespace MudaeFarm
                 const string reinstallPrefix = "--reinstall=";
 
                 if (arg.StartsWith(reinstallPrefix))
-                {
-                    Log.Info($"Upgrading to v{UpdateChecker.CurrentVersion.ToString(3)}...");
-
-                    // wait for old process to exit
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-
-                    var dir = Directory.CreateDirectory(arg.Substring(reinstallPrefix.Length).Trim('"'));
-
-                    try
-                    {
-                        // delete all old files
-                        foreach (var file in dir.EnumerateFiles())
-                            file.Delete();
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-
-                    // copy ourselves in
-                    foreach (var file in new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).EnumerateFiles())
-                    {
-                        try
-                        {
-                            var dest = Path.Combine(dir.FullName, file.Name);
-
-                            file.CopyTo(dest, true);
-
-                            Log.Debug(dest);
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error($"Could not copy: {file.Name}", e);
-                        }
-                    }
-
-                    // run new installation
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName        = dir.EnumerateFiles("*.exe").First().FullName,
-                        UseShellExecute = false
-                    });
-
-                    Process.GetCurrentProcess().Kill();
-                    break;
-                }
+                    await UpdateChecker.InstallUpdateAsync(arg.Substring(reinstallPrefix.Length).Trim('"'));
             }
 
             return true;

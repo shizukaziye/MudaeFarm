@@ -14,7 +14,7 @@ namespace MudaeFarm
         };
 
         // Mudae's maid username regex
-        static readonly Regex _maidRegex = new Regex(@"^Mudae?maid\s*\d+$", RegexOptions.Singleline | RegexOptions.Compiled);
+        static readonly Regex _maidRegex = new Regex(@"^Mudae?(maid|butler)\s*\d+$", RegexOptions.Singleline | RegexOptions.Compiled);
 
         public static bool IsMudae(IUser user) => user.IsBot && (Array.IndexOf(_ids, user.Id) != -1 || _maidRegex.IsMatch(user.Username));
     }

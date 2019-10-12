@@ -248,12 +248,12 @@ namespace MudaeFarm
 
             else if (channel.Id == _wishedCharacterChannel.Id)
             {
-                WishedCharacterRegex = CreateWishRegex(await LoadMessagesAsync(channel));
+                WishedCharacterRegex = CreateWishlistRegex(await LoadMessagesAsync(channel));
             }
 
             else if (channel.Id == _wishedAnimeChannel.Id)
             {
-                WishedAnimeRegex = CreateWishRegex(await LoadMessagesAsync(channel));
+                WishedAnimeRegex = CreateWishlistRegex(await LoadMessagesAsync(channel));
             }
 
             else if (channel.Id == _botChannelChannel.Id)
@@ -361,12 +361,15 @@ namespace MudaeFarm
                 => $"> {key}\n```json\n{JsonConvert.SerializeObject(obj, Formatting.Indented, new StringEnumConverter())}\n```";
         }
 
-        static Regex CreateWishRegex(ICollection<IUserMessage> items)
+        static Regex CreateWishlistRegex(ICollection<IUserMessage> items)
         {
             if (items.Count == 0)
                 return null;
 
-            var s = new HashSet<string>(items.Select(x => x.Content.Trim().ToLowerInvariant())).Select(GlobToRegex);
+            var s = new HashSet<string>(
+                    items.SelectMany(x => x.Content.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                         .Select(x => x.Trim().ToLowerInvariant()))
+               .Select(GlobToRegex);
 
             return new Regex($"({string.Join(")|(", s)})", RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
         }

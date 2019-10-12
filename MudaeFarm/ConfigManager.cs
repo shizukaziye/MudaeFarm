@@ -314,7 +314,7 @@ namespace MudaeFarm
                 return;
             }
 
-            Log.Debug($"Configuration channel '${channel.Name}' reloaded in {measure}.");
+            Log.Debug($"Configuration channel '#{channel.Name}' reloaded in {measure}.");
         }
 
         static readonly Regex _channelMentionRegex = new Regex(@"^<#(?<id>\d+)>$", RegexOptions.Compiled | RegexOptions.Singleline);

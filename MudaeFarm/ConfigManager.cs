@@ -26,6 +26,7 @@ namespace MudaeFarm
         ITextChannel _wishedAnimeChannel;
         ITextChannel _botChannelChannel;
         ITextChannel _claimReplyChannel;
+        ITextChannel _wishlistUsersChannel;
 
         public string StateUpdateCommand;
 
@@ -35,6 +36,7 @@ namespace MudaeFarm
         public TimeSpan KakeraClaimDelay;
         public HashSet<KakeraType> KakeraTargets;
         public bool ClaimCustomEmotes;
+        public HashSet<ulong> ClaimWishlistUserIds;
 
         public bool RollEnabled;
         public string RollCommand;
@@ -108,6 +110,7 @@ namespace MudaeFarm
                 set("wished-anime", ref _wishedAnimeChannel);
                 set("bot-channels", ref _botChannelChannel);
                 set("claim-replies", ref _claimReplyChannel);
+                set("wishlist-users", ref _wishlistUsersChannel);
             }
 
             // create channel if not created already
@@ -115,6 +118,7 @@ namespace MudaeFarm
             _wishedAnimeChannel     = await CreateChannelAsync(_wishedAnimeChannel, "wished-anime", "Configure your anime wishlist here. Wildcards characters are supported. Names are *case-insensitive*.");
             _botChannelChannel      = await CreateChannelAsync(_botChannelChannel, "bot-channels", "Configure channels to enable MudaeFarm autorolling/claiming by sending the __channel ID__.");
             _claimReplyChannel      = await CreateChannelAsync(_claimReplyChannel, "claim-replies", "Configure automatic reply messages when you claim a character. One message is randomly selected. Refer to https://github.com/chiyadev/MudaeFarm for advanced templating.");
+            _wishlistUsersChannel   = await CreateChannelAsync(_wishlistUsersChannel, "wishlist-users", "Configure wishlists of other users to be claimed by sending the __user ID__.");
 
             // initial load
             await ReloadChannelAsync(_generalConfigChannel);
@@ -122,6 +126,7 @@ namespace MudaeFarm
             await ReloadChannelAsync(_wishedAnimeChannel);
             await ReloadChannelAsync(_botChannelChannel);
             await ReloadChannelAsync(_claimReplyChannel);
+            await ReloadChannelAsync(_wishlistUsersChannel);
 
             Log.Info($"Configuration loaded in {measure}.");
 
@@ -272,13 +277,14 @@ namespace MudaeFarm
 
                 foreach (var message in messages)
                 {
-                    var parts = message.Content.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    var id = message.GetChannelIds().SingleOrDefault();
+
+                    if (ulong.TryParse(message.Content, out var x))
+                        id = x;
 
                     ITextChannel chan;
 
-                    if (!ulong.TryParse(parts[0], out var id) &&
-                        !ulong.TryParse(_channelMentionRegex.Match(parts[0]).Groups["id"].Value, out id) ||
-                        (chan = _client.GetChannel(id) as ITextChannel) == null)
+                    if ((chan = _client.GetChannel(id) as ITextChannel) == null || !channelIds.Add(id))
                     {
                         if (message.Reactions.Count == 0)
                             await message.AddReactionAsync(new Emoji("\u274C"));
@@ -286,18 +292,10 @@ namespace MudaeFarm
                         continue;
                     }
 
-                    if (!channelIds.Add(id))
-                    {
-                        if (message.Reactions.Count == 0)
-                            await message.AddReactionAsync(new Emoji("\u0032\u20E3"));
-
-                        continue;
-                    }
-
                     if (message.Reactions.Count != 0)
                         await message.RemoveAllReactionsAsync();
 
-                    if (parts.Length == 1)
+                    if (!message.Content.StartsWith("<#"))
                         await message.ModifyAsync(m => m.Content = $"<#{chan.Id}> - **{chan.Guild.Name}**");
                 }
 
@@ -309,6 +307,38 @@ namespace MudaeFarm
                 ClaimReplies = (await LoadMessagesAsync(channel)).Select(m => m.Content).ToList();
             }
 
+            else if (channel.Id == _wishlistUsersChannel.Id)
+            {
+                var messages = await LoadMessagesAsync(channel);
+                var userIds  = new HashSet<ulong>();
+
+                foreach (var message in messages)
+                {
+                    var id = message.GetUserIds().SingleOrDefault();
+
+                    if (ulong.TryParse(message.Content, out var x))
+                        id = x;
+
+                    IUser user;
+
+                    if ((user = _client.GetUser(id)) == null || !userIds.Add(id))
+                    {
+                        if (message.Reactions.Count == 0)
+                            await message.AddReactionAsync(new Emoji("\u274C"));
+
+                        continue;
+                    }
+
+                    if (message.Reactions.Count != 0)
+                        await message.RemoveAllReactionsAsync();
+
+                    if (!message.Content.StartsWith("<@"))
+                        await message.ModifyAsync(m => m.Content = $"<@{user.Id}> - **{user.Username}#{user.Discriminator}**");
+                }
+
+                ClaimWishlistUserIds = userIds;
+            }
+
             else
             {
                 return;
@@ -316,8 +346,6 @@ namespace MudaeFarm
 
             Log.Debug($"Configuration channel '#{channel.Name}' reloaded in {measure}.");
         }
-
-        static readonly Regex _channelMentionRegex = new Regex(@"^<#(?<id>\d+)>$", RegexOptions.Compiled | RegexOptions.Singleline);
 
         static async Task<T> LoadConfigPartAsync<T>(IMessageChannel channel, string key, IReadOnlyDictionary<string, ConfigPart> dict, Func<T> defaultFactory = null)
             where T : class, new()

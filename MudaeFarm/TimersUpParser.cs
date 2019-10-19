@@ -149,7 +149,7 @@ namespace MudaeFarm
                 }
             }
 
-            return parsed >= 7;
+            return parsed >= 2;
         }
     }
 }

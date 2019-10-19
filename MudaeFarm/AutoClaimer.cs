@@ -117,7 +117,7 @@ namespace MudaeFarm
 
             // matching by wishlist
             if (message.Content.StartsWith("Wished by"))
-                matched |= message.MentionedUserIds.Any(_config.ClaimWishlistUserIds.Contains);
+                matched |= message.GetUserIds().Any(_config.ClaimWishlistUserIds.Contains);
 
             if (matched)
             {

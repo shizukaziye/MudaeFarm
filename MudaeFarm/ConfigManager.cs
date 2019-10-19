@@ -277,7 +277,7 @@ namespace MudaeFarm
 
                 foreach (var message in messages)
                 {
-                    var id = message.MentionedChannelIds.SingleOrDefault();
+                    var id = message.GetChannelIds().SingleOrDefault();
 
                     if (ulong.TryParse(message.Content, out var x))
                         id = x;
@@ -295,7 +295,7 @@ namespace MudaeFarm
                     if (message.Reactions.Count != 0)
                         await message.RemoveAllReactionsAsync();
 
-                    if (message.MentionedChannelIds.Count == 0)
+                    if (!message.Content.StartsWith("<#"))
                         await message.ModifyAsync(m => m.Content = $"<#{chan.Id}> - **{chan.Guild.Name}**");
                 }
 
@@ -314,7 +314,7 @@ namespace MudaeFarm
 
                 foreach (var message in messages)
                 {
-                    var id = message.MentionedUserIds.SingleOrDefault();
+                    var id = message.GetUserIds().SingleOrDefault();
 
                     if (ulong.TryParse(message.Content, out var x))
                         id = x;
@@ -332,7 +332,7 @@ namespace MudaeFarm
                     if (message.Reactions.Count != 0)
                         await message.RemoveAllReactionsAsync();
 
-                    if (message.MentionedChannelIds.Count == 0)
+                    if (!message.Content.StartsWith("<@"))
                         await message.ModifyAsync(m => m.Content = $"<@{user.Id}> - **{user.Username}#{user.Discriminator}**");
                 }
 

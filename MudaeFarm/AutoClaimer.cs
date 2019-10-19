@@ -83,7 +83,7 @@ namespace MudaeFarm
 
         static readonly Regex _imFooterRegex = new Regex(@"^\s*\d+\s*\/\s*\d+\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-        async Task HandleMudaeMessageAsync(SocketUserMessage message)
+        async Task HandleMudaeMessageAsync(IUserMessage message)
         {
             if (!message.Embeds.Any())
                 return;
@@ -109,11 +109,15 @@ namespace MudaeFarm
             var character = embed.Author.Value.Name.Trim();
             var anime     = embed.Description.Split('\n')[0].Trim();
 
-            // matching
+            // matching by character and name
             var matched = false;
 
             matched |= _config.WishedCharacterRegex?.IsMatch(character) ?? false;
             matched |= _config.WishedAnimeRegex?.IsMatch(anime) ?? false;
+
+            // matching by wishlist
+            if (message.Content.StartsWith("Wished by"))
+                matched |= message.MentionedUserIds.Any(_config.ClaimWishlistUserIds.Contains);
 
             if (matched)
             {

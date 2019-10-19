@@ -61,6 +61,14 @@ namespace MudaeFarm
                     ++parsed;
                 }
 
+                else if (line.Contains("claim") && line.Contains("reset"))
+                {
+                    if (TryParseTime(line, out var time))
+                        state.ClaimReset = now + time;
+
+                    ++parsed;
+                }
+
                 else if (line.Contains("rolls") && line.Contains("left"))
                 {
                     if (TryParseInt(line, out var value))
@@ -149,7 +157,7 @@ namespace MudaeFarm
                 }
             }
 
-            return parsed >= 7;
+            return parsed >= 2;
         }
     }
 }

@@ -57,3 +57,4 @@ e.g. `I love *character_full* in *Anime*` produces `I love chino kafuu in Is the
 
 - MudaeFarm will periodically send `$tu` command to determine the claiming cooldown and rolling interval. To disable this behavior, change `state_update_command` to `""`. All subsequent matching rolls will be claimed regardless of cooldown and adaptive autorolling will be disabled.
 - Autorolling is adaptive to the reset time determined by `$tu`. Change `interval_override_minutes` to override the interval in *minutes*.
+- You can also change `state_update_command` to `$mu`.

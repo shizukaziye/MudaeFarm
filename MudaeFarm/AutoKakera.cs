@@ -106,7 +106,8 @@ namespace MudaeFarm
             var state = _state.Get(guildChannel.GuildId);
 
             // must have enough kakera power to claim this kakera
-            if (!state.CanKakera)
+            // can ignore this check for purple kakera because it doesn't cost anything
+            if (kakera != KakeraType.Purple && !state.CanKakera)
                 return;
 
             // claim kakera

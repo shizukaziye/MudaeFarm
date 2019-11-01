@@ -77,11 +77,13 @@ namespace MudaeFarm
                         // send command
                         await channel.SendMessageAsync(_config.StateUpdateCommand);
 
+                        Log.Debug($"Sent state update command '{_config.StateUpdateCommand}' in channel #{channel}");
+
                         state.LastRefresh = now;
                     }
                     catch (Exception e)
                     {
-                        Log.Warning($"Could not send state update command '{_config.StateUpdateCommand}'.", e);
+                        Log.Warning($"Could not send state update command '{_config.StateUpdateCommand}' in channel #{channel}.", e);
                     }
 
                     state.ForceNextRefresh = false;

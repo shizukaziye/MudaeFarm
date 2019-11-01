@@ -63,7 +63,7 @@ namespace MudaeFarm
                         continue;
 
                     // don't spam refreshes
-                    if (now < state.LastRefresh.AddMinutes(1))
+                    if (now < state.LastRefresh.AddMinutes(10))
                         continue;
 
                     // select a bot channel to send command in

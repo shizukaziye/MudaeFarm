@@ -47,6 +47,9 @@ namespace MudaeFarm
 
         async Task HandleMessageAsync(SocketMessage message)
         {
+            if (!_config.Enabled || !_config.ClaimEnabled)
+                return;
+
             if (!(message is SocketUserMessage userMessage))
                 return;
 
@@ -74,9 +77,6 @@ namespace MudaeFarm
 
         async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
         {
-            if (!_config.ClaimEnabled)
-                return;
-
             if (!(channel is IGuildChannel guildChannel))
                 return;
 

@@ -32,6 +32,7 @@ namespace MudaeFarm
         ITextChannel _claimReplyChannel;
         ITextChannel _wishlistUsersChannel;
 
+        public bool Enabled;
         public string StateUpdateCommand;
 
         public bool ClaimEnabled;
@@ -241,14 +242,15 @@ namespace MudaeFarm
                     dict[key] = new ConfigPart(message, value);
                 }
 
-                // general
+                // general part
                 var general = await LoadConfigPartAsync<GeneralConfig>(channel, "General", dict);
 
                 await _client.SetStatusAsync(general.FallbackStatus);
 
+                Enabled            = general.Enabled;
                 StateUpdateCommand = general.StateUpdateCommand;
 
-                // claiming
+                // claiming part
                 var claim = await LoadConfigPartAsync(channel, "Claiming", dict, ClaimConfig.CreateDefault);
 
                 ClaimEnabled      = claim.Enabled;
@@ -257,7 +259,7 @@ namespace MudaeFarm
                 KakeraTargets     = claim.KakeraTargets;
                 ClaimCustomEmotes = claim.CustomEmotes;
 
-                // rolling
+                // rolling part
                 var roll = await LoadConfigPartAsync<RollConfig>(channel, "Rolling", dict);
 
                 RollEnabled            = roll.Enabled;
@@ -268,7 +270,7 @@ namespace MudaeFarm
                 RollTypingDelay        = TimeSpan.FromSeconds(roll.TypingDelay);
                 RollIntervalOverride   = roll.IntervalOverrideMinutes == null ? null as TimeSpan? : TimeSpan.FromMinutes(roll.IntervalOverrideMinutes.Value);
 
-                // miscellaneous
+                // miscellaneous part
                 var miscellaneous = await LoadConfigPartAsync<MiscellaneousConfig>(channel, "Miscellaneous", dict);
 
                 AutoUpdate = miscellaneous.AutoUpdate;
@@ -452,6 +454,9 @@ namespace MudaeFarm
 
         public class GeneralConfig
         {
+            [JsonProperty("enabled")]
+            public bool Enabled { get; set; } = true;
+
             [JsonProperty("fallback_status")]
             public UserStatus FallbackStatus { get; set; } = UserStatus.Idle;
 

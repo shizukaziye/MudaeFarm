@@ -10,6 +10,9 @@ using Newtonsoft.Json.Converters;
 
 namespace MudaeFarm
 {
+    /// <summary>
+    /// Manages configuration using a Discord server.
+    /// </summary>
     public class ConfigManager
     {
         readonly DiscordSocketClient _client;
@@ -19,6 +22,7 @@ namespace MudaeFarm
             _client = client;
         }
 
+        // channels used for configuration
         IGuild _guild;
 
         ITextChannel _generalConfigChannel;
@@ -160,6 +164,9 @@ namespace MudaeFarm
             _client.MessageUpdated  += (cacheable, message, channel) => ReloadChannelAsync(channel);
         }
 
+        /// <summary>
+        /// Creates a channel and updates the description if necessary.
+        /// </summary>
         async Task<ITextChannel> CreateChannelAsync(ITextChannel channel, string name, string topic)
         {
             if (channel == null)
@@ -175,6 +182,9 @@ namespace MudaeFarm
             return channel;
         }
 
+        /// <summary>
+        /// Downloads all messages from a specific channel.
+        /// </summary>
         async Task<List<IUserMessage>> LoadMessagesAsync(IMessageChannel channel)
         {
             var author = _client.CurrentUser.Id;
@@ -198,10 +208,14 @@ namespace MudaeFarm
             return list;
         }
 
+        /// <summary>
+        /// Reloads configuration from a specific channel.
+        /// </summary>
         async Task ReloadChannelAsync(IMessageChannel channel)
         {
             var measure = new MeasureContext();
 
+            // general config channel
             if (channel.Id == _generalConfigChannel.Id)
             {
                 var messages = await LoadMessagesAsync(channel);
@@ -260,16 +274,19 @@ namespace MudaeFarm
                 AutoUpdate = miscellaneous.AutoUpdate;
             }
 
+            // wished character channel
             else if (channel.Id == _wishedCharacterChannel.Id)
             {
                 WishedCharacterRegex = CreateWishlistRegex(await LoadMessagesAsync(channel));
             }
 
+            // wished anime channel
             else if (channel.Id == _wishedAnimeChannel.Id)
             {
                 WishedAnimeRegex = CreateWishlistRegex(await LoadMessagesAsync(channel));
             }
 
+            // bot-channel channel
             else if (channel.Id == _botChannelChannel.Id)
             {
                 var messages   = await LoadMessagesAsync(channel);
@@ -302,11 +319,13 @@ namespace MudaeFarm
                 BotChannelIds = channelIds;
             }
 
+            // automatic claim reply channel
             else if (channel.Id == _claimReplyChannel.Id)
             {
                 ClaimReplies = (await LoadMessagesAsync(channel)).Select(m => m.Content).ToList();
             }
 
+            // user wishlist channel
             else if (channel.Id == _wishlistUsersChannel.Id)
             {
                 var messages = await LoadMessagesAsync(channel);
@@ -347,6 +366,9 @@ namespace MudaeFarm
             Log.Debug($"Configuration channel '#{channel.Name}' reloaded in {measure}.");
         }
 
+        /// <summary>
+        /// Used to load "config parts" in the general configuration channel.
+        /// </summary>
         static async Task<T> LoadConfigPartAsync<T>(IMessageChannel channel, string key, IReadOnlyDictionary<string, ConfigPart> dict, Func<T> defaultFactory = null)
             where T : class, new()
         {
@@ -414,7 +436,7 @@ namespace MudaeFarm
         static string GlobToRegex(string s)
             => $"^{Regex.Escape(s).Replace("\\*", ".*").Replace("\\?", ".")}$";
 
-#region Partial configs
+#region Configuration parts used in the general configuration channel
 
         struct ConfigPart
         {

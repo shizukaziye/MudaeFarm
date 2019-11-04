@@ -9,6 +9,9 @@ using Discord.WebSocket;
 
 namespace MudaeFarm
 {
+    /// <summary>
+    /// An instance of the bot.
+    /// </summary>
     public class MudaeFarm : IDisposable
     {
         public static LogSeverity DefaultDiscordLogLevel { get; set; } = LogSeverity.Info;
@@ -82,7 +85,7 @@ namespace MudaeFarm
                 tasks.Add(new
                 {
                     name = state.GetType().Name,
-                    func = (Func<Task>) (() => state.RunAsync(cancellationToken))
+                    func = (Func<Task>) (() => state.RunAsync(cancellationToken)) // state manager is a special module
                 });
 
                 await Task.WhenAll(tasks.Select(async x =>

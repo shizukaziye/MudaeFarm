@@ -9,6 +9,9 @@ using Newtonsoft.Json;
 
 namespace MudaeFarm
 {
+    /// <summary>
+    /// Responsible for periodically sending "$tu" to update Mudae state.
+    /// </summary>
     public class MudaeStateManager
     {
         // guildId - state

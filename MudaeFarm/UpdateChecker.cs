@@ -10,6 +10,9 @@ using Octokit;
 
 namespace MudaeFarm
 {
+    /// <summary>
+    /// Responsible for updating the bot using GitHub releases.
+    /// </summary>
     public class UpdateChecker : IModule
     {
         public static readonly Version CurrentVersion = typeof(Program).Assembly.GetName().Version;

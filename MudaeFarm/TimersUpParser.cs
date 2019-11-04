@@ -4,6 +4,9 @@ using Discord;
 
 namespace MudaeFarm
 {
+    /// <summary>
+    /// Parses the output of "$tu" or "$mu" commands.
+    /// </summary>
     public static class TimersUpParser
     {
         static readonly Regex _timeRegex = new Regex(@"((?<hour>\d\d?)h\s*)?(?<minute>\d\d?)\**\s*min", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);

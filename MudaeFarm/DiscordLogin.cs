@@ -5,6 +5,9 @@ using Discord.WebSocket;
 
 namespace MudaeFarm
 {
+    /// <summary>
+    /// Manages Discord authentication.
+    /// </summary>
     public class DiscordLogin
     {
         readonly DiscordSocketClient _client;
@@ -33,12 +36,14 @@ namespace MudaeFarm
                 await _client.LoginAsync(TokenType.User, _token.Value);
                 await _client.StartAsync();
 
+                // wait for ready event
                 await completionSource.Task;
             }
             catch (Exception e)
             {
                 Log.Error("Error while authenticating to Discord.", e);
 
+                // reset token if authentication failed
                 _token.Reset();
             }
             finally

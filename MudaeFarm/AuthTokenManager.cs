@@ -3,6 +3,9 @@ using System.IO;
 
 namespace MudaeFarm
 {
+    /// <summary>
+    /// Loads the user token from disk.
+    /// </summary>
     public class AuthTokenManager
     {
         readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MudaeFarm", "auth_token.txt");
@@ -13,7 +16,7 @@ namespace MudaeFarm
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_path));
 
-            // legacy import
+            // legacy config import
             var legacyCfg = LegacyConfig.Load();
 
             if (legacyCfg != null)

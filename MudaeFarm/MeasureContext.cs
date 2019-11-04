@@ -3,6 +3,9 @@ using System.Diagnostics;
 
 namespace MudaeFarm
 {
+    /// <summary>
+    /// Helps to measure time.
+    /// </summary>
     public sealed class MeasureContext : IDisposable
     {
         public readonly Stopwatch Watch = Stopwatch.StartNew();

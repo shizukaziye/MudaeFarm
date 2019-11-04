@@ -58,7 +58,7 @@ namespace MudaeFarm
 
         async Task HandleMessageAsync(SocketMessage message)
         {
-            if (!_config.ClaimEnabled)
+            if (!_config.Enabled || !_config.ClaimEnabled)
                 return;
 
             if (!(message is SocketUserMessage userMessage))

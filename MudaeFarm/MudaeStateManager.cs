@@ -36,6 +36,9 @@ namespace MudaeFarm
 
                 foreach (var guild in _client.Guilds)
                 {
+                    if (!_config.Enabled)
+                        continue;
+
                     var state = Get(guild.Id);
 
                     // if state_update_command is disabled, assume...

@@ -38,7 +38,7 @@ namespace MudaeFarm
         {
             var guildIds = new HashSet<ulong>();
 
-            // start worker for rolling in guilds, on separate threads
+            // start worker for rolling in guilds, on separate tasks
             foreach (var guild in _client.Guilds)
             {
                 guildIds.Add(guild.Id);
@@ -100,7 +100,7 @@ namespace MudaeFarm
 
                 if (interval == null)
                 {
-                    if (!_config.RollEnabled || state.RollsLeft <= 0)
+                    if (!_config.Enabled || !_config.RollEnabled || state.RollsLeft <= 0)
                     {
                         await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                         continue;
@@ -148,7 +148,7 @@ namespace MudaeFarm
             {
                 var state = _state.Get(guild.Id);
 
-                if (!_config.DailyKakeraEnabled || !state.CanKakeraDaily)
+                if (!_config.Enabled || !_config.DailyKakeraEnabled || !state.CanKakeraDaily)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                     continue;

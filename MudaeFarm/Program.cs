@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 
 namespace MudaeFarm
 {
-    public class Program
+    public static class Program
     {
         static async Task Main(string[] args)
         {
@@ -63,5 +64,7 @@ namespace MudaeFarm
 
             return true;
         }
+
+        public static T2[] ToArray<T1, T2>(this IEnumerable<T1> enumerable, Func<T1, T2> selector) => enumerable.Select(selector).ToArray();
     }
 }

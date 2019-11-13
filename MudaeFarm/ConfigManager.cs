@@ -54,6 +54,7 @@ namespace MudaeFarm
 
         public Regex WishedCharacterRegex;
         public Regex WishedAnimeRegex;
+        public Dictionary<string, Regex> WishedAnimeExcludingCharacterRegex; // for "(excluding: ...)"
 
         public bool AutoUpdate;
 
@@ -209,6 +210,8 @@ namespace MudaeFarm
             return list;
         }
 
+        static readonly Regex _excludeCharacterRegex = new Regex(@"\(\s*excluding\s*:\s*(?<list>.*?)\s*\)", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
         /// <summary>
         /// Reloads configuration from a specific channel.
         /// </summary>
@@ -279,13 +282,39 @@ namespace MudaeFarm
             // wished character channel
             else if (channel.Id == _wishedCharacterChannel.Id)
             {
-                WishedCharacterRegex = CreateWishlistRegex(await LoadMessagesAsync(channel));
+                WishedCharacterRegex = CreateWishlistRegex((await LoadMessagesAsync(channel)).Select(m => m.Content));
             }
 
             // wished anime channel
             else if (channel.Id == _wishedAnimeChannel.Id)
             {
-                WishedAnimeRegex = CreateWishlistRegex(await LoadMessagesAsync(channel));
+                var messages = await LoadMessagesAsync(channel);
+
+                var anime = messages.ToArray(m =>
+                {
+                    var name      = m.Content;
+                    var excluding = new string[0];
+
+                    // allow excluding certain characters from an anime (blacklist)
+                    var match = _excludeCharacterRegex.Match(m.Content);
+
+                    if (match.Success)
+                    {
+                        name      = name.Remove(match.Index, match.Length).Trim();
+                        excluding = match.Groups["list"].Value.Split(',').Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()).ToArray();
+                    }
+
+                    return new { name, excluding };
+                });
+
+                WishedAnimeRegex = CreateWishlistRegex(anime.Select(x => x.name));
+
+                var excludingCharDict = new Dictionary<string, Regex>();
+
+                foreach (var x in anime)
+                    excludingCharDict[x.name.ToLowerInvariant()] = CreateWishlistRegex(x.excluding);
+
+                WishedAnimeExcludingCharacterRegex = excludingCharDict;
             }
 
             // bot-channel channel
@@ -422,17 +451,19 @@ namespace MudaeFarm
                 => $"> {key}\n```json\n{JsonConvert.SerializeObject(obj, Formatting.Indented, new StringEnumConverter())}\n```";
         }
 
-        static Regex CreateWishlistRegex(ICollection<IUserMessage> items)
+        // never matching regex https://stackoverflow.com/a/2302992
+        static readonly Regex _neverRegex = new Regex(@"^\b$", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
+        static Regex CreateWishlistRegex(IEnumerable<string> names)
         {
-            if (items.Count == 0)
-                return null;
-
             var s = new HashSet<string>(
-                    items.SelectMany(x => x.Content.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                         .Select(x => x.Trim().ToLowerInvariant()))
-               .Select(GlobToRegex);
+                names.SelectMany(x => x.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                     .Select(x => x.Trim().ToLowerInvariant())
+                     .Select(GlobToRegex));
 
-            return new Regex($"({string.Join(")|(", s)})", RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            return s.Count == 0
+                ? _neverRegex
+                : new Regex($"({string.Join(")|(", s)})", RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
         }
 
         static string GlobToRegex(string s)

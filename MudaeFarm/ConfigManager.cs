@@ -61,10 +61,11 @@ namespace MudaeFarm
         public async Task InitializeAsync()
         {
             var measure = new MeasureContext();
+            var userId  = _client.CurrentUser.Id;
+
+            var infoChannelDescription = $"MudaeFarm Configuration Server {userId} - Do not delete this channel! (Version: v{UpdateChecker.CurrentVersion.ToString(3)})";
 
             // find config guild
-            var userId = _client.CurrentUser.Id;
-
             foreach (var guild in _client.Guilds)
             {
                 if (guild.OwnerId == userId &&
@@ -86,7 +87,7 @@ namespace MudaeFarm
                     foreach (var c in await _guild.GetChannelsAsync())
                         await c.DeleteAsync();
 
-                    var channel = await CreateChannelAsync(null, "information", $"MudaeFarm Configuration Server {userId} - Do not delete this channel!");
+                    var channel = await CreateChannelAsync(null, "information", infoChannelDescription);
 
                     var message = await channel.SendMessageAsync(
                         "This is your MudaeFarm server where you can configure the bot.\n" +
@@ -120,6 +121,7 @@ namespace MudaeFarm
             }
 
             // create channel if not created already
+            _generalConfigChannel   = await CreateChannelAsync(_generalConfigChannel, "information", infoChannelDescription);
             _wishedCharacterChannel = await CreateChannelAsync(_wishedCharacterChannel, "wished-characters", "Configure your character wishlist here. Wildcards characters are supported. Names are *case-insensitive*.");
             _wishedAnimeChannel     = await CreateChannelAsync(_wishedAnimeChannel, "wished-anime", "Configure your anime wishlist here. Wildcards characters are supported. Names are *case-insensitive*.");
             _botChannelChannel      = await CreateChannelAsync(_botChannelChannel, "bot-channels", "Configure channels to enable MudaeFarm autorolling/claiming by sending the __channel ID__.");

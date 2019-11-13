@@ -38,9 +38,10 @@ Names are *case insensitive* and support basic glob expressions like `?` and `*`
 
 To remove a character/anime from the wishlist, delete the message itself.
 
-MudaeFarm wishlists are entirely separate from Mudae the wishlist and will not synchronize against each other.
+MudaeFarm wishlists are entirely separate from Mudae the wishlist and will not synchronize against each other. However, if your *Mudae* wishlist is public, you can use `#wishlist-users` where you can enter your own ID.
 
 - If a server has custom emotes instead of hearts for claiming, change `enable_custom_emotes` to `true` in the claiming configuration.
+- You can exclude specific characters for one anime. e.g. `is the order a rabbit? (excluding: kafuu chino)` will allow claiming every character from "Is the Order a Rabbit?" *except* "Kafuu Chino". Glob expressions will not work in this case.
 
 ### Autoreply
 

@@ -119,6 +119,10 @@ namespace MudaeFarm
             if (message.Content.StartsWith("Wished by"))
                 matched |= message.GetUserIds().Any(_config.ClaimWishlistUserIds.Contains);
 
+            // anime-specific character blacklist
+            if (_config.WishedAnimeExcludingCharacterRegex.TryGetValue(anime.ToLowerInvariant(), out var excludeCharRegex))
+                matched &= !excludeCharRegex.IsMatch(character);
+
             if (matched)
             {
                 var state = _state.Get(guild.Id);
@@ -137,6 +141,7 @@ namespace MudaeFarm
                 _claimQueue[message.Id] = new ClaimQueueItem
                 {
                     Message   = message,
+                    Guild     = guild,
                     Character = new CharacterInfo(character, anime),
                     Measure   = new MeasureContext()
                 };
@@ -152,6 +157,7 @@ namespace MudaeFarm
         struct ClaimQueueItem
         {
             public IUserMessage Message;
+            public IGuild Guild;
             public CharacterInfo Character;
             public MeasureContext Measure;
         }
@@ -161,7 +167,7 @@ namespace MudaeFarm
             if (!_claimQueue.TryRemove(reaction.MessageId, out var x))
                 return;
 
-            var (message, character, measure) = (x.Message, x.Character, x.Measure);
+            var (message, guild, character, measure) = (x.Message, x.Guild, x.Character, x.Measure);
 
             // reaction must be a heart emote (checking is disabled if custom emotes are enabled)
             if (!_config.ClaimCustomEmotes && Array.IndexOf(_heartEmotes, reaction.Emote) == -1)
@@ -174,11 +180,11 @@ namespace MudaeFarm
             {
                 await message.AddReactionAsync(reaction.Emote);
 
-                Log.Warning($"Attempted claim on character '{character.Name}' in {measure}.");
+                Log.Warning($"{guild} #{message.Channel}: Attempted claim on character '{character.Name}' in {measure}.");
             }
             catch (Exception e)
             {
-                Log.Warning($"Could not react with heart emote on character '{character.Name}'.", e);
+                Log.Warning($"{guild} #{message.Channel}: Could not react with heart emote on character '{character.Name}'.", e);
                 return;
             }
 
@@ -186,12 +192,12 @@ namespace MudaeFarm
             _state.Get(((IGuildChannel) message.Channel).GuildId).CanClaim = false;
 
             // automated reply
-            await SendAutoReplyAsync(channel, character);
+            await SendAutoReplyAsync(guild, channel, character);
         }
 
         readonly Regex _bracketRegex = new Regex(@"(\(|\[).*(\)|\])", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-        async Task SendAutoReplyAsync(IMessageChannel channel, CharacterInfo characterInfo)
+        async Task SendAutoReplyAsync(IGuild guild, IMessageChannel channel, CharacterInfo characterInfo)
         {
             if (_config.ClaimReplies.Count == 0)
                 return;
@@ -232,6 +238,8 @@ namespace MudaeFarm
                     await Task.Delay(TimeSpan.FromMilliseconds(reply.Length * 100));
 
                     await channel.SendMessageAsync(reply);
+
+                    Log.Info($"{guild} #{channel}: Sent auto reply: {reply}");
                 }
             }
         }

@@ -136,13 +136,6 @@ namespace MudaeFarm
 
         static Task HandleLogAsync(LogMessage message)
         {
-            // dispatch handling errors occur from using an old version of Discord.Net
-            // they should not affect functionality
-            if (message.Message.Contains("Error handling Dispatch") ||
-                message.Message.Contains("Unknown Dispatch") ||
-                message.Message.Contains("is blocking the gateway task"))
-                return Task.CompletedTask;
-
             var text = message.Exception == null
                 ? message.Message
                 : $"{message.Message}: {message.Exception}";

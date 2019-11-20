@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>exe</OutputType>
-        <TargetFramework>net46</TargetFramework>
+        <TargetFramework>net461</TargetFramework>
         <LangVersion>latest</LangVersion>
         <Version>2.4.6</Version>
         <Title>MudaeFarm</Title>
@@ -13,11 +13,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Discord.Net" Version="1.0.2"/>
-        <PackageReference Include="Discord.Net.Providers.WS4Net" Version="1.0.2"/>
-        <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
+        <PackageReference Include="chiyadev.Discord.Net" Version="2.1.2"/>
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.2"/>
         <PackageReference Include="Octokit" Version="0.33.0"/>
-        <PackageReference Include="System.Net.Http" Version="4.3.4"/>
         <PackageReference Include="System.ValueTuple" Version="4.3.0"/>
     </ItemGroup>
 

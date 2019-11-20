@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Net.Providers.WS4Net;
 using Discord.WebSocket;
 
 namespace MudaeFarm
@@ -16,22 +15,11 @@ namespace MudaeFarm
     {
         public static LogSeverity DefaultDiscordLogLevel { get; set; } = LogSeverity.Info;
 
-        readonly DiscordSocketClient _client = new DiscordSocketClient(CreateConfig());
-
-        static DiscordSocketConfig CreateConfig()
+        readonly DiscordSocketClient _client = new DiscordSocketClient(new DiscordSocketConfig
         {
-            var config = new DiscordSocketConfig
-            {
-                LogLevel         = DefaultDiscordLogLevel,
-                MessageCacheSize = 0
-            };
-
-            // Windows 7 compatibility
-            if (Environment.OSVersion.Version < new Version(6, 2))
-                config.WebSocketProvider = WS4NetProvider.Instance;
-
-            return config;
-        }
+            LogLevel         = DefaultDiscordLogLevel,
+            MessageCacheSize = 0
+        });
 
         public MudaeFarm()
         {

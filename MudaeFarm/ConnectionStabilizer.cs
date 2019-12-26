@@ -23,24 +23,47 @@ namespace MudaeFarm
             Log.Warning("Waiting for connection to stabilize...");
             Log.Color = Log.DebugColor;
 
+            var measure = new MeasureContext();
+
             var channel = await _config.GetOrCreateChannelAsync("connection-test");
+
+            var i = 0;
+
+            Task handleLog(LogMessage m)
+            {
+                if (m.Message.Contains("Failed to resume"))
+                    i = 0;
+
+                return Task.CompletedTask;
+            }
+
+            _client.Log += handleLog;
 
             try
             {
-                while (true)
+                const int iterations = 4;
+
+                for (; i < iterations; i++)
                 {
                     try
                     {
                         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2));
                         using var cts     = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, cancellationToken);
 
-                        await TestReadMessage(channel, cts.Token);
-                        await TestSendAsync(channel, cts.Token);
+                        await TestReadAsync(channel, cts.Token);
+                        await TestEventAsync(channel, cts.Token);
 
-                        return;
+                        if (i < iterations)
+                        {
+                            Log.Debug($"nearly there... {iterations - i}");
+
+                            await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+                        }
                     }
                     catch (OperationCanceledException)
                     {
+                        i = 0;
+
                         Log.Debug("patience...");
                     }
                 }
@@ -52,13 +75,17 @@ namespace MudaeFarm
             }
             finally
             {
+                _client.Log -= handleLog;
+
                 Log.Color = null;
 
                 await channel.DeleteAsync();
             }
+
+            Log.Info($"Connected stabilized in {measure}.");
         }
 
-        static async Task TestReadMessage(IMessageChannel channel, CancellationToken cancellationToken = default)
+        static async Task TestReadAsync(IMessageChannel channel, CancellationToken cancellationToken = default)
         {
             await foreach (var _ in channel.GetMessagesAsync(5).WithCancellation(cancellationToken))
                 return;
@@ -66,7 +93,7 @@ namespace MudaeFarm
 
         readonly Random _random = new Random();
 
-        async Task TestSendAsync(IMessageChannel channel, CancellationToken cancellationToken = default)
+        async Task TestEventAsync(IMessageChannel channel, CancellationToken cancellationToken = default)
         {
             var completion = new TaskCompletionSource<object>();
 

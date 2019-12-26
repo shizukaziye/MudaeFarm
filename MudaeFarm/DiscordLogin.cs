@@ -141,14 +141,15 @@ namespace MudaeFarm
 
                         while (true)
                         {
-                            await Task.Delay(TimeSpan.FromSeconds(1), _cts.Token);
+                            const double interval = 2;
+                            await Task.Delay(TimeSpan.FromSeconds(interval), _cts.Token);
 
                             var elapsed = watch.Elapsed;
 
                             if (elapsed >= _length)
                                 break;
 
-                            Log.Debug($"patience... {Math.Ceiling(_length.TotalSeconds - elapsed.TotalSeconds)}");
+                            Log.Debug("patience...");
                         }
 
                         _completion.TrySetResult(null);

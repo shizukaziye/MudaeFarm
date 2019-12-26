@@ -34,7 +34,7 @@ namespace MudaeFarm
             // discord login
             var login = new DiscordLogin(_client, token);
 
-            await login.RunAsync(cancellationToken);
+            await login.RunAsync();
 
             try
             {

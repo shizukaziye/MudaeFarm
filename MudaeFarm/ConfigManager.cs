@@ -398,7 +398,7 @@ namespace MudaeFarm
                 return;
             }
 
-            Log.Debug($"Configuration channel '#{channel.Name}' reloaded in {measure}.");
+            Log.Info($"Configuration channel '#{channel.Name}' reloaded in {measure}.");
         }
 
         /// <summary>

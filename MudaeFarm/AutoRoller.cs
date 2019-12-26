@@ -118,7 +118,7 @@ namespace MudaeFarm
                     {
                         --state.RollsLeft;
 
-                        Log.Debug($"{channel.Guild} #{channel}: Not rolling '{_config.RollCommand}' because we cannot claim.");
+                        Log.Info($"{channel.Guild} #{channel}: Not rolling '{_config.RollCommand}' because we cannot claim.");
                         break;
                     }
 
@@ -132,7 +132,7 @@ namespace MudaeFarm
 
                             --state.RollsLeft;
 
-                            Log.Debug($"{channel.Guild} #{channel}: Rolled '{_config.RollCommand}'.");
+                            Log.Info($"{channel.Guild} #{channel}: Rolled '{_config.RollCommand}'.");
                         }
                         catch (Exception e)
                         {
@@ -177,7 +177,7 @@ namespace MudaeFarm
 
                             state.CanKakeraDaily = false;
 
-                            Log.Debug($"{channel.Guild} #{channel}: Sent daily kakera command '{_config.DailyKakeraCommand}'.");
+                            Log.Info($"{channel.Guild} #{channel}: Sent daily kakera command '{_config.DailyKakeraCommand}'.");
 
                             if (_config.DailyKakeraStateUpdate && !string.IsNullOrWhiteSpace(_config.StateUpdateCommand))
                             {

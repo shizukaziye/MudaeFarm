@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -56,14 +57,12 @@ namespace MudaeFarm
 
             Task handle1()
             {
-                Log.Debug("patience...");
                 countdown.Reset();
                 return Task.CompletedTask;
             }
 
             Task handle2(Exception _)
             {
-                Log.Debug("patience...");
                 countdown.Reset();
                 return Task.CompletedTask;
             }
@@ -138,7 +137,19 @@ namespace MudaeFarm
                 {
                     try
                     {
-                        await Task.Delay(_length, _cts.Token);
+                        var watch = Stopwatch.StartNew();
+
+                        while (true)
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(1), _cts.Token);
+
+                            var elapsed = watch.Elapsed;
+
+                            if (elapsed >= _length)
+                                break;
+
+                            Log.Debug($"patience... {Math.Ceiling(_length.TotalSeconds - elapsed.TotalSeconds)}");
+                        }
 
                         _completion.TrySetResult(null);
                     }

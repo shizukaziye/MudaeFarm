@@ -69,8 +69,8 @@ namespace MudaeFarm
                         continue;
 
                     // don't spam refreshes
-                    if (now < state.LastRefresh.AddMinutes(10))
-                        continue;
+                    /*if (now < state.LastRefresh.AddMinutes(10))
+                        continue;*/
 
                     // select a bot channel to send command in
                     var channel = guild.TextChannels.FirstOrDefault(c => _config.BotChannelIds.Contains(c.Id));
@@ -86,6 +86,14 @@ namespace MudaeFarm
                         Log.Debug($"Sent state update command '{_config.StateUpdateCommand}' in channel #{channel}: {JsonConvert.SerializeObject(state)}");
 
                         state.LastRefresh = now;
+
+                        // force load
+                        await foreach (var messages in channel.GetMessagesAsync(5).WithCancellation(cancellationToken))
+                        foreach (var message in messages)
+                        {
+                            if (await HandleMessageInternal(message))
+                                break;
+                        }
                     }
                     catch (Exception e)
                     {
@@ -108,23 +116,27 @@ namespace MudaeFarm
         // async with no await
 #pragma warning disable 1998
 
-        async Task HandleMessage(SocketMessage message)
+        Task HandleMessage(SocketMessage message) => HandleMessageInternal(message);
+
+        async Task<bool> HandleMessageInternal(IMessage message)
         {
             if (!(message.Channel is IGuildChannel guildChannel))
-                return;
+                return false;
 
             if (!MudaeInfo.IsMudae(message.Author))
-                return;
+                return false;
 
             if (!_config.BotChannelIds.Contains(message.Channel.Id))
-                return;
+                return false;
 
             if (!TimersUpParser.TryParse(_client, message, out var state))
-                return;
+                return false;
 
             _states[guildChannel.GuildId] = state;
 
             Log.Debug($"Guild '{guildChannel.Guild}' state updated: {JsonConvert.SerializeObject(state)}");
+
+            return true;
         }
 
         public MudaeState Get(ulong guildId) => _states.TryGetValue(guildId, out var state)

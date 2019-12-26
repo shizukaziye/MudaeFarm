@@ -30,11 +30,11 @@ namespace MudaeFarm
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                // check for updates every hour
-                await Task.Delay(TimeSpan.FromHours(1), cancellationToken);
-
                 if (_config.AutoUpdate)
                     await CheckAsync();
+
+                // check for updates every hour
+                await Task.Delay(TimeSpan.FromHours(1), cancellationToken);
             }
         }
 

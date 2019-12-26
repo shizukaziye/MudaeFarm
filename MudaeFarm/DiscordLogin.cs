@@ -45,7 +45,7 @@ namespace MudaeFarm
         /// </remarks>
         async Task StabilizeConnectionAsync(CancellationToken cancellationToken = default)
         {
-            var waitTime   = TimeSpan.FromSeconds(5);
+            var waitTime   = TimeSpan.FromSeconds(10);
             var completion = new TaskCompletionSource<object>();
 
             Log.Error($"Waiting for connection to stabilize. This will take around {waitTime.Seconds} seconds.");

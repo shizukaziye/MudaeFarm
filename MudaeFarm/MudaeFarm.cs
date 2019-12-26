@@ -34,7 +34,7 @@ namespace MudaeFarm
             // discord login
             var login = new DiscordLogin(_client, token);
 
-            await login.RunAsync();
+            await login.RunAsync(cancellationToken);
 
             try
             {
@@ -60,8 +60,6 @@ namespace MudaeFarm
 
                 foreach (var module in modules)
                     module.Initialize();
-
-                Log.Warning("Ready!");
 
                 var tasks = modules.Select(m => new
                                     {

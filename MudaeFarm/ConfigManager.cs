@@ -45,6 +45,7 @@ namespace MudaeFarm
 
         public bool RollEnabled;
         public string RollCommand;
+        public bool RollWithNoClaim;
         public bool DailyKakeraEnabled;
         public string DailyKakeraCommand;
         public bool DailyKakeraStateUpdate;
@@ -269,6 +270,7 @@ namespace MudaeFarm
 
                 RollEnabled            = roll.Enabled;
                 RollCommand            = roll.Command;
+                RollWithNoClaim        = roll.RollWithNoClaim;
                 DailyKakeraEnabled     = roll.KakeraEnabled;
                 DailyKakeraCommand     = roll.KakeraCommand;
                 DailyKakeraStateUpdate = roll.KakeraStateUpdate;
@@ -527,6 +529,9 @@ namespace MudaeFarm
 
             [JsonProperty("command")]
             public string Command { get; set; } = "$w";
+
+            [JsonProperty("roll_with_no_claim")]
+            public bool RollWithNoClaim { get; set; }
 
             [JsonProperty("daily_kakera_enabled")]
             public bool KakeraEnabled { get; set; }

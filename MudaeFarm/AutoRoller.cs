@@ -114,6 +114,14 @@ namespace MudaeFarm
                     if (!_config.BotChannelIds.Contains(channel.Id))
                         continue;
 
+                    if (!state.CanClaim && !_config.RollWithNoClaim)
+                    {
+                        --state.RollsLeft;
+
+                        Log.Debug($"{channel.Guild} #{channel}: Not rolling '{_config.RollCommand}' because we cannot claim.");
+                        break;
+                    }
+
                     using (channel.EnterTypingState())
                     {
                         await Task.Delay(_config.RollTypingDelay, cancellationToken);

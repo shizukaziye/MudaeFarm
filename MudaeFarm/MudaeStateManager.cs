@@ -86,15 +86,6 @@ namespace MudaeFarm
                         Log.Debug($"Sent state update command '{_config.StateUpdateCommand}' in channel #{channel}.");
 
                         state.LastRefresh = now;
-
-                        // force load
-                        if (state.ForceNextRefresh)
-                            await foreach (var messages in channel.GetMessagesAsync(5).WithCancellation(cancellationToken))
-                            foreach (var message in messages)
-                            {
-                                if (await HandleMessageInternal(message))
-                                    break;
-                            }
                     }
                     catch (Exception e)
                     {

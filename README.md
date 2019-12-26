@@ -30,6 +30,28 @@ It may take a while for this server to be created.
 
 You can edit JSON configuration messages and the bot will reload the changes automatically.
 
+- General
+    - `enabled`: Whether MudaeFarm is enabled or not. Setting `false` will completely disable all MduaeFarm features.
+    - `fallback_status`: If you are running MudaeFarm continuously, when your primary client is logged out, the Discord user status to be used. Possible values: `Online`, `Invisible`, `Idle`, `DoNotDisturb`.
+    - `state_update_command`: See [Miscellaneous](#miscellaneous).
+- Claiming
+    - `enabled`: Whether autoclaiming is enabled or not.
+    - `delay_seconds`: When receiving a roll that can be claimed, number of seconds to wait before claiming it.
+    - `kakera_delay_seconds`: Same as `delay_seconds` but for kakeras.
+    - `kakera_targets`: Which type of kakera should be claimed. Purple kakera will always be claimed regardless of this configuration.
+    - `enable_custom_emotes`: Enables compatibility with servers that use custom emotes instead of the default heart emojis. This is not suggested unless necessary as it will bypass some internal emote safety checks.
+- Rolling
+    - `enabled`: Whether autorolling is enabled or not.
+    - `command`: Command to use when rolling.
+    - `roll_with_no_claim`: Whether MudaeFarm should continue rolling even if it cannot claim any rolls or not.
+    - `daily_kakera_enabled`: Whether autorolling of daily kakeras is enabled or not.
+    - `daily_kakera_command`: Command to use when rolling daily kakeras.
+    - `daily_kakera_then_state_update`: Whether state update should be performed after rolling daily kakeras.
+    - `typing_delay_seconds`: Number of seconds to "type" the rolling command before sending it.
+    - `interval_override_minutes`: See [Miscellaneous](#miscellaneous).
+- Miscellaneous
+    - `auto_update`: Set to `false` to disable MudaeFarm from automatically updating itself.
+
 ### Wishlists
 
 To configure character/anime wishlists, you can simply send the name of the character/anime in the wishlist channel, separated by individual messages.
@@ -58,4 +80,4 @@ e.g. `I love *character_full* in *Anime*` produces `I love chino kafuu in Is the
 
 - MudaeFarm will periodically send `$tu` command to determine the claiming cooldown and rolling interval. To disable this behavior, change `state_update_command` to `""`. All subsequent matching rolls will be claimed regardless of cooldown and adaptive autorolling will be disabled.
 - Autorolling is adaptive to the reset time determined by `$tu`. Change `interval_override_minutes` to override the interval in *minutes*.
-- You can also change `state_update_command` to `$mu`.
+- You can also change `state_update_command` to `$mu` or any other command that yields timer output. However, some parts of the bot may not work without required information from this command.

@@ -83,17 +83,18 @@ namespace MudaeFarm
                         // send command
                         await channel.SendMessageAsync(_config.StateUpdateCommand);
 
-                        Log.Debug($"Sent state update command '{_config.StateUpdateCommand}' in channel #{channel}: {JsonConvert.SerializeObject(state)}");
+                        Log.Debug($"Sent state update command '{_config.StateUpdateCommand}' in channel #{channel}.");
 
                         state.LastRefresh = now;
 
                         // force load
-                        await foreach (var messages in channel.GetMessagesAsync(5).WithCancellation(cancellationToken))
-                        foreach (var message in messages)
-                        {
-                            if (await HandleMessageInternal(message))
-                                break;
-                        }
+                        if (state.ForceNextRefresh)
+                            await foreach (var messages in channel.GetMessagesAsync(5).WithCancellation(cancellationToken))
+                            foreach (var message in messages)
+                            {
+                                if (await HandleMessageInternal(message))
+                                    break;
+                            }
                     }
                     catch (Exception e)
                     {

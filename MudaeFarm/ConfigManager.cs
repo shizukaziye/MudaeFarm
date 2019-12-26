@@ -169,14 +169,17 @@ namespace MudaeFarm
             _client.MessageUpdated  += (cacheable, message, channel) => ReloadChannelAsync(channel);
         }
 
+        public async Task<ITextChannel> GetOrCreateChannelAsync(string name)
+            => (await _guild.GetTextChannelsAsync()).FirstOrDefault(c => c.Name == name) ?? await _guild.CreateTextChannelAsync(name);
+
         /// <summary>
         /// Creates a channel and updates the description if necessary.
         /// </summary>
-        async Task<ITextChannel> CreateChannelAsync(ITextChannel channel, string name, string topic)
+        async Task<ITextChannel> CreateChannelAsync(ITextChannel channel, string name, string topic = "")
         {
             if (channel == null)
             {
-                channel = await _guild.CreateTextChannelAsync(name);
+                channel = await GetOrCreateChannelAsync(name);
 
                 Log.Debug($"Channel created: '#{channel}' - '{topic ?? "<null>"}'");
             }

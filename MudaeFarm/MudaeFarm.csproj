@@ -13,10 +13,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="chiyadev.Discord.Net" Version="2.1.2"/>
-        <PackageReference Include="Newtonsoft.Json" Version="12.0.2"/>
-        <PackageReference Include="Octokit" Version="0.33.0"/>
-        <PackageReference Include="System.ValueTuple" Version="4.3.0"/>
+        <PackageReference Include="chiyadev.Discord.Net" Version="2.1.2" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+        <PackageReference Include="Octokit" Version="0.33.0" />
+        <PackageReference Include="System.ValueTuple" Version="4.3.0" />
     </ItemGroup>
 
 </Project>

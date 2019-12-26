@@ -43,6 +43,9 @@ namespace MudaeFarm
 
                 await config.InitializeAsync();
 
+                // wait for stable connection (workaround for some connection problems)
+                await new ConnectionStabilizer(_client, config).RunAsync(cancellationToken);
+
                 // state management
                 var state = new MudaeStateManager(_client, config);
 
@@ -98,6 +101,7 @@ namespace MudaeFarm
             finally
             {
                 await _client.StopAsync();
+                await _client.LogoutAsync();
             }
         }
 

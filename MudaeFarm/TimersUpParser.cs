@@ -33,7 +33,7 @@ namespace MudaeFarm
         static bool TryParseInt(string str, out int value)
             => int.TryParse(_intRegex.Match(str).Value, out value);
 
-        public static bool TryParse(IDiscordClient client, IMessage message, out MudaeState state)
+        public static bool TryParse(IDiscordClient client, IMessage message, out MudaeState state, MudaeState oldState = null)
         {
             if (!message.Content.StartsWith($"**{client.CurrentUser.Username}**") ||
                 message.Embeds.Count != 0 ||
@@ -43,7 +43,7 @@ namespace MudaeFarm
                 return false;
             }
 
-            state = new MudaeState();
+            state = oldState?.Clone() ?? new MudaeState();
 
             var now    = DateTime.Now;
             var parsed = 0;
@@ -160,7 +160,7 @@ namespace MudaeFarm
                 }
             }
 
-            return parsed >= 2;
+            return parsed != 0;
         }
     }
 }

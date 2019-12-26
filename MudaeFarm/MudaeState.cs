@@ -92,5 +92,7 @@ namespace MudaeFarm
         public DateTime LastRefresh { get; set; }
 
 #endregion
+
+        public MudaeState Clone() => JsonConvert.DeserializeObject<MudaeState>(JsonConvert.SerializeObject(this));
     }
 }

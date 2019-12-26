@@ -130,7 +130,9 @@ namespace MudaeFarm
             if (!_config.BotChannelIds.Contains(message.Channel.Id))
                 return false;
 
-            if (!TimersUpParser.TryParse(_client, message, out var state))
+            _states.TryGetValue(guildChannel.GuildId, out var oldState);
+
+            if (!TimersUpParser.TryParse(_client, message, out var state, oldState))
                 return false;
 
             _states[guildChannel.GuildId] = state;

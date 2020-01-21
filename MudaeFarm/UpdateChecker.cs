@@ -43,6 +43,7 @@ namespace MudaeFarm
         public static async Task CheckAsync()
         {
             // prevent updates
+            Log.Warning("Updates have been skipped.");
             return;
 
             Release release;

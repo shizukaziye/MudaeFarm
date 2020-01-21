@@ -42,6 +42,9 @@ namespace MudaeFarm
 
         public static async Task CheckAsync()
         {
+            // prevent updates
+            return;
+
             Release release;
             Version version;
 

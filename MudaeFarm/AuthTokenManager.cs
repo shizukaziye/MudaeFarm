@@ -13,8 +13,10 @@ namespace MudaeFarm
     {
         static readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MudaeFarm", "auth_tokens.json");
 
+        // this is static so that the value is remembered across restarts
+        static string _currentUser = "default";
+
         readonly Dictionary<string, string> _users = new Dictionary<string, string>();
-        readonly string _currentUser = "Default";
 
         public string Value
         {
@@ -59,28 +61,19 @@ namespace MudaeFarm
                 Log.Info($"Failed to load user tokens from: {_path}");
             }
 
-            if (_users.Count == 1)
-            {
-                _currentUser = _users.Keys.First();
-
-                Log.Info($"Selected default user: {_currentUser}");
-            }
-
-            else if (_users.Count > 1)
+            while (!_users.ContainsKey(_currentUser))
             {
                 Console.WriteLine(
                     "\n" +
-                    "Multiple users were found:\n" +
+                    "User profiles:\n" +
                     string.Concat(_users.Keys.Select(s => $"  - {s}\n")));
 
-                do
-                {
-                    Console.Write("Choose user: ");
+                Console.Write("Choose user: ");
 
-                    _currentUser = Console.ReadLine() ?? "";
-                }
-                while (!_users.ContainsKey(_currentUser));
+                _currentUser = Console.ReadLine() ?? "";
             }
+
+            Log.Info($"Selected user: {_currentUser}");
 
             if (string.IsNullOrEmpty(Value))
             {

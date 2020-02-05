@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Newtonsoft.Json;
 
 namespace MudaeFarm
 {
@@ -8,27 +11,81 @@ namespace MudaeFarm
     /// </summary>
     public class AuthTokenManager
     {
-        readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MudaeFarm", "auth_token.txt");
+        static readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MudaeFarm", "auth_tokens.json");
 
-        public readonly string Value;
+        readonly Dictionary<string, string> _users = new Dictionary<string, string>();
+        readonly string _currentUser = "Default";
+
+        public string Value
+        {
+            get => _users.TryGetValue(_currentUser, out var value) ? value : null;
+
+            private set
+            {
+                _users[_currentUser] = value;
+
+                File.WriteAllText(_path, JsonConvert.SerializeObject(_users, Formatting.Indented));
+            }
+        }
 
         public AuthTokenManager()
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(_path));
-
-            // legacy config import
-            var legacyCfg = LegacyConfig.Load();
-
-            if (legacyCfg != null)
-                File.WriteAllText(_path, legacyCfg.AuthToken);
-
-            // load token from filesystem
-            if (File.Exists(_path))
-                Value = File.ReadAllText(_path);
-
-            if (string.IsNullOrWhiteSpace(Value))
+            try
             {
-                Log.Info(
+                // if we can, migrate old "auth_token.txt" plain text file to new "auth_tokens.json"
+                var path = Path.Combine(Path.GetDirectoryName(_path) ?? "", "auth_token.txt");
+
+                Value = File.ReadAllText(path);
+
+                File.Delete(path);
+
+                Log.Warning("Successfully migrated old auth tokens.");
+
+                return;
+            }
+            catch (IOException) { }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(_path) ?? "");
+
+            try
+            {
+                // load tokens from filesystem
+                _users = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_path));
+
+                Log.Info($"User tokens loaded from: {_path}");
+            }
+            catch (IOException)
+            {
+                Log.Info($"Failed to load user tokens from: {_path}");
+            }
+
+            if (_users.Count == 1)
+            {
+                _currentUser = _users.Keys.First();
+
+                Log.Info($"Selected default user: {_currentUser}");
+            }
+
+            else if (_users.Count > 1)
+            {
+                Console.WriteLine(
+                    "\n" +
+                    "Multiple users were found:\n" +
+                    string.Concat(_users.Keys.Select(s => $"  - {s}\n")));
+
+                do
+                {
+                    Console.Write("Choose user: ");
+
+                    _currentUser = Console.ReadLine() ?? "";
+                }
+                while (!_users.ContainsKey(_currentUser));
+            }
+
+            if (string.IsNullOrEmpty(Value))
+            {
+                Console.WriteLine(
+                    "\n" +
                     "MudaeFarm requires your user token in order to proceed.\n" +
                     "\n" +
                     "A user token is a long piece of text that is synonymous to your Discord password.\n" +
@@ -42,23 +99,20 @@ namespace MudaeFarm
                     "If you are concerned, you may inspect MudaeFarm's complete source code at: https://github.com/chiyadev/MudaeFarm\n" +
                     "\n" +
                     "MudaeFarm is licensed under the MIT License. The authors of MudaeFarm shall not be held liable for any claim, damage or liability.\n" +
-                    "You can read the license terms at: https://github.com/chiyadev/MudaeFarm/blob/master/LICENSE\n" +
-                    "\n" +
-                    "Enter your token:");
+                    "You can read the license terms at: https://github.com/chiyadev/MudaeFarm/blob/master/LICENSE\n");
+
+                Console.Write("Enter token: ");
 
                 Value = Console.ReadLine();
 
-                File.WriteAllText(_path, Value);
-
+                // restart to remove inputted token from console
                 throw new DummyRestartException { Delayed = false };
             }
-
-            Log.Info($"User token loaded from: {_path}");
         }
 
         public void Reset()
         {
-            File.Delete(_path);
+            Value = null;
 
             throw new DummyRestartException();
         }

@@ -39,7 +39,7 @@ namespace MudaeFarm
             try
             {
                 // configuration manager
-                var config = new ConfigManager(_client);
+                var config = new ConfigManager(_client, token);
 
                 await config.InitializeAsync();
 

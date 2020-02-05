@@ -16,10 +16,12 @@ namespace MudaeFarm
     public class ConfigManager
     {
         readonly DiscordSocketClient _client;
+        readonly AuthTokenManager _token;
 
-        public ConfigManager(DiscordSocketClient client)
+        public ConfigManager(DiscordSocketClient client, AuthTokenManager token)
         {
             _client = client;
+            _token  = token;
         }
 
         // channels used for configuration
@@ -64,13 +66,25 @@ namespace MudaeFarm
             var measure = new MeasureContext();
             var userId  = _client.CurrentUser.Id;
 
-            var infoChannelDescription = $"MudaeFarm Configuration Server {userId} - Do not delete this channel! (Version: v{UpdateChecker.CurrentVersion.ToString(3)})";
+            var infoChannelDescription = $"MudaeFarm: **{userId}**\nProfile: **{_token.Profile}**\nVersion: **v{UpdateChecker.CurrentVersion.ToString(3)}**";
 
             // find config guild
             foreach (var guild in _client.Guilds)
             {
-                if (guild.OwnerId == userId &&
-                    guild.TextChannels.Any(c => c.Name == "information" && c.Topic.StartsWith($"MudaeFarm Configuration Server {userId}")))
+                if (guild.OwnerId != userId)
+                    continue;
+
+                var topic = guild.TextChannels.FirstOrDefault(c => c.Name == "information")?.Topic ?? "";
+
+                if (topic.StartsWith($"MudaeFarm Configuration Server {userId}")) // old format
+                {
+                    _guild = guild;
+                    break;
+                }
+
+                var lines = topic.Split('\n');
+
+                if (lines.Contains($"MudaeFarm: **{userId}**") && lines.Contains($"Profile: **{_token.Profile}**"))
                 {
                     _guild = guild;
                     break;

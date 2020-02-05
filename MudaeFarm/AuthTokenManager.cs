@@ -11,7 +11,7 @@ namespace MudaeFarm
     /// </summary>
     public class AuthTokenManager
     {
-        static readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MudaeFarm", "auth_tokens.json");
+        static readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MudaeFarm", "profiles.json");
 
         // this is static so that the value is remembered across restarts
         static string _currentProfile = "default";
@@ -61,7 +61,7 @@ namespace MudaeFarm
         {
             try
             {
-                // if we can, migrate old "auth_token.txt" plain text file to new "auth_tokens.json"
+                // migrate old "auth_token.txt" plain text file
                 var path = Path.Combine(Path.GetDirectoryName(_path) ?? "", "auth_token.txt");
 
                 Token = File.ReadAllText(path);

@@ -31,15 +31,22 @@ namespace MudaeFarm
             {
                 var name = Profile;
 
-                do
+                // ReSharper disable once ForCanBeConvertedToForeach
+                for (var i = 0; i < _profiles.Count; i++)
                 {
                     _profiles.TryGetValue(name, out var value);
 
                     // inherited profiles
                     if (value != null && _profiles.ContainsKey(value))
+                    {
                         name = value;
+                        continue;
+                    }
+
+                    return value;
                 }
-                while (true);
+
+                throw new StackOverflowException("Detected circular references in inherited profiles.");
             }
 
             private set

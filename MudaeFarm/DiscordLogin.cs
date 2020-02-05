@@ -33,7 +33,7 @@ namespace MudaeFarm
 
             try
             {
-                await _client.LoginAsync(TokenType.User, _token.Value);
+                await _client.LoginAsync(TokenType.User, _token.Token);
                 await _client.StartAsync();
 
                 await ready.Task;

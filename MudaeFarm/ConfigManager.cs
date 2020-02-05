@@ -96,7 +96,7 @@ namespace MudaeFarm
                 {
                     Log.Warning("Initializing a new configuration server. This may take a while...");
 
-                    _guild = await _client.CreateGuildAsync("MudaeFarm", await _client.GetOptimalVoiceRegionAsync());
+                    _guild = await _client.CreateGuildAsync($"MudaeFarm ({_token.Profile})", await _client.GetOptimalVoiceRegionAsync());
 
                     // delete default channels
                     foreach (var c in await _guild.GetChannelsAsync())

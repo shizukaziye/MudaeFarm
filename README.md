@@ -52,6 +52,32 @@ You can edit JSON configuration messages and the bot will reload the changes aut
 - Miscellaneous
     - `auto_update`: Set to `false` to disable MudaeFarm from automatically updating itself.
 
+#### Profile management
+
+MudaeFarm supports "profiles" that can be used for authenticating as different users or to add multiple isolated configuration servers. Profiles are saved at `%localappdata%\MudaeFarm\profiles.json`.
+
+- You can configure profiles for two different accounts. e.g.
+
+```json
+{
+  "user A": "<user A's token>",
+  "user B": "<user B's token>"
+}
+```
+
+- You can make aliased profiles, which adds multiple configuration servers for one account. Aliased profiles will inherit the referenced profile's token. e.g.
+
+```json
+{
+  "claimer": "<user token>",
+  "claimer (only fav)": "claimer"
+}
+```
+
+- It is possible to start multiple instances of MudaeFarm with different profiles, as they will never interfere with each other.
+- If an account has multiple configurations, you must ensure that the configured servers and characters are mutually exclusive. Otherwise it may result in duplicate claims, race conditions or other undefined behavior.
+- You should avoid renaming profiles because profiles are linked to configuration servers by their name.
+
 ### Wishlists
 
 To configure character/anime wishlists, you can simply send the name of the character/anime in the wishlist channel, separated by individual messages.

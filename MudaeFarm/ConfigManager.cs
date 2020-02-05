@@ -139,8 +139,8 @@ namespace MudaeFarm
 
             Log.Info($"Configuration loaded in {measure}.");
 
-            // import old configuration (config.json)
-            var legacyCfg = LegacyConfig.Load();
+            // import legacy configuration (config.json)
+            /*var legacyCfg = LegacyConfig.Load();
 
             if (legacyCfg != null)
             {
@@ -161,7 +161,7 @@ namespace MudaeFarm
                     }
 
                 LegacyConfig.Delete();
-            }
+            }*/
 
             // events
             _client.MessageReceived += message => ReloadChannelAsync(message.Channel);

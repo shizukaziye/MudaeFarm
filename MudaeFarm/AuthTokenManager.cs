@@ -7,26 +7,46 @@ using Newtonsoft.Json;
 namespace MudaeFarm
 {
     /// <summary>
-    /// Loads the user token from disk.
+    /// Loads user tokens from the disk.
     /// </summary>
     public class AuthTokenManager
     {
         static readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MudaeFarm", "auth_tokens.json");
 
         // this is static so that the value is remembered across restarts
-        static string _currentUser = "default";
+        static string _currentProfile = "default";
 
-        readonly Dictionary<string, string> _users = new Dictionary<string, string>();
+        readonly Dictionary<string, string> _profiles = new Dictionary<string, string>();
 
-        public string Value
+        public string Profile
         {
-            get => _users.TryGetValue(_currentUser, out var value) ? value : null;
+            get => _currentProfile;
+
+            private set => _currentProfile = value;
+        }
+
+        public string Token
+        {
+            get
+            {
+                var name = Profile;
+
+                do
+                {
+                    _profiles.TryGetValue(name, out var value);
+
+                    // inherited profiles
+                    if (value != null && _profiles.ContainsKey(value))
+                        name = value;
+                }
+                while (true);
+            }
 
             private set
             {
-                _users[_currentUser] = value;
+                _profiles[Profile] = value;
 
-                File.WriteAllText(_path, JsonConvert.SerializeObject(_users, Formatting.Indented));
+                File.WriteAllText(_path, JsonConvert.SerializeObject(_profiles, Formatting.Indented));
             }
         }
 
@@ -37,7 +57,7 @@ namespace MudaeFarm
                 // if we can, migrate old "auth_token.txt" plain text file to new "auth_tokens.json"
                 var path = Path.Combine(Path.GetDirectoryName(_path) ?? "", "auth_token.txt");
 
-                Value = File.ReadAllText(path);
+                Token = File.ReadAllText(path);
 
                 File.Delete(path);
 
@@ -52,30 +72,30 @@ namespace MudaeFarm
             try
             {
                 // load tokens from filesystem
-                _users = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_path));
+                _profiles = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_path));
 
-                Log.Info($"User tokens loaded from: {_path}");
+                Log.Info($"Profiles loaded from: {_path}");
             }
             catch (IOException)
             {
-                Log.Info($"Failed to load user tokens from: {_path}");
+                Log.Info($"Failed to load profiles from: {_path}");
             }
 
-            while (!_users.ContainsKey(_currentUser))
+            while (!_profiles.ContainsKey(Profile))
             {
                 Console.WriteLine(
                     "\n" +
-                    "User profiles:\n" +
-                    string.Concat(_users.Keys.Select(s => $"  - {s}\n")));
+                    "Profiles:\n" +
+                    string.Concat(_profiles.Keys.Select(s => $"  - {s}\n")));
 
-                Console.Write("Choose user: ");
+                Console.Write("Choose profile: ");
 
-                _currentUser = Console.ReadLine() ?? "";
+                Profile = Console.ReadLine() ?? "";
             }
 
-            Log.Info($"Selected user: {_currentUser}");
+            Log.Info($"Selected profile: {Profile}");
 
-            if (string.IsNullOrEmpty(Value))
+            if (string.IsNullOrEmpty(Token))
             {
                 Console.WriteLine(
                     "\n" +
@@ -96,7 +116,7 @@ namespace MudaeFarm
 
                 Console.Write("Enter token: ");
 
-                Value = Console.ReadLine();
+                Token = Console.ReadLine();
 
                 // restart to remove inputted token from console
                 throw new DummyRestartException { Delayed = false };
@@ -105,7 +125,7 @@ namespace MudaeFarm
 
         public void Reset()
         {
-            Value = null;
+            Token = null;
 
             throw new DummyRestartException();
         }

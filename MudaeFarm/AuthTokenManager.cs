@@ -88,6 +88,9 @@ namespace MudaeFarm
                 Log.Info($"Failed to load profiles from: {_path}");
             }
 
+            if (_profiles.Count == 0)
+                Token = null;
+
             while (!_profiles.ContainsKey(Profile))
             {
                 Console.WriteLine(

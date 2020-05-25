@@ -5,7 +5,7 @@
 
 This is a simple bot that automatically rolls and claims Mudae waifus/husbandoes.
 
-# State of development
+## State of development
 
 `master` branch contains source code for MudaeFarm which is being completely rewritten from scratch, using a different Discord library called [Disqord](https://github.com/Quahu/Disqord). You can still access legacy code on the `legacy2` branch.
 

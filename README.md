@@ -1,14 +1,17 @@
 **WARNING**:
 > Selfbots are officially banned. It is considered an API abuse and is [no longer tolerated](https://support.discordapp.com/hc/en-us/articles/115002192352-Automated-user-accounts-self-bots-). By using this bot, *you are running a risk of an account ban*.
 
-**NOT MAINTAINED**:
-> - Issues are accepted, but it will likely take weeks or months to be resolved unless it is a critical issue that prevents the bot from working entirely.
-> - Feature requests are accepted, but issues will always take priority.
-> - If you are experienced in C# and Discord.Net and can dedicate some time into developing this bot, you are more than welcome to become a maintainer!
-
 # MudaeFarm
 
 This is a simple bot that automatically rolls and claims Mudae waifus/husbandoes.
+
+# State of development
+
+`master` branch contains source code for MudaeFarm which is being completely rewritten from scratch, using a different Discord library called [Disqord](https://github.com/Quahu/Disqord). You can still access legacy code on the `legacy2` branch.
+
+There are no releases of new MudaeFarm at the moment, and there is no estimated time of release. Stay tuned.
+
+The following guide applies to legacy MudaeFarm. The new version will aim to maintain as much backwards compatibility as possible.
 
 ## Setup
 
@@ -37,20 +40,20 @@ It may take a while for this server to be created.
 You can edit JSON configuration messages and the bot will reload the changes automatically.
 
 - General
-    - `enabled`: Whether MudaeFarm is enabled or not. Setting `false` will completely disable all MduaeFarm features.
+    - `enabled`: Whether MudaeFarm is enabled. Setting `false` will completely disable all MduaeFarm features.
     - `fallback_status`: If you are running MudaeFarm continuously, when your primary client is logged out, the Discord user status to be used. Possible values: `Online`, `Invisible`, `Idle`, `DoNotDisturb`.
     - `state_update_command`: See [Miscellaneous](#miscellaneous).
 - Claiming
-    - `enabled`: Whether autoclaiming is enabled or not.
+    - `enabled`: Whether autoclaiming is enabled.
     - `delay_seconds`: When receiving a roll that can be claimed, number of seconds to wait before claiming it.
     - `kakera_delay_seconds`: Same as `delay_seconds` but for kakeras.
     - `kakera_targets`: Which type of kakera should be claimed. Purple kakera will always be claimed regardless of this configuration.
     - `enable_custom_emotes`: Enables compatibility with servers that use custom emotes instead of the default heart emojis. This is not suggested unless necessary as it will bypass some internal emote safety checks.
 - Rolling
-    - `enabled`: Whether autorolling is enabled or not.
+    - `enabled`: Whether autorolling is enabled.
     - `command`: Command to use when rolling.
-    - `roll_with_no_claim`: Whether MudaeFarm should continue rolling even if it cannot claim any rolls or not.
-    - `daily_kakera_enabled`: Whether autorolling of daily kakeras is enabled or not.
+    - `roll_with_no_claim`: Whether MudaeFarm should continue rolling even if it cannot claim any rolls.
+    - `daily_kakera_enabled`: Whether autorolling of daily kakeras is enabled.
     - `daily_kakera_command`: Command to use when rolling daily kakeras.
     - `daily_kakera_then_state_update`: Whether state update should be performed after rolling daily kakeras.
     - `typing_delay_seconds`: Number of seconds to "type" the rolling command before sending it.

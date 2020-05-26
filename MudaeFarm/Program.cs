@@ -1,7 +1,11 @@
 ﻿using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Octokit;
 
 namespace MudaeFarm
 {
@@ -11,16 +15,38 @@ namespace MudaeFarm
 
         public static IHostBuilder CreateHostBuilder(string[] args)
             => Host.CreateDefaultBuilder(args)
-                   .ConfigureLogging(l =>
+                   .ConfigureLogging(logger =>
                     {
-                        if (args.Contains("--verbose"))
-                            l.SetMinimumLevel(LogLevel.Trace);
+                        if (args.Contains("-v") || args.Contains("--verbose"))
+                            logger.SetMinimumLevel(LogLevel.Trace);
 
-                        l.AddFile("log_{Date}.txt");
+                        logger.AddFile("log_{Date}.txt");
                     })
+                   .ConfigureAppConfiguration(config => config.Add(new DiscordConfigurationSource()))
                    .ConfigureServices((builder, services) =>
                     {
-                        /*services.AddHostedService<Worker>()*/
+                        // configuration
+                        services.AddSingleton((IConfigurationRoot) builder.Configuration)
+                                .Configure<GeneralOptions>(builder.Configuration.GetSection("General"))
+                                .Configure<ClaimingOptions>(builder.Configuration.GetSection("Claiming"))
+                                .Configure<RollingOptions>(builder.Configuration.GetSection("Rolling"))
+                                .Configure<CharacterWishlist>(builder.Configuration.GetSection("Character wishlist"))
+                                .Configure<AnimeWishlist>(builder.Configuration.GetSection("Anime wishlist"))
+                                .Configure<BotChannelList>(builder.Configuration.GetSection("Bot channels"));
+
+                        // discord client
+                        services.AddSingleton<IDiscordClientService, DiscordClientService>()
+                                .AddTransient<IHostedService>(s => s.GetService<IDiscordClientService>());
+
+                        services.AddSingleton<ICredentialManager, CredentialManager>();
+
+                        // state manager
+                        //services.AddSingleton<ITimersUpParser>();
+
+                        // auto updater
+                        services.AddHostedService<Updater>()
+                                .AddSingleton<HttpClient>()
+                                .AddSingleton(s => new GitHubClient(new ProductHeaderValue("MudaeFarm")));
                     });
     }
 }

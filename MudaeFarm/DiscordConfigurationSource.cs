@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -197,7 +196,14 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                                     continue;
                                 }
 
-                                _providers[section] = ConvertToProvider(data);
+                                _providers[section] = ConvertToProvider(JsonConvert.DeserializeObject(data, section.ToLowerInvariant() switch
+                                {
+                                    "general"  => typeof(GeneralOptions),
+                                    "claiming" => typeof(ClaimingOptions),
+                                    "rolling"  => typeof(RollingOptions),
+
+                                    _ => throw new NotSupportedException($"Unknown configuration section '{section}'.")
+                                }));
                             }
                         }
 
@@ -273,7 +279,8 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
 
         static IConfigurationProvider ConvertToProvider(object data)
         {
-            var provider = new JsonStreamConfigurationProvider(new JsonStreamConfigurationSource { Stream = new MemoryStream(Encoding.UTF8.GetBytes(data as string ?? JsonConvert.SerializeObject(data))) });
+            // use System.Text.Json because JsonStreamConfigurationProvider uses that to deserialize
+            var provider = new JsonStreamConfigurationProvider(new JsonStreamConfigurationSource { Stream = new MemoryStream(System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(data)) });
             provider.Load();
             return provider;
         }

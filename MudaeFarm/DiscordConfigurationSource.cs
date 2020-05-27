@@ -267,7 +267,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                 }
 
                 if (valid)
-                    _logger.LogDebug($"Reloaded configuration channel {channel.Id}: {channel.Name}");
+                    _logger.LogInformation($"Reloaded configuration channel {channel.Id}: {channel.Name}");
 
                 Interlocked.Exchange(ref _reloadToken, new ConfigurationReloadToken()).OnReload();
             }

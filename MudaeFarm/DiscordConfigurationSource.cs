@@ -37,6 +37,8 @@ namespace MudaeFarm
             _client      = client;
             _guild       = FindConfigurationGuild() ?? await CreateConfigurationGuild(cancellationToken);
 
+            var watch = Stopwatch.StartNew();
+
             foreach (var channel in await _guild.GetChannelsAsync())
             {
                 if (channel is IMessageChannel textChannel)
@@ -51,6 +53,8 @@ namespace MudaeFarm
             client.ChannelCreated += e => ReloadAsync(e.Channel, cancellationToken);
             client.ChannelDeleted += e => ReloadAsync(e.Channel, cancellationToken);
             client.ChannelUpdated += e => ReloadAsync(e.NewChannel, cancellationToken);
+
+            _logger.LogInformation($"Loaded all configuration in {watch.Elapsed.TotalSeconds:F}s.");
         }
 
         IGuild FindConfigurationGuild()
@@ -176,6 +180,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
             try
             {
                 var valid = true;
+                var watch = Stopwatch.StartNew();
 
                 switch (channel.Name)
                 {
@@ -267,7 +272,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                 }
 
                 if (valid)
-                    _logger.LogInformation($"Reloaded configuration channel {channel.Id}: {channel.Name}");
+                    _logger.LogDebug($"Reloaded configuration channel {channel.Id} in {watch.Elapsed.TotalMilliseconds:F}ms: {channel.Name}");
 
                 Interlocked.Exchange(ref _reloadToken, new ConfigurationReloadToken()).OnReload();
             }

@@ -57,7 +57,16 @@ namespace MudaeFarm
             }
         }
 
+        readonly ConcurrentDictionary<ulong, ClaimState> _states = new ConcurrentDictionary<ulong, ClaimState>();
+
+        sealed class ClaimState
+        {
+            public DateTime CooldownResetTime { get; set; }
+        }
+
+#pragma warning disable 1998
         async Task HandleMessageReceived(MessageReceivedEventArgs e)
+#pragma warning restore 1998
         {
             var options = _options.CurrentValue;
 
@@ -97,7 +106,15 @@ namespace MudaeFarm
                 return;
             }
 
-            //todo: check cooldown
+            // check cooldown
+            var state = _states.GetOrAdd(channel.Id, new ClaimState());
+            var now   = DateTime.Now;
+
+            if (now < state.CooldownResetTime)
+            {
+                _logger.LogWarning($"Ignoring character '{character}' in {logPlace} because of cooldown. Cooldown finishes in {state.CooldownResetTime - now}.");
+                return;
+            }
 
             _logger.LogWarning($"Attempting to claim character '{character}' in {logPlace}...");
 
@@ -121,7 +138,7 @@ namespace MudaeFarm
             }
         }
 
-        static readonly ConcurrentDictionary<ulong, PendingClaim> _pendingClaims = new ConcurrentDictionary<ulong, PendingClaim>();
+        readonly ConcurrentDictionary<ulong, PendingClaim> _pendingClaims = new ConcurrentDictionary<ulong, PendingClaim>();
 
         async Task HandleReactionAdded(ReactionAddedEventArgs e)
         {
@@ -160,6 +177,8 @@ namespace MudaeFarm
 
             if (_outputParser.TryParseClaimFailed(response.Content, out var resetTime))
             {
+                _states.GetOrAdd(message.ChannelId, new ClaimState()).CooldownResetTime = DateTime.Now + resetTime;
+
                 _logger.LogWarning($"Could not claim character '{character}' in {logPlace} due to cooldown. Cooldown finishes in {resetTime}.");
                 return;
             }

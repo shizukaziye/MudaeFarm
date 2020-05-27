@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -20,7 +21,7 @@ namespace MudaeFarm
                         if (args.Contains("-v") || args.Contains("--verbose"))
                             logger.SetMinimumLevel(LogLevel.Trace);
 
-                        logger.AddFile("log_{Date}.txt");
+                        logger.AddFile($"log_{DateTime.Now.ToString("u").Replace(':', '.')}.txt");
                     })
                    .ConfigureAppConfiguration(config => config.Add(new DiscordConfigurationSource()))
                    .ConfigureServices((builder, services) =>

@@ -60,7 +60,7 @@ namespace MudaeFarm
         public async Task<IUserMessage> ReactAsync(IUserMessage message, IEmoji emoji, CancellationToken cancellationToken = default)
         {
             var client  = await _discord.GetClientAsync();
-            var channel = (IMessageChannel) client.GetChannel(message.ChannelId);
+            var channel = client.GetChannel(message.ChannelId);
 
             var watch = Stopwatch.StartNew();
 
@@ -81,7 +81,7 @@ namespace MudaeFarm
             }
         }
 
-        async Task<IUserMessage> ReceiveAsync(DiscordClient client, IMessageChannel channel, CancellationToken cancellationToken = default)
+        async Task<IUserMessage> ReceiveAsync(DiscordClient client, IChannel channel, CancellationToken cancellationToken = default)
         {
             var response = new TaskCompletionSource<IUserMessage>();
 

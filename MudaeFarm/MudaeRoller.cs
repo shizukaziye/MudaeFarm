@@ -114,11 +114,9 @@ namespace MudaeFarm
         {
             if (!(client.GetChannel(channelItem.Id) is IMessageChannel channel))
             {
-                _logger.LogWarning($"Could not find channel {channelItem.Id} to autoroll in.");
+                _logger.LogWarning($"Could not find channel {channelItem.Id} to roll in.");
                 return;
             }
-
-            _logger.LogDebug($"Beginning autoroll in channel '{channel.Name}' ({channel.Id}).");
 
             await Task.WhenAll(RunRollAsync(client, channel, cancellationToken), RunDailyKakeraAsync(channel, cancellationToken));
         }
@@ -153,7 +151,7 @@ namespace MudaeFarm
                 }
                 catch (Exception e)
                 {
-                    _logger.LogWarning(e, $"Could not autoroll in {logPlace}.");
+                    _logger.LogWarning(e, $"Could not roll '{options.Command}' in {logPlace}.");
 
                     await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                     continue;
@@ -163,7 +161,7 @@ namespace MudaeFarm
 
                 if (response.Embeds.Count != 0)
                 {
-                    _logger.LogInformation($"Sent autoroll {rolls} of batch {batches} in {logPlace}.");
+                    _logger.LogInformation($"Sent roll {rolls} of batch {batches} in {logPlace}.");
 
                     await Task.Delay(TimeSpan.FromSeconds(options.IntervalSeconds), cancellationToken);
                     continue;
@@ -173,7 +171,7 @@ namespace MudaeFarm
                 {
                     resetTime += TimeSpan.FromMinutes(1);
 
-                    _logger.LogInformation($"Finished autoroll {rolls} of batch {batches} in {logPlace}. Next batch in {resetTime}.");
+                    _logger.LogInformation($"Finished roll {rolls} of batch {batches} in {logPlace}. Next batch in {resetTime}.");
                     rolls = 0;
                     ++batches;
 
@@ -185,7 +183,7 @@ namespace MudaeFarm
 
                 if (rolls >= 5)
                 {
-                    _logger.LogInformation($"Preemptively finished autoroll {rolls} of batch {batches} in {logPlace}. Next batch in an hour.");
+                    _logger.LogInformation($"Preemptively finished roll {rolls} of batch {batches} in {logPlace}. Next batch in an hour.");
                     rolls = 0;
                     ++batches;
 
@@ -222,7 +220,7 @@ namespace MudaeFarm
                 }
                 catch (Exception e)
                 {
-                    _logger.LogWarning(e, $"Could not autoroll daily kakera in {logPlace}.");
+                    _logger.LogWarning(e, $"Could not roll daily kakera in {logPlace}.");
 
                     await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                     continue;

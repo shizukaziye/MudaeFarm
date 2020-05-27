@@ -13,12 +13,6 @@ namespace MudaeFarm
         [JsonProperty("fallback_status")]
         public UserStatus FallbackStatus { get; set; } = UserStatus.Idle;
 
-        [JsonProperty("state_update_command")]
-        public string StateUpdateCommand { get; set; } = "$tu";
-
-        [JsonProperty("state_update_auto")]
-        public bool StateUpdateAuto { get; set; }
-
         [JsonProperty("auto_update")]
         public bool AutoUpdate { get; set; } = true;
     }
@@ -28,13 +22,13 @@ namespace MudaeFarm
         public const string Section = "Claiming";
 
         [JsonProperty("enabled")]
-        public bool Enabled { get; set; } = true;
+        public bool Enabled { get; set; }
 
         [JsonProperty("delay_seconds")]
-        public double Delay { get; set; } = 0.2;
+        public double DelaySeconds { get; set; } = 0.2;
 
         [JsonProperty("kakera_delay_seconds")]
-        public double KakeraDelay { get; set; } = 0.2;
+        public double KakeraDelaySeconds { get; set; } = 0.2;
 
         [JsonProperty("kakera_targets")]
         public HashSet<KakeraType> KakeraTargets { get; set; } = new HashSet<KakeraType>(Enum.GetValues(typeof(KakeraType)).Cast<KakeraType>());
@@ -53,9 +47,6 @@ namespace MudaeFarm
         [JsonProperty("command")]
         public string Command { get; set; } = "$w";
 
-        [JsonProperty("roll_with_no_claim")]
-        public bool RollWithNoClaim { get; set; }
-
         [JsonProperty("daily_kakera_enabled")]
         public bool DailyKakeraEnabled { get; set; }
 
@@ -63,10 +54,10 @@ namespace MudaeFarm
         public string DailyKakeraCommand { get; set; } = "$dk";
 
         [JsonProperty("typing_delay_seconds")]
-        public double TypingDelay { get; set; } = 0.3;
+        public double TypingDelaySeconds { get; set; } = 0.3;
 
-        [JsonProperty("interval_override_minutes")]
-        public double? IntervalOverrideMinutes { get; set; }
+        [JsonProperty("interval_seconds")]
+        public double IntervalSeconds { get; set; } = 0.5;
     }
 
     public class CharacterWishlist
@@ -80,7 +71,7 @@ namespace MudaeFarm
         }
 
         [JsonProperty("items")]
-        public List<Item> Items { get; set; }
+        public List<Item> Items { get; set; } = new List<Item>();
     }
 
     public class AnimeWishlist
@@ -97,7 +88,7 @@ namespace MudaeFarm
         }
 
         [JsonProperty("items")]
-        public List<Item> Items { get; set; }
+        public List<Item> Items { get; set; } = new List<Item>();
     }
 
     public class BotChannelList
@@ -113,7 +104,7 @@ namespace MudaeFarm
         }
 
         [JsonProperty("items")]
-        public List<Item> Items { get; set; }
+        public List<Item> Items { get; set; } = new List<Item>();
     }
 
     public enum ClaimReplyTiming
@@ -139,7 +130,7 @@ namespace MudaeFarm
         }
 
         [JsonProperty("items")]
-        public List<Item> Items { get; set; }
+        public List<Item> Items { get; set; } = new List<Item>();
     }
 
     public class UserWishlistList
@@ -152,10 +143,10 @@ namespace MudaeFarm
             public ulong Id { get; set; }
 
             [JsonProperty("excluding")]
-            public CharacterWishlist Excluding { get; set; }
+            public CharacterWishlist Excluding { get; set; } = new CharacterWishlist();
         }
 
         [JsonProperty("items")]
-        public List<Item> Items { get; set; }
+        public List<Item> Items { get; set; } = new List<Item>();
     }
 }

@@ -201,11 +201,11 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                                     continue;
                                 }
 
-                                _providers[section] = ConvertToProvider(JsonConvert.DeserializeObject(data, section.ToLowerInvariant() switch
+                                _providers[section] = ConvertToProvider(JsonConvert.DeserializeObject(data, section switch
                                 {
-                                    "general"  => typeof(GeneralOptions),
-                                    "claiming" => typeof(ClaimingOptions),
-                                    "rolling"  => typeof(RollingOptions),
+                                    GeneralOptions.Section  => typeof(GeneralOptions),
+                                    ClaimingOptions.Section => typeof(ClaimingOptions),
+                                    RollingOptions.Section  => typeof(RollingOptions),
 
                                     _ => throw new NotSupportedException($"Unknown configuration section '{section}'.")
                                 }));
@@ -220,7 +220,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                         await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
                             characters.Items.Add(DeserializeOrCreate<CharacterWishlist.Item>(message.Content, (x, v) => x.Name = v));
 
-                        _providers["Character wishlist"] = ConvertToProvider(characters);
+                        _providers[CharacterWishlist.Section] = ConvertToProvider(characters);
                         break;
 
                     case "wished-anime":
@@ -229,7 +229,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                         await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
                             anime.Items.Add(DeserializeOrCreate<AnimeWishlist.Item>(message.Content, (x, v) => x.Name = v));
 
-                        _providers["Anime wishlist"] = ConvertToProvider(anime);
+                        _providers[AnimeWishlist.Section] = ConvertToProvider(anime);
                         break;
 
                     case "bot-channels":
@@ -257,10 +257,16 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                             channels.Items.Add(DeserializeOrCreate<BotChannelList.Item>(message.Content, (x, v) => x.Id = ulong.Parse(v)));
                         }
 
-                        _providers["Bot channels"] = ConvertToProvider(channels);
+                        _providers[BotChannelList.Section] = ConvertToProvider(channels);
                         break;
 
                     case "claim-replies":
+                        var replies = new ClaimReplyList { Items = new List<ClaimReplyList.Item>() };
+
+                        await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
+                            replies.Items.Add(DeserializeOrCreate<ClaimReplyList.Item>(message.Content, (x, v) => x.Content = v));
+
+                        _providers[ClaimReplyList.Section] = ConvertToProvider(replies);
                         break;
 
                     case "wishlist-users":

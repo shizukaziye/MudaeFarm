@@ -8,6 +8,8 @@ namespace MudaeFarm
 {
     public class GeneralOptions
     {
+        public const string Section = "General";
+
         [JsonProperty("fallback_status")]
         public UserStatus FallbackStatus { get; set; } = UserStatus.Idle;
 
@@ -23,6 +25,8 @@ namespace MudaeFarm
 
     public class ClaimingOptions
     {
+        public const string Section = "Claiming";
+
         [JsonProperty("enabled")]
         public bool Enabled { get; set; } = true;
 
@@ -41,6 +45,8 @@ namespace MudaeFarm
 
     public class RollingOptions
     {
+        public const string Section = "Rolling";
+
         [JsonProperty("enabled")]
         public bool Enabled { get; set; }
 
@@ -65,6 +71,8 @@ namespace MudaeFarm
 
     public class CharacterWishlist
     {
+        public const string Section = "Wished characters";
+
         public class Item
         {
             [JsonProperty("name")]
@@ -77,6 +85,8 @@ namespace MudaeFarm
 
     public class AnimeWishlist
     {
+        public const string Section = "Wished anime";
+
         public class Item
         {
             [JsonProperty("name")]
@@ -92,6 +102,8 @@ namespace MudaeFarm
 
     public class BotChannelList
     {
+        public const string Section = "Bot channels";
+
         public class Item
         {
             [JsonProperty("id")]
@@ -102,12 +114,23 @@ namespace MudaeFarm
         public List<Item> Items { get; set; }
     }
 
+    public enum ClaimReplyTiming
+    {
+        After = 0,
+        Before = 1
+    }
+
     public class ClaimReplyList
     {
+        public const string Section = "Claim replies";
+
         public class Item
         {
             [JsonProperty("content")]
             public string Content { get; set; }
+
+            [JsonProperty("timing")]
+            public ClaimReplyTiming Timing { get; set; }
         }
 
         [JsonProperty("items")]

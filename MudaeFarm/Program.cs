@@ -27,12 +27,13 @@ namespace MudaeFarm
                     {
                         // configuration
                         services.AddSingleton((IConfigurationRoot) builder.Configuration)
-                                .Configure<GeneralOptions>(builder.Configuration.GetSection("General"))
-                                .Configure<ClaimingOptions>(builder.Configuration.GetSection("Claiming"))
-                                .Configure<RollingOptions>(builder.Configuration.GetSection("Rolling"))
-                                .Configure<CharacterWishlist>(builder.Configuration.GetSection("Character wishlist"))
-                                .Configure<AnimeWishlist>(builder.Configuration.GetSection("Anime wishlist"))
-                                .Configure<BotChannelList>(builder.Configuration.GetSection("Bot channels"));
+                                .Configure<GeneralOptions>(builder.Configuration.GetSection(GeneralOptions.Section))
+                                .Configure<ClaimingOptions>(builder.Configuration.GetSection(ClaimingOptions.Section))
+                                .Configure<RollingOptions>(builder.Configuration.GetSection(RollingOptions.Section))
+                                .Configure<CharacterWishlist>(builder.Configuration.GetSection(CharacterWishlist.Section))
+                                .Configure<AnimeWishlist>(builder.Configuration.GetSection(AnimeWishlist.Section))
+                                .Configure<BotChannelList>(builder.Configuration.GetSection(BotChannelList.Section))
+                                .Configure<ClaimReplyList>(builder.Configuration.GetSection(ClaimReplyList.Section));
 
                         // discord client
                         services.AddSingleton<IDiscordClientService, DiscordClientService>()

@@ -16,26 +16,29 @@ namespace MudaeFarm
 
         public static IHostBuilder CreateHostBuilder(string[] args)
             => Host.CreateDefaultBuilder(args)
-                   .ConfigureLogging(logger =>
+                   .ConfigureLogging((host, logger) =>
                     {
                         if (args.Contains("-v") || args.Contains("--verbose"))
                             logger.SetMinimumLevel(LogLevel.Trace);
+                        else
+                            logger.SetMinimumLevel(host.HostingEnvironment.IsDevelopment() ? LogLevel.Debug : LogLevel.Information)
+                                  .AddFilter(nameof(Disqord), LogLevel.Warning);
 
                         logger.AddFile($"log_{DateTime.Now.ToString("u").Replace(':', '.')}.txt");
                     })
                    .ConfigureAppConfiguration(config => config.Add(new DiscordConfigurationSource()))
-                   .ConfigureServices((builder, services) =>
+                   .ConfigureServices((host, services) =>
                     {
                         // configuration
-                        services.AddSingleton((IConfigurationRoot) builder.Configuration)
-                                .Configure<GeneralOptions>(builder.Configuration.GetSection(GeneralOptions.Section))
-                                .Configure<ClaimingOptions>(builder.Configuration.GetSection(ClaimingOptions.Section))
-                                .Configure<RollingOptions>(builder.Configuration.GetSection(RollingOptions.Section))
-                                .Configure<CharacterWishlist>(builder.Configuration.GetSection(CharacterWishlist.Section))
-                                .Configure<AnimeWishlist>(builder.Configuration.GetSection(AnimeWishlist.Section))
-                                .Configure<BotChannelList>(builder.Configuration.GetSection(BotChannelList.Section))
-                                .Configure<ClaimReplyList>(builder.Configuration.GetSection(ClaimReplyList.Section))
-                                .Configure<UserWishlistList>(builder.Configuration.GetSection(UserWishlistList.Section));
+                        services.AddSingleton((IConfigurationRoot) host.Configuration)
+                                .Configure<GeneralOptions>(host.Configuration.GetSection(GeneralOptions.Section))
+                                .Configure<ClaimingOptions>(host.Configuration.GetSection(ClaimingOptions.Section))
+                                .Configure<RollingOptions>(host.Configuration.GetSection(RollingOptions.Section))
+                                .Configure<CharacterWishlist>(host.Configuration.GetSection(CharacterWishlist.Section))
+                                .Configure<AnimeWishlist>(host.Configuration.GetSection(AnimeWishlist.Section))
+                                .Configure<BotChannelList>(host.Configuration.GetSection(BotChannelList.Section))
+                                .Configure<ClaimReplyList>(host.Configuration.GetSection(ClaimReplyList.Section))
+                                .Configure<UserWishlistList>(host.Configuration.GetSection(UserWishlistList.Section));
 
                         // discord client
                         services.AddSingleton<IDiscordClientService, DiscordClientService>()

@@ -1,8 +1,10 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Events;
+using Microsoft.Extensions.Logging;
 
 namespace MudaeFarm
 {
@@ -15,11 +17,13 @@ namespace MudaeFarm
     {
         readonly IDiscordClientService _discord;
         readonly IMudaeUserFilter _userFilter;
+        readonly ILogger<MudaeCommandHandler> _logger;
 
-        public MudaeCommandHandler(IDiscordClientService discord, IMudaeUserFilter userFilter)
+        public MudaeCommandHandler(IDiscordClientService discord, IMudaeUserFilter userFilter, ILogger<MudaeCommandHandler> logger)
         {
             _discord    = discord;
             _userFilter = userFilter;
+            _logger     = logger;
         }
 
         public async Task<IUserMessage> SendAsync(IMessageChannel channel, string command, CancellationToken cancellationToken = default)
@@ -48,7 +52,20 @@ namespace MudaeFarm
                 cancellationToken = linkedCts.Token;
 
                 await using (cancellationToken.Register(() => response.TrySetCanceled(cancellationToken)))
-                    return await response.Task;
+                {
+                    var watch = Stopwatch.StartNew();
+
+                    var message = await response.Task;
+
+                    _logger.LogDebug($"Sent command '{command}' in channel '{channel.Name}' ({channel.Id}) and received Mudae response '{message.Content}' ({message.Embeds.Count} embeds) in {watch.Elapsed.TotalMilliseconds}ms.");
+
+                    return message;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning($"Sent command '{command}' in channel '{channel.Name}' ({channel.Id}) but did not receive expected Mudae response.");
+                throw;
             }
             finally
             {

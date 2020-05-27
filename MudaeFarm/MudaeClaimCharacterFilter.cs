@@ -17,6 +17,8 @@ namespace MudaeFarm
             Name  = name?.Trim() ?? "";
             Anime = anime?.Trim() ?? "";
         }
+
+        public override string ToString() => $"{Name} ({Anime})";
     }
 
     public interface IMudaeClaimCharacterFilter

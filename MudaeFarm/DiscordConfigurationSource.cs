@@ -170,6 +170,8 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
             return t;
         }
 
+        static string GlobToRegex(string s) => $"^{Regex.Escape(s).Replace("\\*", ".*").Replace("\\?", ".")}$";
+
         static readonly Regex _sectionRegex = new Regex(@"^>\s*(?<section>.*?)\s*```json\s*(?={)(?<data>.*)(?<=})\s*```$", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
 
         async Task ReloadAsync(IChannel ch, CancellationToken cancellationToken = default)
@@ -218,7 +220,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                         var characters = new CharacterWishlist { Items = new List<CharacterWishlist.Item>() };
 
                         await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
-                            characters.Items.Add(DeserializeOrCreate<CharacterWishlist.Item>(message.Content, (x, v) => x.Name = v));
+                            characters.Items.Add(DeserializeOrCreate<CharacterWishlist.Item>(message.Content, (x, v) => x.Name = GlobToRegex(v)));
 
                         _providers[CharacterWishlist.Section] = CreateSectionProvider(characters);
                         break;
@@ -227,7 +229,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                         var anime = new AnimeWishlist { Items = new List<AnimeWishlist.Item>() };
 
                         await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
-                            anime.Items.Add(DeserializeOrCreate<AnimeWishlist.Item>(message.Content, (x, v) => x.Name = v));
+                            anime.Items.Add(DeserializeOrCreate<AnimeWishlist.Item>(message.Content, (x, v) => x.Name = GlobToRegex(v)));
 
                         _providers[AnimeWishlist.Section] = CreateSectionProvider(anime);
                         break;

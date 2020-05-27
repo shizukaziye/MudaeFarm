@@ -7,6 +7,8 @@ namespace MudaeFarm
     {
         bool TryParseTime(string s, out TimeSpan time);
         bool TryParseRollLimited(string s, out TimeSpan resetTime);
+        bool TryParseClaimSucceeded(string s, out string claimer, out string claimed);
+        bool TryParseClaimFailed(string s, out TimeSpan resetTime);
     }
 
     public class EnglishMudaeOutputParser : IMudaeOutputParser
@@ -19,21 +21,32 @@ namespace MudaeFarm
         {
             var match = _timeRegex.Match(s);
 
-            if (int.TryParse(match.Groups["minute"].Value, out var minutes))
-            {
-                // hour is optional
-                int.TryParse(match.Groups["hour"].Value, out var hours);
+            int.TryParse(match.Groups["minute"].Value, out var minutes);
+            int.TryParse(match.Groups["hour"].Value, out var hours);
 
-                time = new TimeSpan(hours, minutes, 0);
-                return true;
-            }
+            time = new TimeSpan(hours, minutes, 0);
 
-            time = default;
-            return false;
+            return match.Success;
         }
 
         static readonly Regex _rollLimitedRegex = new Regex(@"roulette\s+is\s+limited", _regexOptions);
 
         public bool TryParseRollLimited(string s, out TimeSpan resetTime) => _rollLimitedRegex.IsMatch(s) & TryParseTime(s, out resetTime);
+
+        static readonly Regex _claimSucceededRegex = new Regex(@"\*\*(?<claimer>.*)\*\*\s+and\s+\*\*(?<character>.*)\*\*.*married", _regexOptions);
+
+        public bool TryParseClaimSucceeded(string s, out string claimer, out string claimed)
+        {
+            var match = _claimSucceededRegex.Match(s);
+
+            claimer = match.Groups["claimer"].Value;
+            claimed = match.Groups["character"].Value;
+
+            return match.Success;
+        }
+
+        static readonly Regex _claimFailedRegex = new Regex(@"next\s+interval\s+begins", _regexOptions);
+
+        public bool TryParseClaimFailed(string s, out TimeSpan resetTime) => _claimFailedRegex.IsMatch(s) & TryParseTime(s, out resetTime);
     }
 }

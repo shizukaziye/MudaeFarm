@@ -131,6 +131,26 @@ namespace MudaeFarm
 
             [JsonProperty("timing")]
             public ClaimReplyTiming Timing { get; set; }
+
+            [JsonProperty("weight")]
+            public double Weight { get; set; } = 1;
+        }
+
+        [JsonProperty("items")]
+        public List<Item> Items { get; set; }
+    }
+
+    public class UserWishlistList
+    {
+        public const string Section = "User wishlists";
+
+        public class Item
+        {
+            [JsonProperty("id")]
+            public ulong Id { get; set; }
+
+            [JsonProperty("excluding")]
+            public CharacterWishlist Excluding { get; set; }
         }
 
         [JsonProperty("items")]

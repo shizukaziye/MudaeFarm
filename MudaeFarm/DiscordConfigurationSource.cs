@@ -201,7 +201,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                                     continue;
                                 }
 
-                                _providers[section] = ConvertToProvider(JsonConvert.DeserializeObject(data, section switch
+                                _providers[section] = CreateSectionProvider(JsonConvert.DeserializeObject(data, section switch
                                 {
                                     GeneralOptions.Section  => typeof(GeneralOptions),
                                     ClaimingOptions.Section => typeof(ClaimingOptions),
@@ -220,7 +220,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                         await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
                             characters.Items.Add(DeserializeOrCreate<CharacterWishlist.Item>(message.Content, (x, v) => x.Name = v));
 
-                        _providers[CharacterWishlist.Section] = ConvertToProvider(characters);
+                        _providers[CharacterWishlist.Section] = CreateSectionProvider(characters);
                         break;
 
                     case "wished-anime":
@@ -229,7 +229,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                         await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
                             anime.Items.Add(DeserializeOrCreate<AnimeWishlist.Item>(message.Content, (x, v) => x.Name = v));
 
-                        _providers[AnimeWishlist.Section] = ConvertToProvider(anime);
+                        _providers[AnimeWishlist.Section] = CreateSectionProvider(anime);
                         break;
 
                     case "bot-channels":
@@ -257,7 +257,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                             channels.Items.Add(DeserializeOrCreate<BotChannelList.Item>(message.Content, (x, v) => x.Id = ulong.Parse(v)));
                         }
 
-                        _providers[BotChannelList.Section] = ConvertToProvider(channels);
+                        _providers[BotChannelList.Section] = CreateSectionProvider(channels);
                         break;
 
                     case "claim-replies":
@@ -266,10 +266,35 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                         await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
                             replies.Items.Add(DeserializeOrCreate<ClaimReplyList.Item>(message.Content, (x, v) => x.Content = v));
 
-                        _providers[ClaimReplyList.Section] = ConvertToProvider(replies);
+                        _providers[ClaimReplyList.Section] = CreateSectionProvider(replies);
                         break;
 
                     case "wishlist-users":
+                        var wishlists = new UserWishlistList { Items = new List<UserWishlistList.Item>() };
+
+                        await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
+                        {
+                            if (ulong.TryParse(message.Content, out var id))
+                            {
+                                if (_client.GetUser(id) is IUser u)
+                                    await message.ModifyAsync(m => m.Content = $"<@{id}> - **{u.Name}#{u.Discriminator}**");
+
+                                wishlists.Items.Add(new UserWishlistList.Item { Id = id });
+                                continue;
+                            }
+
+                            var mentionedUser = message.GetUserIds().FirstOrDefault();
+
+                            if (mentionedUser != 0)
+                            {
+                                wishlists.Items.Add(new UserWishlistList.Item { Id = id });
+                                continue;
+                            }
+
+                            wishlists.Items.Add(DeserializeOrCreate<UserWishlistList.Item>(message.Content, (x, v) => x.Id = ulong.Parse(v)));
+                        }
+
+                        _providers[UserWishlistList.Section] = CreateSectionProvider(wishlists);
                         break;
 
                     default:
@@ -288,7 +313,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
             }
         }
 
-        static IConfigurationProvider ConvertToProvider(object data)
+        static IConfigurationProvider CreateSectionProvider(object data)
         {
             // use System.Text.Json because JsonStreamConfigurationProvider uses that to deserialize
             var provider = new JsonStreamConfigurationProvider(new JsonStreamConfigurationSource { Stream = new MemoryStream(System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(data)) });

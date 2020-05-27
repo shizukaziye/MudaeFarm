@@ -33,7 +33,8 @@ namespace MudaeFarm
                                 .Configure<CharacterWishlist>(builder.Configuration.GetSection(CharacterWishlist.Section))
                                 .Configure<AnimeWishlist>(builder.Configuration.GetSection(AnimeWishlist.Section))
                                 .Configure<BotChannelList>(builder.Configuration.GetSection(BotChannelList.Section))
-                                .Configure<ClaimReplyList>(builder.Configuration.GetSection(ClaimReplyList.Section));
+                                .Configure<ClaimReplyList>(builder.Configuration.GetSection(ClaimReplyList.Section))
+                                .Configure<UserWishlistList>(builder.Configuration.GetSection(UserWishlistList.Section));
 
                         // discord client
                         services.AddSingleton<IDiscordClientService, DiscordClientService>()

@@ -173,7 +173,16 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
             return t;
         }
 
-        static string GlobToRegex(string s) => $"^{Regex.Escape(s).Replace("\\*", ".*").Replace("\\?", ".")}$";
+        static string ConvertWishItemToRegex(string s)
+        {
+            // wish items are globs
+            s = $"^{Regex.Escape(s).Replace("\\*", ".*").Replace("\\?", ".")}$";
+
+            // replace spaces with space expressions
+            s = s.Replace(" ", "\\s+");
+
+            return s;
+        }
 
         static readonly Regex _sectionRegex = new Regex(@"^>\s*(?<section>.*?)\s*```json\s*(?={)(?<data>.*)(?<=})\s*```$", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
 
@@ -231,7 +240,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                         var characters = new CharacterWishlist();
 
                         await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
-                            characters.Items.Add(DeserializeOrCreate<CharacterWishlist.Item>(message.Content, (x, v) => x.Name = GlobToRegex(v)));
+                            characters.Items.Add(DeserializeOrCreate<CharacterWishlist.Item>(message.Content, (x, v) => x.Name = ConvertWishItemToRegex(v)));
 
                         SetSection(CharacterWishlist.Section, characters);
                         break;
@@ -240,7 +249,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                         var anime = new AnimeWishlist();
 
                         await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
-                            anime.Items.Add(DeserializeOrCreate<AnimeWishlist.Item>(message.Content, (x, v) => x.Name = GlobToRegex(v)));
+                            anime.Items.Add(DeserializeOrCreate<AnimeWishlist.Item>(message.Content, (x, v) => x.Name = ConvertWishItemToRegex(v)));
 
                         SetSection(AnimeWishlist.Section, anime);
                         break;

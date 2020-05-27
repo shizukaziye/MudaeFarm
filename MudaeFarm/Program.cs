@@ -48,11 +48,16 @@ namespace MudaeFarm
 
                         // mudae services
                         services.AddSingleton<IMudaeUserFilter, MudaeUserFilter>()
+                                .AddSingleton<IMudaeClaimCharacterFilter, MudaeClaimCharacterFilter>()
+                                .AddSingleton<IMudaeClaimEmojiFilter, MudaeClaimEmojiFilter>()
                                 .AddSingleton<IMudaeCommandHandler, MudaeCommandHandler>()
                                 .AddSingleton<IMudaeOutputParser, EnglishMudaeOutputParser>(); //todo: this should be configurable
 
                         services.AddSingleton<IMudaeRoller, MudaeRoller>()
                                 .AddTransient<IHostedService>(s => s.GetService<IMudaeRoller>());
+
+                        services.AddSingleton<IMudaeClaimer, MudaeClaimer>()
+                                .AddTransient<IHostedService>(s => s.GetService<IMudaeClaimer>());
 
                         // auto updater
                         services.AddHostedService<Updater>()

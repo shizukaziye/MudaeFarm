@@ -43,17 +43,19 @@ namespace MudaeFarm
             foreach (var channel in await _guild.GetChannelsAsync())
             {
                 if (channel is IMessageChannel textChannel)
-                    await ReloadAsync(textChannel, cancellationToken);
+                    await ReloadAsync(textChannel, false, cancellationToken);
             }
 
-            client.MessageReceived     += e => ReloadAsync(e.Message.Channel, cancellationToken);
-            client.MessageUpdated      += e => ReloadAsync(e.Channel, cancellationToken);
-            client.MessageDeleted      += e => ReloadAsync(e.Channel, cancellationToken);
-            client.MessagesBulkDeleted += e => ReloadAsync(e.Channel, cancellationToken);
+            NotifyReload(); // reload in bulk and notify once
 
-            client.ChannelCreated += e => ReloadAsync(e.Channel, cancellationToken);
-            client.ChannelDeleted += e => ReloadAsync(e.Channel, cancellationToken);
-            client.ChannelUpdated += e => ReloadAsync(e.NewChannel, cancellationToken);
+            client.MessageReceived     += e => ReloadAsync(e.Message.Channel, true, cancellationToken);
+            client.MessageUpdated      += e => ReloadAsync(e.Channel, true, cancellationToken);
+            client.MessageDeleted      += e => ReloadAsync(e.Channel, true, cancellationToken);
+            client.MessagesBulkDeleted += e => ReloadAsync(e.Channel, true, cancellationToken);
+
+            client.ChannelCreated += e => ReloadAsync(e.Channel, true, cancellationToken);
+            client.ChannelDeleted += e => ReloadAsync(e.Channel, true, cancellationToken);
+            client.ChannelUpdated += e => ReloadAsync(e.NewChannel, true, cancellationToken);
 
             _logger.LogInformation($"Loaded all configuration in {watch.Elapsed.TotalSeconds:F}s.");
         }
@@ -175,7 +177,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
 
         static readonly Regex _sectionRegex = new Regex(@"^>\s*(?<section>.*?)\s*```json\s*(?={)(?<data>.*)(?<=})\s*```$", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
 
-        async Task ReloadAsync(IChannel ch, CancellationToken cancellationToken = default)
+        async Task ReloadAsync(IChannel ch, bool notifyReload, CancellationToken cancellationToken = default)
         {
             if (!(ch is IMessageChannel channel && ch is IGuildChannel guildChannel && guildChannel.GuildId == _guild.Id))
                 return;
@@ -316,13 +318,18 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                 if (valid)
                     _logger.LogDebug($"Reloaded configuration channel '{channel.Name}' ({channel.Id}) in {watch.Elapsed.TotalMilliseconds:F}ms.");
 
-                Interlocked.Exchange(ref _reloadToken, new ConfigurationReloadToken()).OnReload();
+                if (notifyReload)
+                    NotifyReload();
             }
             catch (Exception e)
             {
                 _logger.LogWarning(e, $"Could not reload configuration channel '{channel.Name}' ({channel.Id}).");
             }
         }
+
+        void NotifyReload() => Interlocked.Exchange(ref _reloadToken, new ConfigurationReloadToken()).OnReload();
+
+        readonly ConcurrentDictionary<string, IConfigurationProvider> _providers = new ConcurrentDictionary<string, IConfigurationProvider>(StringComparer.OrdinalIgnoreCase);
 
         void SetSection(string section, object data)
         {
@@ -332,11 +339,9 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
 
             _providers[section] = provider;
 
-            if (_logger.IsEnabled(LogLevel.Debug))
+            if (_logger?.IsEnabled(LogLevel.Debug) == true) // null in ctor
                 _logger.LogDebug($"Set configuration section '{section}': {JsonConvert.SerializeObject(data)}");
         }
-
-        readonly ConcurrentDictionary<string, IConfigurationProvider> _providers = new ConcurrentDictionary<string, IConfigurationProvider>(StringComparer.OrdinalIgnoreCase);
 
         public bool TryGet(string key, out string value)
         {
@@ -351,10 +356,22 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
 
         public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath)
         {
-            // ReSharper disable once PossibleMultipleEnumeration
             foreach (var (section, provider) in _providers)
-            foreach (var key in provider.GetChildKeys(earlierKeys, parentPath))
-                yield return $"{section}:{key}";
+            {
+                if (!parentPath.StartsWith(section, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var nestedPath = parentPath.Substring(section.Length).TrimStart(':');
+
+                if (nestedPath.Length == 0)
+                    nestedPath = null;
+
+                foreach (var key in provider.GetChildKeys(Enumerable.Empty<string>(), nestedPath))
+                    yield return key;
+            }
+
+            foreach (var key in earlierKeys)
+                yield return key;
         }
 
         ConfigurationReloadToken _reloadToken = new ConfigurationReloadToken();

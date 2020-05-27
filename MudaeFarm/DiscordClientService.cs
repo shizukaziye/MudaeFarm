@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
@@ -50,6 +51,8 @@ namespace MudaeFarm
             {
                 try
                 {
+                    _logger.LogWarning($"Logged in as {client.CurrentUser}.");
+
                     foreach (var provider in _configuration.Providers)
                     {
                         if (provider is DiscordConfigurationProvider discordProvider)
@@ -91,8 +94,16 @@ namespace MudaeFarm
 
             public event EventHandler<MessageLoggedEventArgs> MessageLogged;
 
+            static readonly Dictionary<string, string[]> _ignoredLogs = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Gateway"] = new[] { "SESSIONS_REPLACE" }
+            };
+
             public void Log(object sender, MessageLoggedEventArgs e)
             {
+                if (_ignoredLogs.TryGetValue(e.Source, out var ignored) && Array.FindIndex(ignored, e.Message.Contains) != -1)
+                    return;
+
                 MessageLogged?.Invoke(sender, e);
 
                 var level = e.Severity switch

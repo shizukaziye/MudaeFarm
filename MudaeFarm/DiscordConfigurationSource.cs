@@ -94,7 +94,7 @@ namespace MudaeFarm
 
                 if (userId == _client.CurrentUser.Id && profile != null && profile.Equals(_credentials.SelectedProfile, StringComparison.OrdinalIgnoreCase))
                 {
-                    _logger.LogInformation($"Using configuration server {guild.Id}: {guild.Name}");
+                    _logger.LogInformation($"Using configuration server '{guild.Name}' ({guild.Id}).");
                     return guild;
                 }
             }
@@ -305,13 +305,13 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                 }
 
                 if (valid)
-                    _logger.LogDebug($"Reloaded configuration channel {channel.Id} in {watch.Elapsed.TotalMilliseconds:F}ms: {channel.Name}");
+                    _logger.LogDebug($"Reloaded configuration channel '{channel.Name}' ({channel.Id}) in {watch.Elapsed.TotalMilliseconds:F}ms.");
 
                 Interlocked.Exchange(ref _reloadToken, new ConfigurationReloadToken()).OnReload();
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, $"Could not reload configuration channel {channel.Id}: {channel.Name}");
+                _logger.LogWarning(e, $"Could not reload configuration channel '{channel.Name}' ({channel.Id}).");
             }
         }
 

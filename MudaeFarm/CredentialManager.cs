@@ -49,7 +49,7 @@ namespace MudaeFarm
                 SelectedProfile = Console.ReadLine() ?? "";
             }
 
-            _logger.LogInformation($"Selected profile: {SelectedProfile}");
+            _logger.LogInformation($"Selected profile '{SelectedProfile}'.");
 
             if (string.IsNullOrEmpty(token))
             {

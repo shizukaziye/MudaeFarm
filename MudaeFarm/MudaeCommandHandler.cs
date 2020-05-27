@@ -36,7 +36,7 @@ namespace MudaeFarm
 
             Task handleMessage(MessageReceivedEventArgs e)
             {
-                if (e.Message.Channel.Id == channel.Id && _userFilter.IsMudae(e.Message.Author) && e.Message is IUserMessage message)
+                if (e.Message is IUserMessage message && message.ChannelId == channel.Id && _userFilter.IsMudae(message.Author))
                     response.TrySetResult(message);
 
                 return Task.CompletedTask;

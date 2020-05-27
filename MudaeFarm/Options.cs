@@ -104,10 +104,12 @@ namespace MudaeFarm
     {
         public const string Section = "Bot channels";
 
-        public class Item
+        public class Item : IEquatable<Item>
         {
             [JsonProperty("id")]
             public ulong Id { get; set; }
+
+            public bool Equals(Item other) => other != null && Id == other.Id;
         }
 
         [JsonProperty("items")]

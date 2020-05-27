@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
@@ -94,16 +93,8 @@ namespace MudaeFarm
 
             public event EventHandler<MessageLoggedEventArgs> MessageLogged;
 
-            static readonly Dictionary<string, string[]> _ignoredLogs = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
-            {
-                ["Gateway"] = new[] { "SESSIONS_REPLACE" }
-            };
-
             public void Log(object sender, MessageLoggedEventArgs e)
             {
-                if (_ignoredLogs.TryGetValue(e.Source, out var ignored) && Array.FindIndex(ignored, e.Message.Contains) != -1)
-                    return;
-
                 MessageLogged?.Invoke(sender, e);
 
                 var level = e.Severity switch
@@ -117,6 +108,10 @@ namespace MudaeFarm
 
                     _ => LogLevel.None
                 };
+
+                // downgrade unknown dispatch logs to debug level
+                if (e.Source.Equals("Gateway", StringComparison.OrdinalIgnoreCase) && e.Message.Contains("Unknown dispatch", StringComparison.OrdinalIgnoreCase))
+                    level = level < LogLevel.Debug ? level : LogLevel.Debug;
 
                 _logger.Log(level, e.Exception, $"[{e.Source}] {e.Message}");
             }

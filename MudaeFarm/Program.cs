@@ -42,8 +42,9 @@ namespace MudaeFarm
 
                         services.AddSingleton<ICredentialManager, CredentialManager>();
 
-                        // state manager
-                        //services.AddSingleton<ITimersUpParser>();
+                        // mudae services
+                        services.AddSingleton<IMudaeUserFilter, MudaeUserFilter>()
+                                .AddSingleton<IMudaeCommandHandler, MudaeCommandHandler>();
 
                         // auto updater
                         services.AddHostedService<Updater>()

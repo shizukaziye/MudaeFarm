@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
@@ -20,26 +21,29 @@ namespace MudaeFarm
 
     public interface IMudaeClaimCharacterFilter
     {
-        bool IsWished(CharacterInfo character);
+        bool IsWished(CharacterInfo character, ulong[] wishedBy = null);
     }
 
     public class MudaeClaimCharacterFilter : IMudaeClaimCharacterFilter
     {
         readonly ILogger<MudaeClaimCharacterFilter> _logger;
 
-        public MudaeClaimCharacterFilter(IOptionsMonitor<CharacterWishlist> characterWishlist, IOptionsMonitor<AnimeWishlist> animeWishlist, ILogger<MudaeClaimCharacterFilter> logger)
+        public MudaeClaimCharacterFilter(IOptionsMonitor<CharacterWishlist> characterWishlist, IOptionsMonitor<AnimeWishlist> animeWishlist, IOptionsMonitor<UserWishlistList> wishlistList, ILogger<MudaeClaimCharacterFilter> logger)
         {
             _logger = logger;
 
             ResetNameMatch(characterWishlist.CurrentValue);
             ResetAnimeMatch(animeWishlist.CurrentValue);
+            ResetWishedByMatch(wishlistList.CurrentValue);
 
             characterWishlist.OnChange(ResetNameMatch);
             animeWishlist.OnChange(ResetAnimeMatch);
+            wishlistList.OnChange(ResetWishedByMatch);
         }
 
         NameMatch _name;
         AnimeMatch _anime;
+        WishedByMatch _wishedBy;
 
         void ResetNameMatch(CharacterWishlist wishlist)
         {
@@ -50,7 +54,7 @@ namespace MudaeFarm
             catch (Exception e)
             {
                 _name = default;
-                _logger.LogWarning(e, "Could not build regex for character wishlist.");
+                _logger.LogWarning(e, "Could not build character match.");
             }
         }
 
@@ -63,7 +67,20 @@ namespace MudaeFarm
             catch (Exception e)
             {
                 _anime = default;
-                _logger.LogWarning(e, "Could not build regex for anime wishlist.");
+                _logger.LogWarning(e, "Could not build anime match.");
+            }
+        }
+
+        void ResetWishedByMatch(UserWishlistList list)
+        {
+            try
+            {
+                _wishedBy = new WishedByMatch(list);
+            }
+            catch (Exception e)
+            {
+                _wishedBy = default;
+                _logger.LogWarning(e, "Could not build wishlist match.");
             }
         }
 
@@ -138,6 +155,47 @@ namespace MudaeFarm
             }
         }
 
-        public bool IsWished(CharacterInfo character) => _name.IsMatch(character) || _anime.IsMatch(character);
+        readonly struct WishedByMatch
+        {
+            readonly struct Item
+            {
+                readonly NameMatch _excludingCharacters;
+                readonly AnimeMatch _excludingAnime;
+
+                public Item(UserWishlistList.Item item)
+                {
+                    _excludingCharacters = item.ExcludingCharacters == null ? default : new NameMatch(item.ExcludingCharacters);
+                    _excludingAnime      = item.ExcludingAnime == null ? default : new AnimeMatch(item.ExcludingAnime);
+                }
+
+                public bool IsMatch(CharacterInfo character) => !_excludingCharacters.IsMatch(character) && !_excludingAnime.IsMatch(character);
+            }
+
+            readonly Dictionary<ulong, Item> _items;
+
+            public WishedByMatch(UserWishlistList list)
+            {
+                _items = new Dictionary<ulong, Item>(list.Items.Count);
+
+                foreach (var item in list.Items)
+                    _items[item.Id] = new Item(item);
+            }
+
+            public bool IsMatch(CharacterInfo character, ulong[] wishedBy)
+            {
+                if (wishedBy == null)
+                    return false;
+
+                foreach (var userId in wishedBy)
+                {
+                    if (_items.TryGetValue(userId, out var item) && item.IsMatch(character))
+                        return true;
+                }
+
+                return false;
+            }
+        }
+
+        public bool IsWished(CharacterInfo character, ulong[] wishedBy = null) => _name.IsMatch(character) || _anime.IsMatch(character) || _wishedBy.IsMatch(character, wishedBy);
     }
 }

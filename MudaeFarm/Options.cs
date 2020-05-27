@@ -143,7 +143,10 @@ namespace MudaeFarm
             public ulong Id { get; set; }
 
             [JsonProperty("excluding")]
-            public CharacterWishlist Excluding { get; set; } = new CharacterWishlist();
+            public CharacterWishlist ExcludingCharacters { get; set; } = new CharacterWishlist();
+
+            [JsonProperty("excluding_anime")]
+            public AnimeWishlist ExcludingAnime { get; set; } = new AnimeWishlist();
         }
 
         [JsonProperty("items")]

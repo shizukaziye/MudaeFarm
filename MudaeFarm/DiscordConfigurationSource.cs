@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace MudaeFarm
 {
@@ -136,8 +137,8 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
 
             await notice.PinAsync();
 
-            Task addSection<T>(string name) where T : new()
-                => information.SendMessageAsync($"> {name}\n```json\n{JsonConvert.SerializeObject(new T(), Formatting.Indented)}\n```");
+            Task addSection<T>(string section) where T : new()
+                => information.SendMessageAsync($"> {section}\n```json\n{JsonConvert.SerializeObject(new T(), Formatting.Indented, new StringEnumConverter())}\n```");
 
             await addSection<GeneralOptions>("General");
             await addSection<ClaimingOptions>("Claiming");
@@ -203,14 +204,22 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                                     continue;
                                 }
 
-                                _providers[section] = CreateSectionProvider(JsonConvert.DeserializeObject(data, section switch
+                                var dataObj = JsonConvert.DeserializeObject(data, section switch
                                 {
                                     GeneralOptions.Section  => typeof(GeneralOptions),
                                     ClaimingOptions.Section => typeof(ClaimingOptions),
                                     RollingOptions.Section  => typeof(RollingOptions),
 
                                     _ => throw new NotSupportedException($"Unknown configuration section '{section}'.")
-                                }));
+                                });
+
+                                // check data string and reserialized data; this will prettify the message
+                                var dataPretty = JsonConvert.SerializeObject(dataObj, Formatting.Indented, new StringEnumConverter());
+
+                                if (data != dataPretty)
+                                    await message.ModifyAsync(m => m.Content = $"> {section}\n```json\n{dataPretty}\n```");
+
+                                _providers[section] = CreateSectionProvider(dataObj);
                             }
                         }
 

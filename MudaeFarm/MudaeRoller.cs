@@ -125,6 +125,8 @@ namespace MudaeFarm
 
         async Task RunRollAsync(DiscordClient client, IMessageChannel channel, CancellationToken cancellationToken = default)
         {
+            var logPlace = $"channel '{channel.Name}' ({channel.Id})";
+
             var batches = 0;
             var rolls   = 0;
 
@@ -151,7 +153,7 @@ namespace MudaeFarm
                 }
                 catch (Exception e)
                 {
-                    _logger.LogWarning(e, $"Could not autoroll in channel '{channel.Name}' ({channel.Id}).");
+                    _logger.LogWarning(e, $"Could not autoroll in {logPlace}.");
 
                     await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                     continue;
@@ -161,7 +163,7 @@ namespace MudaeFarm
 
                 if (response.Embeds.Count != 0)
                 {
-                    _logger.LogInformation($"Sent autoroll {rolls} of batch {batches} in channel '{channel.Name}' ({channel.Id}).");
+                    _logger.LogInformation($"Sent autoroll {rolls} of batch {batches} in {logPlace}.");
 
                     await Task.Delay(TimeSpan.FromSeconds(options.IntervalSeconds), cancellationToken);
                     continue;
@@ -171,7 +173,7 @@ namespace MudaeFarm
                 {
                     resetTime += TimeSpan.FromMinutes(1);
 
-                    _logger.LogInformation($"Finished autoroll {rolls} of batch {batches} in channel '{channel.Name}' ({channel.Id}). Next batch in {resetTime}.");
+                    _logger.LogInformation($"Finished autoroll {rolls} of batch {batches} in {logPlace}. Next batch in {resetTime}.");
                     rolls = 0;
                     ++batches;
 
@@ -183,7 +185,7 @@ namespace MudaeFarm
 
                 if (rolls >= 5)
                 {
-                    _logger.LogInformation($"Preemptively finished autoroll {rolls} of batch {batches} in channel '{channel.Name}' ({channel.Id}). Next batch in an hour.");
+                    _logger.LogInformation($"Preemptively finished autoroll {rolls} of batch {batches} in {logPlace}. Next batch in an hour.");
                     rolls = 0;
                     ++batches;
 
@@ -195,6 +197,8 @@ namespace MudaeFarm
 
         async Task RunDailyKakeraAsync(IMessageChannel channel, CancellationToken cancellationToken = default)
         {
+            var logPlace = $"channel '{channel.Name}' ({channel.Id})";
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 var options = _options.CurrentValue;
@@ -218,7 +222,7 @@ namespace MudaeFarm
                 }
                 catch (Exception e)
                 {
-                    _logger.LogWarning(e, $"Could not autoroll daily kakera in channel '{channel.Name}' ({channel.Id}).");
+                    _logger.LogWarning(e, $"Could not autoroll daily kakera in {logPlace}.");
 
                     await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                     continue;
@@ -226,14 +230,14 @@ namespace MudaeFarm
 
                 if (_outputParser.TryParseTime(response.Content, out var resetTime))
                 {
-                    _logger.LogInformation($"Could not claim daily kakera in channel '{channel.Name}' ({channel.Id}). Next reset in {resetTime}.");
+                    _logger.LogInformation($"Could not claim daily kakera in {logPlace}. Next reset in {resetTime}.");
 
                     await Task.Delay(resetTime, cancellationToken);
                     continue;
                 }
 
                 // dk output doesn't really matter, because we'll have to wait a day anyway
-                _logger.LogInformation($"Claimed daily kakera in channel '{channel.Name}' ({channel.Id})");
+                _logger.LogInformation($"Claimed daily kakera in {logPlace}.");
 
                 await Task.Delay(TimeSpan.FromDays(1), cancellationToken);
             }

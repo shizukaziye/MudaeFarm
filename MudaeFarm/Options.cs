@@ -13,6 +13,9 @@ namespace MudaeFarm
         [JsonProperty("fallback_status")]
         public UserStatus FallbackStatus { get; set; } = UserStatus.Idle;
 
+        [JsonProperty("reply_typing_cpm")]
+        public double ReplyTypingCpm { get; set; } = 190;
+
         [JsonProperty("auto_update")]
         public bool AutoUpdate { get; set; } = true;
     }
@@ -113,23 +116,27 @@ namespace MudaeFarm
         public List<Item> Items { get; set; } = new List<Item>();
     }
 
-    public enum ClaimReplyTiming
+    public enum ReplyEvent
     {
-        After = 0,
-        Before = 1
+        ClaimSucceeded = 0,
+        ClaimFailed = 1,
+        BeforeClaim = 2,
+        KakeraSucceeded = 3,
+        KakeraFailed = 4,
+        BeforeKakera = 5
     }
 
-    public class ClaimReplyList
+    public class ReplyList
     {
-        public const string Section = "Claim replies";
+        public const string Section = "Replies";
 
         public class Item
         {
             [JsonProperty("content")]
             public string Content { get; set; }
 
-            [JsonProperty("timing")]
-            public ClaimReplyTiming Timing { get; set; }
+            [JsonProperty("event")]
+            public ReplyEvent Event { get; set; }
 
             [JsonProperty("weight")]
             public double Weight { get; set; } = 1;

@@ -283,12 +283,12 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                         break;
 
                     case "claim-replies":
-                        var replies = new ClaimReplyList();
+                        var replies = new ReplyList();
 
                         await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
-                            replies.Items.Add(DeserializeOrCreate<ClaimReplyList.Item>(message.Content, (x, v) => x.Content = v));
+                            replies.Items.Add(DeserializeOrCreate<ReplyList.Item>(message.Content, (x, v) => x.Content = v));
 
-                        SetSection(ClaimReplyList.Section, replies);
+                        SetSection(ReplyList.Section, replies);
                         break;
 
                     case "wishlist-users":

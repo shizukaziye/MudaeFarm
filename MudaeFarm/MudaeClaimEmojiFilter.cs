@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Disqord;
 using Microsoft.Extensions.Options;
 
@@ -7,6 +8,7 @@ namespace MudaeFarm
     public interface IMudaeClaimEmojiFilter
     {
         bool IsClaimEmoji(IEmoji emoji);
+        bool IsKakeraEmoji(IEmoji emoji, out KakeraType kakera);
     }
 
     public class MudaeClaimEmojiFilter : IMudaeClaimEmojiFilter
@@ -48,5 +50,19 @@ namespace MudaeFarm
 
             return Array.IndexOf(_heartEmojis, emoji) != -1;
         }
+
+        static readonly Dictionary<string, KakeraType> _kakeraMap = new Dictionary<string, KakeraType>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "kakerap", KakeraType.Purple },
+            { "kakera", KakeraType.Blue },
+            { "kakerat", KakeraType.Teal },
+            { "kakerag", KakeraType.Green },
+            { "kakeray", KakeraType.Yellow },
+            { "kakerao", KakeraType.Orange },
+            { "kakerar", KakeraType.Red },
+            { "kakeraw", KakeraType.Rainbow }
+        };
+
+        public bool IsKakeraEmoji(IEmoji emoji, out KakeraType kakera) => emoji is ICustomEmoji & _kakeraMap.TryGetValue(emoji.Name, out kakera);
     }
 }

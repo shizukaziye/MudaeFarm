@@ -30,7 +30,7 @@ namespace MudaeFarm
         {
             var selected = SelectItem(@event);
 
-            if (selected == null)
+            if (selected == null || selected.Content == ".") // "." represents not sending a reply
                 return;
 
             var message = ApplySubstitutions(selected.Content, substitutions);

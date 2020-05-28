@@ -43,8 +43,15 @@ namespace MudaeFarm
         {
             var client = await _discord.GetClientAsync();
 
+            Task handleReactionAdded(ReactionAddedEventArgs args)
+            {
+                // this needs to run in background because it waiting for Mudae output blocks message receive
+                var _ = Task.Run(() => HandleReactionAdded(args), stoppingToken);
+                return Task.CompletedTask;
+            }
+
             client.MessageReceived += HandleMessageReceived;
-            client.ReactionAdded   += HandleReactionAdded;
+            client.ReactionAdded   += handleReactionAdded;
 
             try
             {
@@ -53,7 +60,7 @@ namespace MudaeFarm
             finally
             {
                 client.MessageReceived -= HandleMessageReceived;
-                client.ReactionAdded   -= HandleReactionAdded;
+                client.ReactionAdded   -= handleReactionAdded;
             }
         }
 

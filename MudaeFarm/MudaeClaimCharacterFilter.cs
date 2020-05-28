@@ -9,8 +9,13 @@ namespace MudaeFarm
 {
     public readonly struct CharacterInfo
     {
+        static readonly Regex _bracketRegex = new Regex(@"(\(|\[).*(\)|\])", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
         public readonly string Name;
         public readonly string Anime;
+
+        public string DisplayName => _bracketRegex.Replace(Name, "").Trim();
+        public string DisplayAnime => _bracketRegex.Replace(Anime, "").Trim();
 
         public CharacterInfo(string name, string anime)
         {

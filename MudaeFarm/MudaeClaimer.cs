@@ -83,7 +83,7 @@ namespace MudaeFarm
             var embed = message.Embeds[0];
 
             // character must not belong to another user
-            if (embed.Footer?.Text.StartsWith("belongs", StringComparison.OrdinalIgnoreCase) != false)
+            if (embed.Footer?.Text.StartsWith("belongs", StringComparison.OrdinalIgnoreCase) == true)
                 return;
 
             // i forgot what this was about, but it existed in legacy MudaeFarm

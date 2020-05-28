@@ -76,7 +76,7 @@ namespace MudaeFarm
             {
                 current += item.Weight;
 
-                if (selected <= current)
+                if (selected < current)
                     return item;
             }
 

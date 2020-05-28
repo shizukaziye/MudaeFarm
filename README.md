@@ -1,71 +1,151 @@
 **WARNING**:
-> Selfbots are officially banned. It is considered an API abuse and is [no longer tolerated](https://support.discordapp.com/hc/en-us/articles/115002192352-Automated-user-accounts-self-bots-). By using this bot, *you are running a risk of an account ban*.
+> Selfbots are officially banned. It is considered an API abuse and is [no longer tolerated](https://support.discordapp.com/hc/en-us/articles/115002192352-Automated-user-accounts-self-bots-). By using this bot, *you are running a risk of having your account permanently banned from Discord*.
 
 # MudaeFarm
 
-This is a simple bot that automatically rolls and claims Mudae waifus/husbandoes.
-
-## State of development
-
-`master` branch contains source code for MudaeFarm which is being completely rewritten from scratch, using a different Discord library called [Disqord](https://github.com/Quahu/Disqord). You can still access legacy code on the `legacy2` branch.
-
-There are no releases of new MudaeFarm at the moment, and there is no estimated time of release. Stay tuned.
-
-The following guide applies to legacy MudaeFarm. The new version will aim to maintain as much backwards compatibility as possible.
+This is a ~~simple~~ bot that automatically rolls and claims Mudae waifus/husbandoes.
 
 ## Setup
 
-1. Download and extract the [latest release](https://github.com/chiyadev/MudaeFarm/releases/latest/download/MudaeFarm.zip).
-
+1. Download and extract the [latest release](https://github.com/chiyadev/mudaefarm/releases).
 2. Run `MudaeFarm.exe`.
 
-You can bypass the "Windows protected your PC" popup by clicking "More info". Alternatively, you may build this project yourself using the .NET Framework SDK. (I cannot afford a code signing certificate.)
+You can bypass the "Windows protected your PC" popup by clicking "More info". Alternatively, you may build this project yourself using the .NET Core SDK.
 
 3. Enter your user token. [How?](https://github.com/chiyadev/MudaeFarm/blob/master/User%20tokens.md)
 
-## Usage
+## Initialization
 
-### Initialization
-
-On initial run, MudaeFarm will create a dedicated server named `MudaeFarm` for bot configuration. You can edit your wishlists, claiming, rolling and other miscellaneous settings there.
+On initial run, MudaeFarm will create a dedicated server named `MudaeFarm` for configuration. In this server you can edit your character wishlists and configurations for claiming and rolling.
 
 It may take a while for this server to be created.
 
-**MudaeFarm is disabled on all servers by default.** You must copy the *ID of the channel* in which you want to enable MudaeFarm (usually the bot/spam channel of that server), and send that ID in `#bot-channels`.
+**MudaeFarm is disabled on all servers by default.** You must copy the *ID of the channel* in which you want to enable MudaeFarm (usually the bot/spam channel of that server), and send that ID in `#bot-channels`. See Configuration section below for details.
 
-**MudaeFarm requires you to have some kakera beforehand.** If you don't, get some using `$dk`.
+## Configuration
 
-### Configuration
+Configuration is written in JSON and stored in messages that you can edit at anytime. MudaeFarm will reload changes automatically. `#information` is the channel where most configurations are stored.
 
-You can edit JSON configuration messages and the bot will reload the changes automatically.
+### `#information`
 
-- General
-    - `enabled`: Whether MudaeFarm is enabled. Setting `false` will completely disable all MduaeFarm features.
-    - `fallback_status`: If you are running MudaeFarm continuously, when your primary client is logged out, the Discord user status to be used. Possible values: `Online`, `Invisible`, `Idle`, `DoNotDisturb`.
-    - `state_update_command`: See [Miscellaneous](#miscellaneous).
-- Claiming
+- **General**
+    - `fallback_status`: When MudaeFarm is running in the background, the user status to set on your account. Other Discord clients that set a higher value will override this. Accepted values: `online`, `invisible`, `idle`, `dnd`.
+    - `reply_typing_cpm`: When sending automatic replies, the number of characters to type in a minute i.e. "characters per minute". This is used to make automatic replies look realistically typed.
+    - `auto_update`: Whether to check for updates and automatically update MudaeFarm in the background.
+
+- **Claiming**
     - `enabled`: Whether autoclaiming is enabled.
-    - `delay_seconds`: When receiving a roll that can be claimed, number of seconds to wait before claiming it.
-    - `kakera_delay_seconds`: Same as `delay_seconds` but for kakeras.
-    - `kakera_targets`: Which type of kakera should be claimed. Purple kakera will always be claimed regardless of this configuration.
-    - `enable_custom_emotes`: Enables compatibility with servers that use custom emotes instead of the default heart emojis. This is not suggested unless necessary as it will bypass some internal emote safety checks.
-- Rolling
+    - `delay_seconds`: On finding a character that can be claimed, the number of seconds to wait before attempting to claiming it.
+    - `ignore_cooldown`: Whether to attempt to claim characters regardless of claim cooldown.
+    - `kakera_delay_seconds`: Same as `delay_seconds` but for kakera.
+    - `kakera_ignore_cooldown`: Same as `ignore_cooldown` but for kakera.
+    - `kakera_targets`: Specifies which types of kakera should be claimed.
+    - `enable_custom_emotes`: Enables compatibility with servers that use custom emotes instead of the default heart emoji. This will cause heart emoji safety code to be bypassed.
+
+- **Rolling**
     - `enabled`: Whether autorolling is enabled.
-    - `command`: Command to use when rolling.
-    - `roll_with_no_claim`: Whether MudaeFarm should continue rolling even if it cannot claim any rolls.
-    - `daily_kakera_enabled`: Whether autorolling of daily kakeras is enabled.
-    - `daily_kakera_command`: Command to use when rolling daily kakeras.
-    - `daily_kakera_then_state_update`: Whether state update should be performed after rolling daily kakeras.
-    - `typing_delay_seconds`: Number of seconds to "type" the rolling command before sending it.
-    - `interval_override_minutes`: See [Miscellaneous](#miscellaneous).
-- Miscellaneous
-    - `auto_update`: Set to `false` to disable MudaeFarm from automatically updating itself.
+    - `command`: Command to use for rolling.
+    - `daily_kakera_enabled`: Whether autorolling of daily kakera is enabled.
+    - `daily_kakera_command`: Command to use for rolling daily kakera.
+    - `typing_delay_seconds`: Number of seconds to type the rolling command before sending it.
+    - `interval_seconds`: Interval in seconds between each roll (not applicable to daily kakera).
 
-#### Profile management
+### `#wished-characters`
 
-MudaeFarm supports "profiles" that can be used for authenticating as different users or to add multiple isolated configuration servers. Profiles are saved at `%localappdata%\MudaeFarm\profiles.json`.
+This channel contains a list of characters that should be claimed. Rules:
 
-- You can configure profiles for two different accounts. e.g.
+- Each message contains one character name.
+- Character names are case-insensitive.
+- If a character name contains information in brackets for disambiguation, this must be included.
+- Basic glob expressions are supported. `?` for matching any single character. `*` for matching any zero-or-more characters.
+
+JSON objects are also accepted:
+
+- `name`: a regular expression (not glob expression) that matches character name.
+
+For example,
+
+- `goku` matches Goku and Goku only.
+- `* kurosaki` matches any character with name ending with "kurosaki" (Ichigo Kurosaki).
+- `kazuya (planetarian)` matches Kazuya from the anime Planetarian.
+- `{"name": "^goku$"}` matches Goku and Goku only.
+- `{"name": "^.*\s+kurosaki$"}` matches any character with name ending with "kurosaki" (Ichigo Kurosaki).
+- `{"name": "^kazuya\s+\(planetarian\)$"}` matches Kazuya from the anime Planetarian.
+
+### `#wished-anime`
+
+This channel contains a list of anime from which characters should be claimed. Rules are the same as `#wished-characters`.
+
+JSON objects are also accepted:
+
+- `name`: a regular expression (not glob expression) that matches anime name.
+- `excluding`: an array of JSON objects specified in `#wished-characters`. This acts like a blacklist of characters from a specific anime.
+
+For example,
+
+- `is the order a rabbit?` matches all characters from the anime Is the Order a Rabbit?
+- `{"name": "^is the order a rabbit\?$", "excluding": [{"name": "^chino\s+kafuu$}]}` matches all characters from the anime Is the Order a Rabbit? except Chino Kafuu.
+
+Note: Legacy versions of MudaeFarm supported the excluding bracket notation like `is the order a rabbit? (excluding: chino kafuu)`. This was not very flexible, and is not supported by current versions of MudaeFarm, so you must use JSON objects instead.
+
+### `#bot-channels`
+
+This channel contains a list of channels in which MudaeFarm should roll and claim. Rules:
+
+- Send channel ID only. This can be retrieved by enabling Discord developer mode and right-clicking on a channel.
+
+If MudaeFarm recognizes the ID, it will indicate success by replacing the message with a tagged channel.
+
+### `#claim-replies`
+
+This channel contains a list of messages that will be automatically sent after successfully claiming a character. This can make MudaeFarm look more human-like when used effectively. Rules:
+
+- Each message literally represents a message that will be sent.
+- One message in the entire channel history will be selected at random. All messages have a weight of `1` by default, which means all messages are equally likely to be selected.
+- Duplicate messages are accepted, increasing the probability of selecting such message.
+- A message containing just a dot `.` represents NOT sending anything.
+- A message containing `\n` will be splitted and sent separately, sequentially.
+- Basic variable substitution is supported, in the format `*variable*`.
+
+JSON objects are also accepted:
+
+- `content`: Content of the message to send. The same formatting rules outlined above apply.
+- `event`: Specifies exactly when the message will be sent. All non-JSON messages in this channel have `ClaimSucceeded` by default. It is not possible to change this field without using JSON. Accepted values: `ClaimSucceeded`, `ClaimFailed`, `BeforeClaim`, `KakeraSucceeded`, `KakeraFailed`, `BeforeKakera`.
+- `weight`: Changes the probability of this message being selected, with a higher value indicating higher probability. This is `1` by default.
+
+There are different variable substitutions available for events:
+
+- ClaimSucceeded, ClaimFailed, BeforeClaim
+    - `character`: Character's lowercase first name.
+    - `Character`: Character's first name.
+    - `character_full`: Character's lowercase full name.
+    - `Character_full`: Character's full name.
+    - `anime`: Character's lowercase anime.
+    - `Anime`: Character's anime.
+- KakeraSucceeded, KakeraFailed, BeforeKakera
+    - `kakera`: kakera color e.g. purple, blue, teal
+
+For example,
+
+- `I love *Character_full* in *anime*!` is converted to `I love Chino Kafuu in is the order a rabbit?!` and sent after successfully claiming a character.
+- `Wow!\n*Character* is really cute.` is converted to `Wow!\nChino is really cute.` and sent in two messages, `Wow!` and `Chino is really cute.`, after successfully claiming a character.
+- `{"content": "I hate *character*.", "weight": 0}` is converted to `{"content": "I hate chino.", "weight": 0}` but will never be sent because weight is zero.
+- `{"content": "I will claim a *kakera* kakera now.", "event": "BeforeKakera"}` is converted to `{"content": "I will claim a rainbow kakera now.", "event": "BeforeKakera"}` and sent before claiming a kakera.
+
+### `#wishlist-users`
+
+This channel contains a list of users whose wishlists will be used for claiming characters. Rules:
+
+- Send user ID only. This can be retrieved by enabling Discord developer mode and right-clicking on a user.
+- The target user's wishlist must be public for this to work. This feature relies on Mudae pinging users after a roll, like "Wished by @user1, @user2".
+
+It is possible to add your own ID in this channel. This effectively allows MudaeFarm use your public Mudae wishlist for claiming. MudaeFarm's own wishlist behavior will not be affected.
+
+### Configuration profiles
+
+MudaeFarm supports "profiles" that can be used for authenticating as a different user or to add multiple isolated configuration servers. This is useful for having different configurations for certain servers. Profiles are located at `%localappdata%\MudaeFarm\profiles.json`.
+
+You can configure profiles for two different accounts.
 
 ```json
 {
@@ -74,47 +154,28 @@ MudaeFarm supports "profiles" that can be used for authenticating as different u
 }
 ```
 
-- You can make aliased profiles, which adds multiple configuration servers for one account. Aliased profiles will inherit the referenced profile's token. e.g.
+You can make aliased profiles, which adds multiple configuration servers to an account. Aliased profiles will inherit the referenced profile's token.
 
 ```json
 {
-  "claimer": "<user token>",
-  "claimer (only fav)": "claimer"
+  "claimer (general)": "<user token>",
+  "claimer (only fav)": "claimer (general)"
 }
 ```
 
-- Profiles should not be named `default`, because default profiles will always be selected automatically.
-- When you are renaming a profile, you should also edit `#information` channel's topic to match the profile's name.
+Some notes about profiles:
 
+- When using custom profiles, you should remove the `default` profile, because it will always be selected automatically.
+- When you are renaming a profile, you must also edit `#information` channel's topic to match the profile's name.
 - It is possible to start multiple instances of MudaeFarm with different profiles, as they will never interfere with each other.
-- If an account has multiple configurations, you must ensure that the configured servers and characters are mutually exclusive. Otherwise it may result in duplicate claims, race conditions or other undefined behavior.
+- If an account has multiple configurations, it is your responsibility to ensure that the configured servers and characters are mutually exclusive. Otherwise, it may result in duplicate claims, race conditions or other undefined behavior.
 
-### Wishlists
+## Reporting bugs
 
-To configure character/anime wishlists, you can simply send the name of the character/anime in the wishlist channel, separated by individual messages.
+0. Before you decide to report a bug, try reading this guide again. You may have missed some critical steps while configuring this bot.
 
-Names are *case insensitive* and support basic glob expressions like `?` and `*`.
+1. Run this bot with verbose logging for at least an hour. Open the folder that contains `MudaeFarm.exe`, click Windows Explorer navigation bar, and enter `MudaeFarm.exe --verbose`. MudaeFarm will print much more logs than normal, and these logs are saved in the same folder.
 
-To remove a character/anime from the wishlist, delete the message itself.
+2. MudaeFarm does not generally log sensitive data, but if you consider your username#0000 or user/channel/guild IDs to be "sensitive" data, you can delete them.
 
-MudaeFarm wishlists are entirely separate from Mudae the wishlist and will not synchronize against each other. However, if your *Mudae* wishlist is public, you can use `#wishlist-users` where you can enter your own ID.
-
-- If a server has custom emotes instead of hearts for claiming, change `enable_custom_emotes` to `true` in the claiming configuration.
-- You can exclude specific characters for one anime. e.g. `is the order a rabbit? (excluding: kafuu chino)` will allow claiming every character from "Is the Order a Rabbit?" *except* "Kafuu Chino". Glob expressions will not work in this case.
-
-### Autoreply
-
-MudaeFarm can optionally send a reply message when a character is claimed. Selection is random.
-
-- `.` represents *not* sending a reply.
-- `\n` splits one selected reply into multiple messages.
-- `*Character*` is replaced by the character's first name. `*Character_full*` is replaced by the character's full name. Lowercase `character` makes the template lowercase.
-- `*Anime*` is replaced by the character's anime. Lowercase `anime` makes the template lowercase.
-
-e.g. `I love *character_full* in *Anime*` produces `I love chino kafuu in Is the Order a Rabbit?`.
-
-### Miscellaneous
-
-- MudaeFarm will periodically send `$tu` command to determine the claiming cooldown and rolling interval. To disable this behavior, change `state_update_command` to `""`. All subsequent matching rolls will be claimed regardless of cooldown and adaptive autorolling will be disabled.
-- Autorolling is adaptive to the reset time determined by `$tu`. Change `interval_override_minutes` to override the interval in *minutes*.
-- You can also change `state_update_command` to `$mu` or any other command that yields timer output. However, some parts of the bot may not work without required information from this command.
+3. [Create a GitHub issue](https://github.com/chiyadev/MudaeFarm/issues/new) with the relevant log file attached. Please do NOT post a screenshot of the log file or the console window. A screenshot of the configuration channel can be helpful, however. Describe the buggy behavior, the expected behavior, and (if you know) what can be done to fix it. This can make fixing the bug a lot easier for the developers.

@@ -105,7 +105,7 @@ namespace MudaeFarm
                 var state = _states.GetOrAdd(channel.Id, new ClaimState());
                 var now   = DateTime.Now;
 
-                if (now < state.KakeraResetTime)
+                if (!options.KakeraIgnoreCooldown && now < state.KakeraResetTime)
                     return;
 
                 _pendingClaims[message.Id] = new PendingClaim(logPlace, message, character, stopwatch, true);
@@ -126,7 +126,7 @@ namespace MudaeFarm
                 var state = _states.GetOrAdd(channel.Id, new ClaimState());
                 var now   = DateTime.Now;
 
-                if (now < state.CooldownResetTime)
+                if (!options.IgnoreCooldown && now < state.CooldownResetTime)
                 {
                     _logger.LogWarning($"Ignoring character '{character}' in {logPlace} because of cooldown. Cooldown finishes in {state.CooldownResetTime - now}.");
                     return;

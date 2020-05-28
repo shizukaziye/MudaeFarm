@@ -27,8 +27,14 @@ namespace MudaeFarm
         [JsonProperty("delay_seconds")]
         public double DelaySeconds { get; set; } = 0.2;
 
+        [JsonProperty("ignore_cooldown")]
+        public bool IgnoreCooldown { get; set; }
+
         [JsonProperty("kakera_delay_seconds")]
         public double KakeraDelaySeconds { get; set; } = 0.2;
+
+        [JsonProperty("kakera_ignore_cooldown")]
+        public bool KakeraIgnoreCooldown { get; set; }
 
         [JsonProperty("kakera_targets")]
         public HashSet<KakeraType> KakeraTargets { get; set; } = new HashSet<KakeraType>(Enum.GetValues(typeof(KakeraType)).Cast<KakeraType>());

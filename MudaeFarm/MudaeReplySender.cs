@@ -44,9 +44,12 @@ namespace MudaeFarm
             lock (_random)
                 typingTime *= 0.9 + 0.2 * _random.NextDouble();
 
-            await Task.Delay(typingTime, cancellationToken);
+            using (channel.Typing())
+            {
+                await Task.Delay(typingTime, cancellationToken);
 
-            await channel.SendMessageAsync(message);
+                await channel.SendMessageAsync(message);
+            }
         }
 
         ReplyList.Item SelectItem(ReplyEvent @event)

@@ -86,23 +86,19 @@ namespace MudaeFarm
             if (embed.Footer?.Text.StartsWith("belongs", StringComparison.OrdinalIgnoreCase) == true)
                 return;
 
-            // i forgot what this was about, but it existed in legacy MudaeFarm
-            if (embed.Author != null)
-                return;
-
             var description = embed.Description.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
             // ignore $im messages
             if (description.Any(l => l.StartsWith("claims:", StringComparison.OrdinalIgnoreCase) || l.StartsWith("likes:", StringComparison.OrdinalIgnoreCase)))
                 return;
 
-            var character = new CharacterInfo(embed.Title, description[0]);
+            var character = new CharacterInfo(embed.Author.Name, description[0]);
             var wishedBy  = message.Content.StartsWith("wished by", StringComparison.OrdinalIgnoreCase) ? message.GetUserIds().ToArray() : null;
 
             // must be wished or included in a user wishlist
             if (!_characterFilter.IsWished(character, wishedBy))
             {
-                _logger.LogInformation($"Ignoring character '{character}' in {logPlace} because not wished.");
+                _logger.LogInformation($"Ignoring character '{character}' in {logPlace} because they are not wished.");
                 return;
             }
 

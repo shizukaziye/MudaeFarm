@@ -38,17 +38,21 @@ namespace MudaeFarm
             if (message.Length == 0)
                 return;
 
-            var options    = _options.CurrentValue;
-            var typingTime = TimeSpan.FromMinutes(message.Length / options.ReplyTypingCpm);
+            var options = _options.CurrentValue;
 
-            lock (_random)
-                typingTime *= 0.9 + 0.2 * _random.NextDouble();
-
-            using (channel.Typing())
+            foreach (var part in message.Split("\\n", StringSplitOptions.RemoveEmptyEntries)) // literal "\n" splits a message into multiple messages
             {
-                await Task.Delay(typingTime, cancellationToken);
+                var typingTime = TimeSpan.FromMinutes(part.Length / options.ReplyTypingCpm);
 
-                await channel.SendMessageAsync(message);
+                lock (_random)
+                    typingTime *= 0.9 + 0.2 * _random.NextDouble();
+
+                using (channel.Typing())
+                {
+                    await Task.Delay(typingTime, cancellationToken);
+
+                    await channel.SendMessageAsync(part);
+                }
             }
         }
 

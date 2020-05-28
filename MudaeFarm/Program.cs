@@ -37,7 +37,7 @@ namespace MudaeFarm
                                 .Configure<CharacterWishlist>(host.Configuration.GetSection(CharacterWishlist.Section))
                                 .Configure<AnimeWishlist>(host.Configuration.GetSection(AnimeWishlist.Section))
                                 .Configure<BotChannelList>(host.Configuration.GetSection(BotChannelList.Section))
-                                .Configure<ClaimReplyList>(host.Configuration.GetSection(ClaimReplyList.Section))
+                                .Configure<ReplyList>(host.Configuration.GetSection(ReplyList.Section))
                                 .Configure<UserWishlistList>(host.Configuration.GetSection(UserWishlistList.Section));
 
                         // discord client
@@ -51,7 +51,8 @@ namespace MudaeFarm
                                 .AddSingleton<IMudaeClaimCharacterFilter, MudaeClaimCharacterFilter>()
                                 .AddSingleton<IMudaeClaimEmojiFilter, MudaeClaimEmojiFilter>()
                                 .AddSingleton<IMudaeCommandHandler, MudaeCommandHandler>()
-                                .AddSingleton<IMudaeOutputParser, EnglishMudaeOutputParser>(); //todo: this should be configurable
+                                .AddSingleton<IMudaeOutputParser, EnglishMudaeOutputParser>() //todo: this needs to be configurable
+                                .AddSingleton<IMudaeReplySender, MudaeReplySender>();
 
                         services.AddSingleton<IMudaeRoller, MudaeRoller>()
                                 .AddTransient<IHostedService>(s => s.GetService<IMudaeRoller>());

@@ -24,9 +24,10 @@ namespace MudaeFarm
         readonly IOptionsMonitor<BotChannelList> _channelList;
         readonly IMudaeCommandHandler _commandHandler;
         readonly IMudaeOutputParser _outputParser;
+        readonly IMudaeReplySender _replySender;
         readonly ILogger<MudaeClaimer> _logger;
 
-        public MudaeClaimer(IDiscordClientService discord, IMudaeUserFilter userFilter, IMudaeClaimCharacterFilter characterFilter, IMudaeClaimEmojiFilter claimEmojiFilter, IOptionsMonitor<ClaimingOptions> options, IOptionsMonitor<BotChannelList> channelList, IMudaeCommandHandler commandHandler, IMudaeOutputParser outputParser, ILogger<MudaeClaimer> logger)
+        public MudaeClaimer(IDiscordClientService discord, IMudaeUserFilter userFilter, IMudaeClaimCharacterFilter characterFilter, IMudaeClaimEmojiFilter claimEmojiFilter, IOptionsMonitor<ClaimingOptions> options, IOptionsMonitor<BotChannelList> channelList, IMudaeCommandHandler commandHandler, IMudaeOutputParser outputParser, IMudaeReplySender replySender, ILogger<MudaeClaimer> logger)
         {
             _discord          = discord;
             _userFilter       = userFilter;
@@ -36,6 +37,7 @@ namespace MudaeFarm
             _channelList      = channelList;
             _commandHandler   = commandHandler;
             _outputParser     = outputParser;
+            _replySender      = replySender;
             _logger           = logger;
         }
 
@@ -84,7 +86,7 @@ namespace MudaeFarm
 
             var stopwatch = Stopwatch.StartNew();
 
-            var channel  = e.Client.GetChannel(message.ChannelId);
+            var channel  = (IMessageChannel) e.Client.GetChannel(message.ChannelId);
             var guild    = channel is IGuildChannel gc ? e.Client.GetGuild(gc.GuildId) : null;
             var logPlace = $"channel '{channel.Name}' ({channel.Id}, server '{guild?.Name}')";
 
@@ -108,7 +110,7 @@ namespace MudaeFarm
                 if (!options.KakeraIgnoreCooldown && now < state.KakeraResetTime)
                     return;
 
-                _pendingClaims[message.Id] = new PendingClaim(logPlace, message, character, stopwatch, true);
+                _pendingClaims[message.Id] = new PendingClaim(logPlace, channel, message, character, stopwatch, true);
             }
 
             else
@@ -134,7 +136,7 @@ namespace MudaeFarm
 
                 _logger.LogWarning($"Attempting to claim character '{character}' in {logPlace}...");
 
-                _pendingClaims[message.Id] = new PendingClaim(logPlace, message, character, stopwatch, false);
+                _pendingClaims[message.Id] = new PendingClaim(logPlace, channel, message, character, stopwatch, false);
             }
 
             // purge old pending claims
@@ -150,16 +152,18 @@ namespace MudaeFarm
             public readonly DateTime CreatedTime;
 
             public readonly string LogPlace;
+            public readonly IMessageChannel Channel;
             public readonly IUserMessage Message;
             public readonly CharacterInfo Character;
             public readonly Stopwatch Stopwatch;
             public readonly bool OnlyKakera;
 
-            public PendingClaim(string logPlace, IUserMessage message, CharacterInfo character, Stopwatch stopwatch, bool onlyKakera)
+            public PendingClaim(string logPlace, IMessageChannel channel, IUserMessage message, CharacterInfo character, Stopwatch stopwatch, bool onlyKakera)
             {
                 CreatedTime = DateTime.Now;
 
                 LogPlace   = logPlace;
+                Channel    = channel;
                 Message    = message;
                 Character  = character;
                 Stopwatch  = stopwatch;
@@ -177,12 +181,13 @@ namespace MudaeFarm
                 return;
 
             var logPlace   = claim.LogPlace;
+            var channel    = claim.Channel;
             var message    = claim.Message;
             var character  = claim.Character;
             var stopwatch  = claim.Stopwatch;
             var onlyKakera = claim.OnlyKakera;
 
-            if (_claimEmojiFilter.IsKakeraEmoji(e.Emoji, out var kakera) && _pendingClaims.TryRemove(e.Message.Id, out claim))
+            if (_claimEmojiFilter.IsKakeraEmoji(e.Emoji, out var kakera) && _pendingClaims.TryRemove(e.Message.Id, out _))
             {
                 if (!options.KakeraTargets.Contains(kakera))
                 {
@@ -191,6 +196,14 @@ namespace MudaeFarm
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(options.KakeraDelaySeconds));
+
+                var replySubs = new
+                {
+                    kakera = kakera.ToString().ToLowerInvariant(),
+                    Kakera = kakera.ToString()
+                };
+
+                await _replySender.SendAsync(channel, ReplyEvent.BeforeKakera, replySubs);
 
                 IUserMessage response;
 
@@ -207,6 +220,8 @@ namespace MudaeFarm
                 if (_outputParser.TryParseKakeraSucceeded(response.Content, out var claimer, out _) && claimer.Equals(e.Client.CurrentUser.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     _logger.LogWarning($"Claimed {kakera} kakera on character '{character}' in {logPlace} in {stopwatch.Elapsed.TotalMilliseconds}ms.");
+
+                    await _replySender.SendAsync(channel, ReplyEvent.KakeraSucceeded, replySubs);
                     return;
                 }
 
@@ -215,15 +230,30 @@ namespace MudaeFarm
                     _states.GetOrAdd(message.ChannelId, new ClaimState()).KakeraResetTime = DateTime.Now + resetTime;
 
                     _logger.LogWarning($"Could not claim {kakera} kakera on character '{character}' in {logPlace} due to cooldown. Kakera is reset in {resetTime}.");
+
+                    await _replySender.SendAsync(channel, ReplyEvent.KakeraFailed, replySubs);
                     return;
                 }
 
                 _logger.LogWarning($"Probably claimed {kakera} kakera on character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy.");
             }
 
-            else if (!onlyKakera && _claimEmojiFilter.IsClaimEmoji(e.Emoji) && _pendingClaims.TryRemove(e.Message.Id, out claim))
+            else if (!onlyKakera && _claimEmojiFilter.IsClaimEmoji(e.Emoji) && _pendingClaims.TryRemove(e.Message.Id, out _))
             {
                 await Task.Delay(TimeSpan.FromSeconds(options.DelaySeconds));
+
+                var replySubs = new
+                {
+                    character      = character.DisplayName.Split(' ', 2)[0].ToLowerInvariant(),
+                    character_full = character.DisplayName.ToLowerInvariant(),
+                    Character      = character.DisplayName.Split(' ', 2)[0],
+                    Character_full = character.DisplayName,
+
+                    anime = character.DisplayAnime.ToLowerInvariant(),
+                    Anime = character.DisplayAnime
+                };
+
+                await _replySender.SendAsync(channel, ReplyEvent.BeforeClaim, replySubs);
 
                 IUserMessage response;
 
@@ -240,6 +270,8 @@ namespace MudaeFarm
                 if (_outputParser.TryParseClaimSucceeded(response.Content, out var claimer, out _) && claimer.Equals(e.Client.CurrentUser.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     _logger.LogWarning($"Claimed character '{character}' in {logPlace} in {stopwatch.Elapsed.TotalMilliseconds}ms.");
+
+                    await _replySender.SendAsync(channel, ReplyEvent.ClaimSucceeded, replySubs);
                     return;
                 }
 
@@ -248,10 +280,12 @@ namespace MudaeFarm
                     _states.GetOrAdd(message.ChannelId, new ClaimState()).CooldownResetTime = DateTime.Now + resetTime;
 
                     _logger.LogWarning($"Could not claim character '{character}' in {logPlace} due to cooldown. Cooldown finishes in {resetTime}.");
+
+                    await _replySender.SendAsync(channel, ReplyEvent.ClaimFailed, replySubs);
                     return;
                 }
 
-                _logger.LogWarning($"Probably claimed character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy. Not sending claim replies.");
+                _logger.LogWarning($"Probably claimed character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy.");
             }
         }
     }

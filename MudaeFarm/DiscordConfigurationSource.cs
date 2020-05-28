@@ -125,8 +125,8 @@ namespace MudaeFarm
                 await channel.DeleteAsync();
 
             var information = await guild.CreateTextChannelAsync("information", c => c.Topic = $"MudaeFarm: **{_client.CurrentUser.Id}**\nProfile: **{_credentials.SelectedProfile}**\nVersion: {Updater.CurrentVersion.ToString(3)}");
-            await guild.CreateTextChannelAsync("wished-characters", c => c.Topic = "Configure your character wishlist here. Wildcards characters are supported. Names are *case-insensitive*.");
-            await guild.CreateTextChannelAsync("wished-anime", c => c.Topic      = "Configure your anime wishlist here. Wildcards characters are supported. Names are *case-insensitive*.");
+            await guild.CreateTextChannelAsync("wished-characters", c => c.Topic = "Configure your character wishlist here. Glob expressions are supported. Names are *case-insensitive*.");
+            await guild.CreateTextChannelAsync("wished-anime", c => c.Topic      = "Configure your anime wishlist here. Glob expressions are supported. Names are *case-insensitive*.");
             await guild.CreateTextChannelAsync("bot-channels", c => c.Topic      = "Configure channels to enable MudaeFarm autorolling/claiming by sending the __channel ID__.");
             await guild.CreateTextChannelAsync("claim-replies", c => c.Topic     = "Configure automatic reply messages when you claim a character. One message is randomly selected. Refer to https://github.com/chiyadev/MudaeFarm for advanced templating.");
             await guild.CreateTextChannelAsync("wishlist-users", c => c.Topic    = "Configure wishlists of other users to be claimed by sending the __user ID__.");

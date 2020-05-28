@@ -133,8 +133,11 @@ namespace MudaeFarm
 
                 public Item(AnimeWishlist.Item item)
                 {
-                    _anime     = new Regex(item.Name, RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase);
-                    _excluding = item.Excluding == null ? default : new NameMatch(item.Excluding);
+                    _anime = new Regex(item.Name, RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase);
+
+                    _excluding = item.Excluding == null
+                        ? default
+                        : new NameMatch(new CharacterWishlist { Items = new List<CharacterWishlist.Item>(item.Excluding) });
                 }
 
                 public bool IsMatch(CharacterInfo character) => _anime?.IsMatch(character.Anime ?? "") == true && !_excluding.IsMatch(character);
@@ -171,8 +174,13 @@ namespace MudaeFarm
 
                 public Item(UserWishlistList.Item item)
                 {
-                    _excludingCharacters = item.ExcludingCharacters == null ? default : new NameMatch(item.ExcludingCharacters);
-                    _excludingAnime      = item.ExcludingAnime == null ? default : new AnimeMatch(item.ExcludingAnime);
+                    _excludingCharacters = item.ExcludingCharacters == null
+                        ? default
+                        : new NameMatch(new CharacterWishlist { Items = new List<CharacterWishlist.Item>(item.ExcludingCharacters) });
+
+                    _excludingAnime = item.ExcludingAnime == null
+                        ? default
+                        : new AnimeMatch(new AnimeWishlist { Items = new List<AnimeWishlist.Item>(item.ExcludingAnime) });
                 }
 
                 public bool IsMatch(CharacterInfo character) => !_excludingCharacters.IsMatch(character) && !_excludingAnime.IsMatch(character);

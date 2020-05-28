@@ -93,7 +93,7 @@ namespace MudaeFarm
             public string Name { get; set; }
 
             [JsonProperty("excluding")]
-            public CharacterWishlist Excluding { get; set; }
+            public CharacterWishlist.Item[] Excluding { get; set; }
         }
 
         [JsonProperty("items")]
@@ -156,10 +156,10 @@ namespace MudaeFarm
             public ulong Id { get; set; }
 
             [JsonProperty("excluding")]
-            public CharacterWishlist ExcludingCharacters { get; set; } = new CharacterWishlist();
+            public CharacterWishlist.Item[] ExcludingCharacters { get; set; }
 
             [JsonProperty("excluding_anime")]
-            public AnimeWishlist ExcludingAnime { get; set; } = new AnimeWishlist();
+            public AnimeWishlist.Item[] ExcludingAnime { get; set; }
         }
 
         [JsonProperty("items")]

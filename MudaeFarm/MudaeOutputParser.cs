@@ -9,6 +9,8 @@ namespace MudaeFarm
         bool TryParseRollLimited(string s, out TimeSpan resetTime);
         bool TryParseClaimSucceeded(string s, out string claimer, out string claimed);
         bool TryParseClaimFailed(string s, out TimeSpan resetTime);
+        bool TryParseKakeraSucceeded(string s, out string claimer, out int claimed);
+        bool TryParseKakeraFailed(string s, out TimeSpan resetTime);
     }
 
     public class EnglishMudaeOutputParser : IMudaeOutputParser
@@ -48,5 +50,21 @@ namespace MudaeFarm
         static readonly Regex _claimFailedRegex = new Regex(@"next\s+interval\s+begins", _regexOptions);
 
         public bool TryParseClaimFailed(string s, out TimeSpan resetTime) => _claimFailedRegex.IsMatch(s) & TryParseTime(s, out resetTime);
+
+        static readonly Regex _kakeraSucceededRegex = new Regex(@":kakera\w?:\s*\*\*(?<claimer>.*)\s+\+(?<claimed>\d+)", _regexOptions);
+
+        public bool TryParseKakeraSucceeded(string s, out string claimer, out int claimed)
+        {
+            var match = _kakeraSucceededRegex.Match(s);
+
+            claimer = match.Groups["claimer"].Value;
+            int.TryParse(match.Groups["claimed"].Value, out claimed);
+
+            return match.Success;
+        }
+
+        static readonly Regex _kakeraFailedRegex = new Regex(@"can't\s+react\s+to\s+a\s+kakera", _regexOptions);
+
+        public bool TryParseKakeraFailed(string s, out TimeSpan resetTime) => _kakeraFailedRegex.IsMatch(s) & TryParseTime(s, out resetTime);
     }
 }

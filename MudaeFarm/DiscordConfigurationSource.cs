@@ -179,7 +179,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
             s = $"^{Regex.Escape(s).Replace("\\*", ".*").Replace("\\?", ".")}$";
 
             // replace spaces with space expressions
-            s = s.Replace(" ", "\\s+");
+            s = s.Replace("\\ ", "\\s+");
 
             return s;
         }

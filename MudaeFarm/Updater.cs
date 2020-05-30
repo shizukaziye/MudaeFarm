@@ -123,23 +123,47 @@ namespace MudaeFarm
 
         public static async Task InstallUpdateAsync(string path, CancellationToken cancellationToken = default)
         {
+            if (!Directory.Exists(path))
+            {
+                Console.WriteLine($"Installation directory '{path}' does not exist.");
+                return;
+            }
+
             Console.WriteLine($"Installing update v{CurrentVersion.ToString(3)} to '{path}'...");
 
-            foreach (var file in new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).EnumerateFiles())
+            // delete all existing files except logs
+            foreach (var file in Directory.EnumerateFiles(path))
             {
                 for (var i = 0; i < 10; i++)
                 {
                     try
                     {
-                        file.CopyTo(Path.Combine(path, file.Name), true);
+                        if (!file.StartsWith("log", StringComparison.OrdinalIgnoreCase))
+                            File.Delete(file);
+
                         break;
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine($"Could not copy {file.Name}. {e}");
+                        Console.WriteLine($"Could not delete '{file}'. {e}");
 
                         await Task.Delay(TimeSpan.FromMilliseconds(200), cancellationToken);
                     }
+                }
+            }
+
+            foreach (var file in Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory))
+            {
+                try
+                {
+                    File.Copy(file, Path.Combine(path, Path.GetFileName(file)), true);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Could not copy '{file}'. {e}");
+
+                    await Task.Delay(TimeSpan.FromMilliseconds(200), cancellationToken);
                 }
             }
 

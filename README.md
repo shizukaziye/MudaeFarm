@@ -174,7 +174,7 @@ Some notes about profiles:
 
 0. Before you decide to report a bug, try reading this guide again. You may have missed some critical steps while configuring this bot.
 
-1. Run this bot with verbose logging for at least an hour. Open the folder that contains `MudaeFarm.exe`, click Windows Explorer navigation bar, and enter `MudaeFarm.exe --verbose`. MudaeFarm will print much more logs than normal, and these logs are saved in the same folder.
+1. Run this bot with verbose logging and collect logs. Open the folder that contains `MudaeFarm.exe`, click Windows Explorer navigation bar, and enter `MudaeFarm.exe --verbose`. MudaeFarm will print much more logs than normal, and these logs are saved in the same folder.
 
 2. MudaeFarm does not generally log sensitive data, but if you consider your username#0000 or user/channel/guild IDs to be "sensitive" data, you can delete them.
 

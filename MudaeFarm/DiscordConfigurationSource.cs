@@ -163,10 +163,15 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
             }
         }
 
+        static readonly JsonSerializerSettings _deserializeSettings = new JsonSerializerSettings
+        {
+            ObjectCreationHandling = ObjectCreationHandling.Replace
+        };
+
         static T DeserializeOrCreate<T>(string value, Action<T, string> configure) where T : class, new()
         {
             if (value.StartsWith('{'))
-                return JsonConvert.DeserializeObject<T>(value);
+                return JsonConvert.DeserializeObject<T>(value, _deserializeSettings);
 
             var t = new T();
             configure(t, value);
@@ -222,7 +227,7 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                                     RollingOptions.Section  => typeof(RollingOptions),
 
                                     _ => throw new NotSupportedException($"Unknown configuration section '{section}'.")
-                                });
+                                }, _deserializeSettings);
 
                                 // check data string and reserialized data; this will prettify the message
                                 var dataPretty = JsonConvert.SerializeObject(dataObj, Formatting.Indented, new StringEnumConverter());

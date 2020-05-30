@@ -12,7 +12,37 @@ namespace MudaeFarm
 {
     public static class Program
     {
-        public static Task Main(string[] args) => CreateHostBuilder(args).Build().RunAsync();
+        public static async Task Main(string[] args)
+        {
+            if (!await HandleArgsAsync(args))
+                await CreateHostBuilder(args).Build().RunAsync();
+        }
+
+        static async Task<bool> HandleArgsAsync(string[] args)
+        {
+            for (var i = 0; i < args.Length; i++)
+            {
+                switch (args[i].ToLowerInvariant())
+                {
+                    case "--kill":
+                        if (++i < args.Length && int.TryParse(args[i], out var pid))
+                            await Updater.KillProcessAsync(pid);
+
+                        break;
+
+                    case "--update":
+                        if (++i < args.Length)
+                            await Updater.InstallUpdateAsync(args[i]);
+
+                        break;
+
+                    default:
+                        continue;
+                }
+            }
+
+            return args.Length != 0;
+        }
 
         public static IHostBuilder CreateHostBuilder(string[] args)
             => Host.CreateDefaultBuilder(args)

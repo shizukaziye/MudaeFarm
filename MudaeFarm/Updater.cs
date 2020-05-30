@@ -94,8 +94,8 @@ namespace MudaeFarm
                         UseShellExecute = false,
                         ArgumentList =
                         {
-                            $"--kill={Process.GetCurrentProcess().Id}",
-                            $"--reinstall=\"{AppDomain.CurrentDomain.BaseDirectory}\""
+                            "--kill", Process.GetCurrentProcess().Id.ToString(),
+                            "--update", AppDomain.CurrentDomain.BaseDirectory
                         }
                     }
                 };
@@ -123,7 +123,7 @@ namespace MudaeFarm
 
         public static async Task InstallUpdateAsync(string path, CancellationToken cancellationToken = default)
         {
-            Console.WriteLine($"Installing update v{CurrentVersion.ToString(3)}...");
+            Console.WriteLine($"Installing update v{CurrentVersion.ToString(3)} to '{path}'...");
 
             foreach (var file in new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).EnumerateFiles())
             {

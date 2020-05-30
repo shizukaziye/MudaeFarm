@@ -140,8 +140,6 @@ namespace MudaeFarm
                     {
                         if (!file.StartsWith("log", StringComparison.OrdinalIgnoreCase))
                             File.Delete(file);
-
-                        break;
                     }
                     catch (Exception e)
                     {
@@ -157,7 +155,6 @@ namespace MudaeFarm
                 try
                 {
                     File.Copy(file, Path.Combine(path, Path.GetFileName(file)), true);
-                    break;
                 }
                 catch (Exception e)
                 {

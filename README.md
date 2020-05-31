@@ -54,7 +54,7 @@ Configuration is written in JSON and stored in messages that you can edit at any
 
 This channel contains a list of characters that should be claimed. Rules:
 
-- Each message contains one character name.
+- Each message contains one or more character names, separated by lines.
 - Character names are case-insensitive.
 - If a character name contains information in brackets for disambiguation, this must be included.
 - Basic glob expressions are supported. `?` for matching any single character. `*` for matching any zero-or-more characters.

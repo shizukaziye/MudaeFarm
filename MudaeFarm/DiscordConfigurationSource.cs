@@ -95,7 +95,7 @@ namespace MudaeFarm
                     }
                 }
 
-                if (userId == _client.CurrentUser.Id && profile != null && profile.Equals(_credentials.SelectedProfile, StringComparison.OrdinalIgnoreCase))
+                if (userId == _client.CurrentUser.Id && _credentials.SelectedProfile.Equals(profile, StringComparison.OrdinalIgnoreCase))
                 {
                     _logger.LogInformation($"Using configuration server '{guild.Name}' ({guild.Id}).");
                     return guild;

@@ -77,14 +77,16 @@ You can read the license terms at: https://github.com/chiyadev/MudaeFarm/blob/ma
                 File.WriteAllText(_path, JsonConvert.SerializeObject(profiles, Formatting.Indented));
             }
 
+            var selected = SelectedProfile;
+
             for (var i = 0; i < profiles.Count; i++)
             {
-                profiles.TryGetValue(SelectedProfile, out var value);
+                profiles.TryGetValue(selected, out var value);
 
                 // aliased profiles
                 if (value != null && profiles.ContainsKey(value))
                 {
-                    SelectedProfile = value;
+                    selected = value;
                     continue;
                 }
 

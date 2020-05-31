@@ -6,6 +6,7 @@ namespace MudaeFarm
     public interface IMudaeOutputParser
     {
         bool TryParseTime(string s, out TimeSpan time);
+        bool TryParseRollRemaining(string s, out int count);
         bool TryParseRollLimited(string s, out TimeSpan resetTime);
         bool TryParseClaimSucceeded(string s, out string claimer, out string claimed);
         bool TryParseClaimFailed(string s, out TimeSpan resetTime);
@@ -27,6 +28,17 @@ namespace MudaeFarm
             int.TryParse(match.Groups["hour"].Value, out var hours);
 
             time = new TimeSpan(hours, minutes, 0);
+
+            return match.Success;
+        }
+
+        static readonly Regex _rollRemainingRegex = new Regex(@"(?<remaining>\d+)\s+uses\s+left", _regexOptions);
+
+        public bool TryParseRollRemaining(string s, out int count)
+        {
+            var match = _rollRemainingRegex.Match(s);
+
+            int.TryParse(match.Groups["remaining"].Value, out count);
 
             return match.Success;
         }

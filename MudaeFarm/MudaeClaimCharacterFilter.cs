@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace MudaeFarm
 {
@@ -57,6 +58,7 @@ namespace MudaeFarm
             try
             {
                 _name = new NameMatch(wishlist);
+                _logger.LogDebug($"Loaded character wishlist: {JsonConvert.SerializeObject(wishlist)}");
             }
             catch (Exception e)
             {
@@ -70,6 +72,7 @@ namespace MudaeFarm
             try
             {
                 _anime = new AnimeMatch(wishlist);
+                _logger.LogDebug($"Loaded anime wishlist: {JsonConvert.SerializeObject(wishlist)}");
             }
             catch (Exception e)
             {
@@ -83,6 +86,7 @@ namespace MudaeFarm
             try
             {
                 _wishedBy = new WishedByMatch(list);
+                _logger.LogDebug($"Loaded user wishlist list: {JsonConvert.SerializeObject(list)}");
             }
             catch (Exception e)
             {

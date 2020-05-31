@@ -167,16 +167,27 @@ namespace MudaeFarm
                     continue;
                 }
 
-                if (response.Content.StartsWith($"**{client.CurrentUser.Name}**", StringComparison.OrdinalIgnoreCase) && _outputParser.TryParseRollLimited(response.Content, out var resetTime))
+                if (response.Content.StartsWith($"**{client.CurrentUser.Name}**", StringComparison.OrdinalIgnoreCase))
                 {
-                    resetTime += TimeSpan.FromMinutes(1);
+                    if (_outputParser.TryParseRollRemaining(response.Content, out var remaining))
+                    {
+                        _logger.LogInformation($"Sent roll {rolls} of batch {batches} in {logPlace}. {remaining} rolls are remaining.");
 
-                    _logger.LogInformation($"Finished roll {rolls} of batch {batches} in {logPlace}. Next batch in {resetTime}.");
-                    rolls = 0;
-                    ++batches;
+                        await Task.Delay(TimeSpan.FromSeconds(options.IntervalSeconds), cancellationToken);
+                        continue;
+                    }
 
-                    await Task.Delay(resetTime, cancellationToken);
-                    continue;
+                    if (_outputParser.TryParseRollLimited(response.Content, out var resetTime))
+                    {
+                        resetTime += TimeSpan.FromMinutes(1);
+
+                        _logger.LogInformation($"Finished roll {rolls} of batch {batches} in {logPlace}. Next batch in {resetTime}.");
+                        rolls = 0;
+                        ++batches;
+
+                        await Task.Delay(resetTime, cancellationToken);
+                        continue;
+                    }
                 }
 
                 _logger.LogWarning($"Could not handle Mudae response for command '{options.Command}'. Assuming a sane default of 5 rolls per hour ({rolls} right now). Response: {response.Content}");

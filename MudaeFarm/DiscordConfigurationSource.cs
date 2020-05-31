@@ -178,6 +178,14 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
             return t;
         }
 
+        static string[] SplitIfNotJson(string value)
+        {
+            if (value.StartsWith('{'))
+                return new[] { value };
+
+            return value.Split('\n');
+        }
+
         static string ConvertWishItemToRegex(string s)
         {
             // wish items are globs
@@ -245,7 +253,8 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                         var characters = new CharacterWishlist();
 
                         await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
-                            characters.Items.Add(DeserializeOrCreate<CharacterWishlist.Item>(message.Content, (x, v) => x.Name = ConvertWishItemToRegex(v)));
+                        foreach (var line in SplitIfNotJson(message.Content))
+                            characters.Items.Add(DeserializeOrCreate<CharacterWishlist.Item>(line, (x, v) => x.Name = ConvertWishItemToRegex(v)));
 
                         SetSection(CharacterWishlist.Section, characters);
                         break;
@@ -254,7 +263,8 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
                         var anime = new AnimeWishlist();
 
                         await foreach (var message in EnumerateMessagesAsync(channel, cancellationToken))
-                            anime.Items.Add(DeserializeOrCreate<AnimeWishlist.Item>(message.Content, (x, v) => x.Name = ConvertWishItemToRegex(v)));
+                        foreach (var line in SplitIfNotJson(message.Content))
+                            anime.Items.Add(DeserializeOrCreate<AnimeWishlist.Item>(line, (x, v) => x.Name = ConvertWishItemToRegex(v)));
 
                         SetSection(AnimeWishlist.Section, anime);
                         break;

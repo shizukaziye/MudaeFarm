@@ -20,6 +20,8 @@ namespace MudaeFarm
 
         static async Task<bool> HandleArgsAsync(string[] args)
         {
+            var shouldContinue = true;
+
             for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i].ToLowerInvariant())
@@ -31,6 +33,8 @@ namespace MudaeFarm
                         break;
 
                     case "--update":
+                        shouldContinue = false;
+
                         if (++i < args.Length)
                             await Updater.InstallUpdateAsync(args[i]);
 
@@ -41,7 +45,7 @@ namespace MudaeFarm
                 }
             }
 
-            return args.Length != 0;
+            return shouldContinue;
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args)

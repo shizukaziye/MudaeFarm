@@ -70,8 +70,8 @@ namespace MudaeFarm
 
         sealed class ClaimState
         {
-            public DateTime CooldownResetTime { get; set; }
-            public DateTime KakeraResetTime { get; set; }
+            public DateTime CooldownResetTime;
+            public DateTime KakeraResetTime;
         }
 
 #pragma warning disable 1998
@@ -237,6 +237,13 @@ namespace MudaeFarm
             {
                 var (logPlace, channel, message, character, stopwatch) = claim;
 
+                // check cooldown here (to allow skipping cooldown check for purple kakera)
+                var state = _states.GetOrAdd(channel.Id, new ClaimState());
+                var now   = DateTime.Now;
+
+                if (!options.KakeraIgnoreCooldown && now < state.KakeraResetTime && kakera != KakeraType.Purple)
+                    return;
+
                 if (!options.KakeraTargets.Contains(kakera))
                 {
                     _logger.LogInformation($"Ignoring {kakera} kakera on character '{character}' in {logPlace} because it is not targeted.");
@@ -275,7 +282,7 @@ namespace MudaeFarm
 
                 if (_outputParser.TryParseKakeraFailed(response.Content, out var resetTime))
                 {
-                    _states.GetOrAdd(message.ChannelId, new ClaimState()).KakeraResetTime = DateTime.Now + resetTime;
+                    state.KakeraResetTime = now + resetTime;
 
                     _logger.LogWarning($"Could not claim {kakera} kakera on character '{character}' in {logPlace} due to cooldown. Kakera is reset in {resetTime}.");
 

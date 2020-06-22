@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Disqord;
 using Newtonsoft.Json;
 
@@ -40,7 +39,7 @@ namespace MudaeFarm
         public bool KakeraIgnoreCooldown { get; set; }
 
         [JsonProperty("kakera_targets")]
-        public HashSet<KakeraType> KakeraTargets { get; set; } = new HashSet<KakeraType>(Enum.GetValues(typeof(KakeraType)).Cast<KakeraType>());
+        public HashSet<KakeraType> KakeraTargets { get; set; } = new HashSet<KakeraType>();
 
         [JsonProperty("enable_custom_emotes")]
         public bool CustomEmotes { get; set; }

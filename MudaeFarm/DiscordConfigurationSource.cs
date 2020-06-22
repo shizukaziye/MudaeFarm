@@ -139,11 +139,11 @@ Check <https://github.com/chiyadev/MudaeFarm> for detailed usage guidelines!
 
             await notice.PinAsync();
 
-            Task addSection<T>(string section) where T : new()
-                => information.SendMessageAsync($"> {section}\n```json\n{JsonConvert.SerializeObject(new T(), Formatting.Indented, new StringEnumConverter())}\n```");
+            Task addSection<T>(string section, T defaultValue = default) where T : class, new()
+                => information.SendMessageAsync($"> {section}\n```json\n{JsonConvert.SerializeObject(defaultValue ?? new T(), Formatting.Indented, new StringEnumConverter())}\n```");
 
             await addSection<GeneralOptions>("General");
-            await addSection<ClaimingOptions>("Claiming");
+            await addSection<ClaimingOptions>("Claiming", new ClaimingOptions { KakeraTargets = new HashSet<KakeraType>(Enum.GetValues(typeof(KakeraType)).Cast<KakeraType>()) });
             await addSection<RollingOptions>("Rolling");
 
             _logger.LogInformation($"Took {watch.Elapsed.TotalSeconds:F}s to initialize configuration server {guild.Id}.");

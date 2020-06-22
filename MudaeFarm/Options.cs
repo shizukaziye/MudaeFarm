@@ -43,6 +43,12 @@ namespace MudaeFarm
 
         [JsonProperty("enable_custom_emotes")]
         public bool CustomEmotes { get; set; }
+
+        /// <summary>
+        /// https://github.com/chiyadev/MudaeFarm/issues/152
+        /// </summary>
+        [JsonProperty("bypass_im_check_bug_152")]
+        public bool BypassImCheck { get; set; }
     }
 
     public class RollingOptions

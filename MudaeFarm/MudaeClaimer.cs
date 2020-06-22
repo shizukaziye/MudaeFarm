@@ -108,7 +108,7 @@ namespace MudaeFarm
             var character   = new CharacterInfo(embed.Author.Name, description[0]);
 
             // ignore $im messages
-            if (description.Any(l => l.StartsWith("claims:", StringComparison.OrdinalIgnoreCase) || l.StartsWith("likes:", StringComparison.OrdinalIgnoreCase)))
+            if (!options.BypassImCheck && description.Any(l => l.StartsWith("claims:", StringComparison.OrdinalIgnoreCase) || l.StartsWith("likes:", StringComparison.OrdinalIgnoreCase)))
                 return;
 
             _logger.LogDebug($"Detected character '{character}' in {logPlace}.");

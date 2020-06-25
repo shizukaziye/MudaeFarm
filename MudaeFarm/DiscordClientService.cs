@@ -114,6 +114,10 @@ namespace MudaeFarm
                     level = level < LogLevel.Debug ? level : LogLevel.Debug;
 
                 _logger.Log(level, e.Exception, $"[{e.Source}] {e.Message}");
+
+                // log a note about expired tokens: https://github.com/chiyadev/MudaeFarm/issues/153
+                if (e.Message.Contains("AuthenticationFailed", StringComparison.OrdinalIgnoreCase))
+                    _logger.Log(level, "Your Discord authentication token seems to have expired. Please try updating your token in \"profiles.json\" file in the folder \"%localappdata%\\MudaeFarm\".");
             }
         }
     }

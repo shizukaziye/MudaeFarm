@@ -6,7 +6,7 @@
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <PublishTrimmed>true</PublishTrimmed>
         <LangVersion>8</LangVersion>
-        <Version>4.0.4</Version>
+        <Version>4.0.4.1</Version>
         <Title>MudaeFarm</Title>
         <Authors>chiya.dev</Authors>
         <Copyright>Copyright (C) chiya.dev 2018-2020</Copyright>
@@ -19,11 +19,6 @@
         <PublishSingleFile>true</PublishSingleFile>
         <PublishTrimmed>true</PublishTrimmed>
     </PropertyGroup>
-
-    <ItemGroup>
-        <EmbeddedResource Include="*.dll"/>
-        <EmbeddedResource Include="*.exe"/>
-    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.4"/>

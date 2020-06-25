@@ -43,7 +43,7 @@ namespace MudaeFarm
                 if (_options.CurrentValue.AutoUpdate)
                     await CheckAsync(stoppingToken);
 
-                await Task.Delay(TimeSpan.FromHours(6), stoppingToken);
+                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
             }
         }
 

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Windows.UI.Notifications;
+using Windows.Data.Xml.Dom;
 
 namespace MudaeFarm
 {
@@ -181,9 +182,9 @@ namespace MudaeFarm
         async Task HandleReactionAdded(ReactionAddedEventArgs e)
         {
             var options = _options.CurrentValue;
-            var template = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastText01);
-            var textNodes = template.GetElementsByTagName("text");
-            var notifier = ToastNotificationManager.CreateToastNotifier("MuadeFarm");
+            XmlDocument toastXml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastText01);
+            XmlNodeList toastTextElements = toastXml.GetElementsByTagName("text");
+            ToastNotifier notifier = ToastNotificationManager.CreateToastNotifier("MuadeFarm");
 
             if (_claimEmojiFilter.IsClaimEmoji(e.Emoji) && _pendingClaims.TryRemove(e.Message.Id, out var claim))
             {
@@ -221,8 +222,8 @@ namespace MudaeFarm
 
                     await _replySender.SendAsync(channel, ReplyEvent.ClaimSucceeded, replySubs);
 
-                    textNodes.Item(0).InnerText = $"Claimed character '{character}' in {channel.Name}.";
-                    var claimedNotification = new ToastNotification(template);
+                    toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Claimed character '{character}' in {channel.Name}."));
+                    ToastNotification claimedNotification = new ToastNotification(toastXml);
                     notifier.Show(claimedNotification);
                     return;
                 }
@@ -237,8 +238,8 @@ namespace MudaeFarm
                     return;
                 }
 
-                textNodes.Item(0).InnerText = $"Probably claimed character '{character}' in {channel.Name}, but result could not be determined.";
-                var probablyNotification = new ToastNotification(template);
+                toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Probably claimed character '{character}' in {channel.Name}, but result could not be determined."));
+                ToastNotification probablyNotification = new ToastNotification(toastXml);
                 notifier.Show(probablyNotification);
                 _logger.LogWarning($"Probably claimed character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy.");
             }

@@ -25,8 +25,12 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3"/>
     <PackageReference Include="Octokit" Version="0.47.0"/>
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0"/>
-    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="*"/>
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="*" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
   </ItemGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOsPlatform('Windows'))">
+    <DefineConstants>_WINDOWS</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Disqord\src\Disqord\Disqord.csproj"/>

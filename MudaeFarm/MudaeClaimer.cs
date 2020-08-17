@@ -9,8 +9,10 @@ using Disqord.Events;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Windows.UI.Notifications;
-using Windows.Data.Xml.Dom;
+#if _WINDOWS
+    using Windows.UI.Notifications;
+    using Windows.Data.Xml.Dom;
+#endif
 
 namespace MudaeFarm
 {
@@ -182,9 +184,12 @@ namespace MudaeFarm
         async Task HandleReactionAdded(ReactionAddedEventArgs e)
         {
             var options = _options.CurrentValue;
-            XmlDocument toastXml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastText01);
-            XmlNodeList toastTextElements = toastXml.GetElementsByTagName("text");
-            ToastNotifier notifier = ToastNotificationManager.CreateToastNotifier("MuadeFarm");
+
+            #if _WINDOWS
+                XmlDocument toastXml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastText01);
+                XmlNodeList toastTextElements = toastXml.GetElementsByTagName("text");
+                ToastNotifier notifier = ToastNotificationManager.CreateToastNotifier("MuadeFarm");
+            #endif
 
             if (_claimEmojiFilter.IsClaimEmoji(e.Emoji) && _pendingClaims.TryRemove(e.Message.Id, out var claim))
             {
@@ -222,9 +227,12 @@ namespace MudaeFarm
 
                     await _replySender.SendAsync(channel, ReplyEvent.ClaimSucceeded, replySubs);
 
-                    toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Claimed character '{character}' in {channel.Name}."));
-                    ToastNotification claimedNotification = new ToastNotification(toastXml);
-                    notifier.Show(claimedNotification);
+                    #if _WINDOWS
+                        toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Claimed character '{character}' in {channel.Name}."));
+                        ToastNotification claimedNotification = new ToastNotification(toastXml);
+                        notifier.Show(claimedNotification);
+                    #endif
+
                     return;
                 }
 
@@ -238,9 +246,12 @@ namespace MudaeFarm
                     return;
                 }
 
-                toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Probably claimed character '{character}' in {channel.Name}, but result could not be determined."));
-                ToastNotification probablyNotification = new ToastNotification(toastXml);
-                notifier.Show(probablyNotification);
+                #if _WINDOWS
+                    toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Probably claimed character '{character}' in {channel.Name}, but result could not be determined."));
+                    ToastNotification probablyNotification = new ToastNotification(toastXml);
+                    notifier.Show(probablyNotification);
+                #endif
+
                 _logger.LogWarning($"Probably claimed character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy.");
             }
 

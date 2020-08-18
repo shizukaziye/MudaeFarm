@@ -41,6 +41,8 @@ Configuration is written in JSON and stored in messages that you can edit at any
     - `kakera_ignore_cooldown`: Same as `ignore_cooldown` but for kakera.
     - `kakera_targets`: Specifies which types of kakera should be claimed.
     - `enable_custom_emotes`: Enables compatibility with servers that use custom emotes instead of the default heart emoji. This will cause heart emoji safety code to be bypassed.
+    - `notify_char_claim`: Enables Windows 10 toast notifications when a character is claimed. (Make sure notifications are turned on in the Windows action center)
+    - `notify_kakera_claim`: Same as `notify_char_claim` but for kakera.
 
 - **Rolling**
     - `enabled`: Whether autorolling is enabled.

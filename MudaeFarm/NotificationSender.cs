@@ -27,7 +27,8 @@ namespace MudaeFarm
 
         public void SentToast(string s)
         {
-            if (!isWindows){
+            if (!isWindows)
+            {
                  _logger.LogWarning($"Can't sent a Windows toast notifcation on non-Windows OS.");
                 return;
             }

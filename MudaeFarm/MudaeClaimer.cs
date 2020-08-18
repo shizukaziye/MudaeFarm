@@ -228,7 +228,7 @@ namespace MudaeFarm
                     await _replySender.SendAsync(channel, ReplyEvent.ClaimSucceeded, replySubs);
 
                     #if _WINDOWS
-                        toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Claimed character '{character}' in {channel.Name}."));
+                        toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Claimed character '{character}' in {logPlace}."));
                         ToastNotification claimedNotification = new ToastNotification(toastXml);
                         notifier.Show(claimedNotification);
                     #endif
@@ -247,7 +247,7 @@ namespace MudaeFarm
                 }
 
                 #if _WINDOWS
-                    toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Probably claimed character '{character}' in {channel.Name}, but result could not be determined."));
+                    toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Probably claimed character '{character}' in {logPlace}, but result could not be determined."));
                     ToastNotification probablyNotification = new ToastNotification(toastXml);
                     notifier.Show(probablyNotification);
                 #endif
@@ -298,6 +298,12 @@ namespace MudaeFarm
                 {
                     _logger.LogWarning($"Claimed {kakera} kakera on character '{character}' in {logPlace} in {stopwatch.Elapsed.TotalMilliseconds}ms.");
 
+                    #if _WINDOWS
+                        toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Claimed {kakera} kakera in {logPlace}"));
+                        ToastNotification claimNotification = new ToastNotification(toastXml);
+                        notifier.Show(claimNotification);
+                    #endif
+
                     await _replySender.SendAsync(channel, ReplyEvent.KakeraSucceeded, replySubs);
                     return;
                 }
@@ -312,6 +318,12 @@ namespace MudaeFarm
                     return;
                 }
 
+
+                #if _WINDOWS
+                    toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Probably claimed {kakera} kakera in {logPlace}"));
+                    ToastNotification probablyNotification = new ToastNotification(toastXml);
+                    notifier.Show(probablyNotification);
+                #endif
                 _logger.LogWarning($"Probably claimed {kakera} kakera on character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy.");
             }
         }

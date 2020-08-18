@@ -228,7 +228,7 @@ namespace MudaeFarm
                     await _replySender.SendAsync(channel, ReplyEvent.ClaimSucceeded, replySubs);
 
                     #if _WINDOWS
-                        if (options.NotifyOnClaim) {
+                        if (options.NotifyOnChar) {
                         toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Claimed character '{character}' in {logPlace}."));
                         ToastNotification claimedNotification = new ToastNotification(toastXml);
                         notifier.Show(claimedNotification);
@@ -249,7 +249,7 @@ namespace MudaeFarm
                 }
 
                 #if _WINDOWS
-                    if (options.NotifyOnClaim) {
+                    if (options.NotifyOnChar) {
                         toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Probably claimed character '{character}' in {logPlace}, but result could not be determined."));
                         ToastNotification probablyNotification = new ToastNotification(toastXml);
                         notifier.Show(probablyNotification);

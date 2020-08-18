@@ -44,11 +44,11 @@ namespace MudaeFarm
         [JsonProperty("enable_custom_emotes")]
         public bool CustomEmotes { get; set; }
 
-        [JsonProperty("notify_on_kakera_windows")]
+        [JsonProperty("notify_on_kakera_claim_windows")]
         public bool NotifyOnKakera { get; set; }
 
-        [JsonProperty("notify_on_claim_windows")]
-        public bool NotifyOnClaim { get; set; }
+        [JsonProperty("notify_on_char_claim_windows")]
+        public bool NotifyOnChar { get; set; }
 
         /// <summary>
         /// https://github.com/chiyadev/MudaeFarm/issues/152

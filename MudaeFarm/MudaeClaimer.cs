@@ -223,7 +223,7 @@ namespace MudaeFarm
                     await _replySender.SendAsync(channel, ReplyEvent.ClaimSucceeded, replySubs);
 
                     if (isWindows && options.NotifyOnChar) {
-                        notification.sentToast($"Claimed character '{character}' in {logPlace}.");
+                        notification.SentToast($"Claimed character '{character}' in {logPlace}.");
                     }
 
                     return;
@@ -240,7 +240,7 @@ namespace MudaeFarm
                 }
 
                 if (isWindows && options.NotifyOnChar) {
-                    notification.sentToast($"Probably claimed character '{character}' in {logPlace}, but result could not be determined.");
+                    notification.SentToast($"Probably claimed character '{character}' in {logPlace}, but result could not be determined.");
                 }
 
                 _logger.LogWarning($"Probably claimed character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy.");
@@ -290,7 +290,7 @@ namespace MudaeFarm
                     _logger.LogWarning($"Claimed {kakera} kakera on character '{character}' in {logPlace} in {stopwatch.Elapsed.TotalMilliseconds}ms.");
 
                     if (isWindows && options.NotifyOnKakera) {
-                        notification.sentToast($"Claimed {kakera} kakera in {logPlace}");
+                        notification.SentToast($"Claimed {kakera} kakera in {logPlace}");
                     }
 
                     await _replySender.SendAsync(channel, ReplyEvent.KakeraSucceeded, replySubs);
@@ -309,7 +309,7 @@ namespace MudaeFarm
 
 
                 if (isWindows && options.NotifyOnKakera) {
-                    notification.sentToast($"Probably claimed {kakera} kakera in {logPlace}");
+                    notification.SentToast($"Probably claimed {kakera} kakera in {logPlace}");
                 }
 
                 _logger.LogWarning($"Probably claimed {kakera} kakera on character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy.");

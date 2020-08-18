@@ -28,10 +28,6 @@
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="*" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
   </ItemGroup>
 
-  <PropertyGroup Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-    <DefineConstants>_WINDOWS</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Disqord\src\Disqord\Disqord.csproj"/>
   </ItemGroup>

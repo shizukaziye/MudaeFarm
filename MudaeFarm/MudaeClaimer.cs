@@ -4,16 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using Disqord;
 using Disqord.Events;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-#if _WINDOWS
-    using Windows.UI.Notifications;
-    using Windows.Data.Xml.Dom;
-#endif
-
 namespace MudaeFarm
 {
     public interface IMudaeClaimer : IHostedService { }
@@ -29,9 +25,12 @@ namespace MudaeFarm
         readonly IMudaeCommandHandler _commandHandler;
         readonly IMudaeOutputParser _outputParser;
         readonly IMudaeReplySender _replySender;
+        readonly INotificationSender __notificationSender;
         readonly ILogger<MudaeClaimer> _logger;
+        readonly bool isWindows;
 
-        public MudaeClaimer(IDiscordClientService discord, IMudaeUserFilter userFilter, IMudaeClaimCharacterFilter characterFilter, IMudaeClaimEmojiFilter claimEmojiFilter, IOptionsMonitor<ClaimingOptions> options, IOptionsMonitor<BotChannelList> channelList, IMudaeCommandHandler commandHandler, IMudaeOutputParser outputParser, IMudaeReplySender replySender, ILogger<MudaeClaimer> logger)
+
+        public MudaeClaimer(IDiscordClientService discord, IMudaeUserFilter userFilter, IMudaeClaimCharacterFilter characterFilter, IMudaeClaimEmojiFilter claimEmojiFilter, IOptionsMonitor<ClaimingOptions> options, IOptionsMonitor<BotChannelList> channelList, IMudaeCommandHandler commandHandler, IMudaeOutputParser outputParser, IMudaeReplySender replySender, INotificationSender notificationSender, ILogger<MudaeClaimer> logger)
         {
             _discord          = discord;
             _userFilter       = userFilter;
@@ -43,6 +42,8 @@ namespace MudaeFarm
             _outputParser     = outputParser;
             _replySender      = replySender;
             _logger           = logger;
+            __notificationSender = notificationSender;
+            isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -143,7 +144,6 @@ namespace MudaeFarm
             }
 
             _logger.LogWarning($"Attempting to claim character '{character}' in {logPlace}...");
-
             _pendingClaims[message.Id] = new PendingClaim(logPlace, channel, message, character, stopwatch);
         }
 
@@ -184,12 +184,7 @@ namespace MudaeFarm
         async Task HandleReactionAdded(ReactionAddedEventArgs e)
         {
             var options = _options.CurrentValue;
-
-            #if _WINDOWS
-                XmlDocument toastXml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastText01);
-                XmlNodeList toastTextElements = toastXml.GetElementsByTagName("text");
-                ToastNotifier notifier = ToastNotificationManager.CreateToastNotifier("MuadeFarm");
-            #endif
+            var notification = __notificationSender;
 
             if (_claimEmojiFilter.IsClaimEmoji(e.Emoji) && _pendingClaims.TryRemove(e.Message.Id, out var claim))
             {
@@ -227,13 +222,9 @@ namespace MudaeFarm
 
                     await _replySender.SendAsync(channel, ReplyEvent.ClaimSucceeded, replySubs);
 
-                    #if _WINDOWS
-                        if (options.NotifyOnChar) {
-                        toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Claimed character '{character}' in {logPlace}."));
-                        ToastNotification claimedNotification = new ToastNotification(toastXml);
-                        notifier.Show(claimedNotification);
-                        }
-                    #endif
+                    if (isWindows && options.NotifyOnChar) {
+                        notification.sentToast($"Claimed character '{character}' in {logPlace}.");
+                    }
 
                     return;
                 }
@@ -248,13 +239,9 @@ namespace MudaeFarm
                     return;
                 }
 
-                #if _WINDOWS
-                    if (options.NotifyOnChar) {
-                        toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Probably claimed character '{character}' in {logPlace}, but result could not be determined."));
-                        ToastNotification probablyNotification = new ToastNotification(toastXml);
-                        notifier.Show(probablyNotification);
-                    }
-                #endif
+                if (isWindows && options.NotifyOnChar) {
+                    notification.sentToast($"Probably claimed character '{character}' in {logPlace}, but result could not be determined.");
+                }
 
                 _logger.LogWarning($"Probably claimed character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy.");
             }
@@ -302,13 +289,9 @@ namespace MudaeFarm
                 {
                     _logger.LogWarning($"Claimed {kakera} kakera on character '{character}' in {logPlace} in {stopwatch.Elapsed.TotalMilliseconds}ms.");
 
-                    #if _WINDOWS
-                        if (options.NotifyOnKakera) {
-                            toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Claimed {kakera} kakera in {logPlace}"));
-                            ToastNotification claimNotification = new ToastNotification(toastXml);
-                            notifier.Show(claimNotification);
-                        }
-                    #endif
+                    if (isWindows && options.NotifyOnKakera) {
+                        notification.sentToast($"Claimed {kakera} kakera in {logPlace}");
+                    }
 
                     await _replySender.SendAsync(channel, ReplyEvent.KakeraSucceeded, replySubs);
                     return;
@@ -325,13 +308,10 @@ namespace MudaeFarm
                 }
 
 
-                #if _WINDOWS
-                    if (options.NotifyOnKakera) {
-                        toastTextElements[0].AppendChild(toastXml.CreateTextNode($"Probably claimed {kakera} kakera in {logPlace}"));
-                        ToastNotification probablyNotification = new ToastNotification(toastXml);
-                        notifier.Show(probablyNotification);
-                    }
-                #endif
+                if (isWindows && options.NotifyOnKakera) {
+                    notification.sentToast($"Probably claimed {kakera} kakera in {logPlace}");
+                }
+
                 _logger.LogWarning($"Probably claimed {kakera} kakera on character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy.");
             }
         }

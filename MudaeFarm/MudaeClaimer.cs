@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
 using Disqord;
 using Disqord.Events;
 using Microsoft.Extensions.Hosting;
@@ -27,8 +26,6 @@ namespace MudaeFarm
         readonly IMudaeReplySender _replySender;
         readonly INotificationSender __notificationSender;
         readonly ILogger<MudaeClaimer> _logger;
-        readonly bool isWindows;
-
 
         public MudaeClaimer(IDiscordClientService discord, IMudaeUserFilter userFilter, IMudaeClaimCharacterFilter characterFilter, IMudaeClaimEmojiFilter claimEmojiFilter, IOptionsMonitor<ClaimingOptions> options, IOptionsMonitor<BotChannelList> channelList, IMudaeCommandHandler commandHandler, IMudaeOutputParser outputParser, IMudaeReplySender replySender, INotificationSender notificationSender, ILogger<MudaeClaimer> logger)
         {
@@ -43,7 +40,6 @@ namespace MudaeFarm
             _replySender      = replySender;
             _logger           = logger;
             __notificationSender = notificationSender;
-            isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -222,7 +218,8 @@ namespace MudaeFarm
 
                     await _replySender.SendAsync(channel, ReplyEvent.ClaimSucceeded, replySubs);
 
-                    if (isWindows && options.NotifyOnChar) {
+                    if (options.NotifyOnChar)
+                    {
                         notification.SentToast($"Claimed character '{character}' in {logPlace}.");
                     }
 
@@ -239,7 +236,8 @@ namespace MudaeFarm
                     return;
                 }
 
-                if (isWindows && options.NotifyOnChar) {
+                if (options.NotifyOnChar)
+                {
                     notification.SentToast($"Probably claimed character '{character}' in {logPlace}, but result could not be determined.");
                 }
 
@@ -289,7 +287,8 @@ namespace MudaeFarm
                 {
                     _logger.LogWarning($"Claimed {kakera} kakera on character '{character}' in {logPlace} in {stopwatch.Elapsed.TotalMilliseconds}ms.");
 
-                    if (isWindows && options.NotifyOnKakera) {
+                    if (options.NotifyOnKakera)
+                    {
                         notification.SentToast($"Claimed {kakera} kakera in {logPlace}");
                     }
 
@@ -308,7 +307,8 @@ namespace MudaeFarm
                 }
 
 
-                if (isWindows && options.NotifyOnKakera) {
+                if (options.NotifyOnKakera)
+                {
                     notification.SentToast($"Probably claimed {kakera} kakera in {logPlace}");
                 }
 

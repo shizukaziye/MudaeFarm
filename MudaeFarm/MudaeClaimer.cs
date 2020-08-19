@@ -25,9 +25,10 @@ namespace MudaeFarm
         readonly IMudaeCommandHandler _commandHandler;
         readonly IMudaeOutputParser _outputParser;
         readonly IMudaeReplySender _replySender;
+        readonly INotificationSender _notification;
         readonly ILogger<MudaeClaimer> _logger;
 
-        public MudaeClaimer(IDiscordClientService discord, IMudaeUserFilter userFilter, IMudaeClaimCharacterFilter characterFilter, IMudaeClaimEmojiFilter claimEmojiFilter, IOptionsMonitor<ClaimingOptions> options, IOptionsMonitor<BotChannelList> channelList, IMudaeCommandHandler commandHandler, IMudaeOutputParser outputParser, IMudaeReplySender replySender, ILogger<MudaeClaimer> logger)
+        public MudaeClaimer(IDiscordClientService discord, IMudaeUserFilter userFilter, IMudaeClaimCharacterFilter characterFilter, IMudaeClaimEmojiFilter claimEmojiFilter, IOptionsMonitor<ClaimingOptions> options, IOptionsMonitor<BotChannelList> channelList, IMudaeCommandHandler commandHandler, IMudaeOutputParser outputParser, IMudaeReplySender replySender, INotificationSender notification, ILogger<MudaeClaimer> logger)
         {
             _discord          = discord;
             _userFilter       = userFilter;
@@ -38,6 +39,7 @@ namespace MudaeFarm
             _commandHandler   = commandHandler;
             _outputParser     = outputParser;
             _replySender      = replySender;
+            _notification     = notification;
             _logger           = logger;
         }
 
@@ -216,7 +218,11 @@ namespace MudaeFarm
                 {
                     _logger.LogWarning($"Claimed character '{character}' in {logPlace} in {stopwatch.Elapsed.TotalMilliseconds}ms.");
 
+                    if (options.NotifyOnCharacter)
+                        _notification.SendToast($"Claimed character '{character}' in {logPlace}.");
+
                     await _replySender.SendAsync(channel, ReplyEvent.ClaimSucceeded, replySubs);
+
                     return;
                 }
 
@@ -231,6 +237,9 @@ namespace MudaeFarm
                 }
 
                 _logger.LogWarning($"Probably claimed character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy.");
+
+                if (options.NotifyOnCharacter)
+                    _notification.SendToast($"Probably claimed character '{character}' in {logPlace}, but result could not be determined.");
             }
 
             else if (_claimEmojiFilter.IsKakeraEmoji(e.Emoji, out var kakera) && _pendingKakeraClaims.TryRemove(e.Message.Id, out claim))
@@ -276,6 +285,9 @@ namespace MudaeFarm
                 {
                     _logger.LogWarning($"Claimed {kakera} kakera on character '{character}' in {logPlace} in {stopwatch.Elapsed.TotalMilliseconds}ms.");
 
+                    if (options.NotifyOnKakera)
+                        _notification.SendToast($"Claimed {kakera} kakera in {logPlace}.");
+
                     await _replySender.SendAsync(channel, ReplyEvent.KakeraSucceeded, replySubs);
                     return;
                 }
@@ -291,6 +303,9 @@ namespace MudaeFarm
                 }
 
                 _logger.LogWarning($"Probably claimed {kakera} kakera on character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy.");
+
+                if (options.NotifyOnKakera)
+                    _notification.SendToast($"Probably claimed {kakera} kakera in {logPlace}.");
             }
         }
     }

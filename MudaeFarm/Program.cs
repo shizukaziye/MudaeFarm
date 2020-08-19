@@ -88,6 +88,8 @@ namespace MudaeFarm
                                 .AddSingleton<IMudaeOutputParser, EnglishMudaeOutputParser>() //todo: this needs to be configurable
                                 .AddSingleton<IMudaeReplySender, MudaeReplySender>();
 
+                        services.AddSingleton<INotificationSender, NotificationSender>();
+
                         services.AddSingleton<IMudaeRoller, MudaeRoller>()
                                 .AddTransient<IHostedService>(s => s.GetService<IMudaeRoller>());
 

@@ -172,6 +172,11 @@ Some notes about profiles:
 - It is possible to start multiple instances of MudaeFarm with different profiles, as they will never interfere with each other.
 - If an account has multiple configurations, it is your responsibility to ensure that the configured servers and characters are mutually exclusive. Otherwise, it may result in duplicate claims, race conditions or other undefined behavior.
 
+## Contributors
+
+- [phosphene47](https://github.com/phosphene47) Maintainer
+- [zhaobenny](https://github.com/zhaobenny) [#201](https://github.com/chiyadev/MudaeFarm/pull/201)
+
 ## Reporting bugs
 
 0. Before you decide to report a bug, try reading this guide again. You may have missed some critical steps while configuring this bot.

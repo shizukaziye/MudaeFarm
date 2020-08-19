@@ -141,6 +141,7 @@ namespace MudaeFarm
             }
 
             _logger.LogWarning($"Attempting to claim character '{character}' in {logPlace}...");
+
             _pendingClaims[message.Id] = new PendingClaim(logPlace, channel, message, character, stopwatch);
         }
 
@@ -185,6 +186,7 @@ namespace MudaeFarm
             if (_claimEmojiFilter.IsClaimEmoji(e.Emoji) && _pendingClaims.TryRemove(e.Message.Id, out var claim))
             {
                 var (logPlace, channel, message, character, stopwatch) = claim;
+
                 await Task.Delay(TimeSpan.FromSeconds(options.DelaySeconds));
 
                 var replySubs = new

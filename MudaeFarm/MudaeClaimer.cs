@@ -216,7 +216,7 @@ namespace MudaeFarm
                 {
                     _logger.LogWarning($"Claimed character '{character}' in {logPlace} in {stopwatch.Elapsed.TotalMilliseconds}ms.");
 
-                    if (options.NotifyOnChar)
+                    if (options.NotifyOnCharacter)
                         _notification.SendToast($"Claimed character '{character}' in {logPlace}.");
 
                     await _replySender.SendAsync(channel, ReplyEvent.ClaimSucceeded, replySubs);
@@ -236,7 +236,7 @@ namespace MudaeFarm
 
                 _logger.LogWarning($"Probably claimed character '{character}' in {logPlace}, but result could not be determined. Channel is probably busy.");
 
-                if (options.NotifyOnChar)
+                if (options.NotifyOnCharacter)
                     _notification.SendToast($"Probably claimed character '{character}' in {logPlace}, but result could not be determined.");
             }
 

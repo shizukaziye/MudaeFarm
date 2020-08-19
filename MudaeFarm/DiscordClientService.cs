@@ -61,6 +61,12 @@ namespace MudaeFarm
                     // at this point all option values are available
                     await client.SetPresenceAsync(_options.CurrentValue.FallbackStatus);
 
+                    _logger.LogWarning(
+                        "MudaeFarm is up and running! " +
+                        "MudaeFarm will shut down when you close this window. " +
+                        "Refer to https://github.com/chiyadev/MudaeFarm#configuration for the configuration guide. " +
+                        "For additional logging information, restart MudaeFarm with a --verbose CLI argument.");
+
                     _source.TrySetResult(client);
                 }
                 catch (Exception e)

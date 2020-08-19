@@ -1,6 +1,8 @@
 **WARNING**:
 > Selfbots are officially banned. It is considered an API abuse and is [no longer tolerated](https://support.discordapp.com/hc/en-us/articles/115002192352-Automated-user-accounts-self-bots-). By using this bot, *you are running a risk of having your account permanently banned from Discord*.
 
+> This project is not being actively maintained. Be prepared to encounter critical errors or buggy behavior, and not all bug reports will be addressed immediately. However, pull requests to fix these bugs are welcome and will be merged as soon as possible.
+
 # MudaeFarm
 
 This is a ~~simple~~ bot that automatically rolls and claims Mudae waifus/husbandoes.

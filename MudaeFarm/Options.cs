@@ -45,7 +45,7 @@ namespace MudaeFarm
         public bool CustomEmotes { get; set; }
 
         [JsonProperty("notify_on_character_claim")]
-        public bool NotifyOnCharacter { get; set; }
+        public bool NotifyOnCharacter { get; set; } = true;
 
         [JsonProperty("notify_on_kakera_claim")]
         public bool NotifyOnKakera { get; set; }

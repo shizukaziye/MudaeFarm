@@ -189,10 +189,15 @@ namespace MudaeFarm
                         continue;
                     }
                 }
+                else if (response.Content.StartsWith("wished by", StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger.LogInformation($"Found a wished character with command '{options.Command}'. Response: {response.Content}. Continuing the rolls.");
+                    continue;
+                }
 
-                _logger.LogWarning($"Could not handle Mudae response for command '{options.Command}'. Assuming a sane default of 5 rolls per hour ({rolls} right now). Response: {response.Content}");
+                _logger.LogWarning($"Could not handle Mudae response for command '{options.Command}'. Assuming a sane default of {options.GlobalMaxRolls} rolls per hour ({rolls} right now). Response: {response.Content}");
 
-                if (rolls >= 5)
+                if (rolls >= options.GlobalMaxRolls)
                 {
                     _logger.LogInformation($"Preemptively finished roll {rolls} of batch {batches} in {logPlace}. Next batch in an hour.");
                     rolls = 0;
@@ -248,7 +253,7 @@ namespace MudaeFarm
                 // dk output doesn't really matter, because we'll have to wait a day anyway
                 _logger.LogInformation($"Claimed daily kakera in {logPlace}.");
 
-                await Task.Delay(TimeSpan.FromDays(1), cancellationToken);
+                await Task.Delay(TimeSpan.FromHours(options.DailyKakeraWaitTime), cancellationToken);
             }
         }
     }

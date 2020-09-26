@@ -79,11 +79,11 @@ namespace MudaeFarm
         [JsonProperty("interval_seconds")]
         public double IntervalSeconds { get; set; } = 0.5;
 
-        [JsonProperty("global_max_rolls")]
-        public int GlobalMaxRolls { get; set; } = 5;
+        [JsonProperty("default_per_hour")]
+        public int DefaultPerHour { get; set; } = 5;
 
-        [JsonProperty("daily_kakera_wait_time")]
-        public int DailyKakeraWaitTime { get; set; } = 20;
+        [JsonProperty("daily_kakera_wait_hours")]
+        public int DailyKakeraWaitHours { get; set; } = 20;
     }
 
     public class CharacterWishlist

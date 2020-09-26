@@ -190,7 +190,7 @@ namespace MudaeFarm
                     }
                 }
 
-                _logger.LogWarning($"Could not handle Mudae response for command '{options.Command}'. Assuming a sane default of {options.GlobalMaxRolls} rolls per hour ({rolls} right now). Response: {response.Content}");
+                _logger.LogWarning($"Could not handle Mudae response for command '{options.Command}'. Assuming a sane default of {options.DefaultPerHour} rolls per hour ({rolls} right now). Response: {response.Content}");
 
                 if (rolls >= options.DefaultPerHour)
                 {

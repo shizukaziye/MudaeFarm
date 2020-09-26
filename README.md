@@ -53,6 +53,8 @@ Configuration is written in JSON and stored in messages that you can edit at any
     - `daily_kakera_command`: Command to use for rolling daily kakera.
     - `typing_delay_seconds`: Number of seconds to type the rolling command before sending it.
     - `interval_seconds`: Interval in seconds between each roll (not applicable to daily kakera).
+    - `default_per_hour`: Number of rolls that MudaeFarm will perform every hour at minimum if it was not able to determine the roll's result.
+    - `daily_kakera_wait_hours`: Number of hours that MudaeFarm will wait for between each $dk. (set it to 10 for premium members, 20 for regular)
 
 ### `#wished-characters`
 

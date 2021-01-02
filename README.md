@@ -1,7 +1,12 @@
-**WARNING**:
-> Selfbots are officially banned. It is considered an API abuse and is [no longer tolerated](https://support.discordapp.com/hc/en-us/articles/115002192352-Automated-user-accounts-self-bots-). By using this bot, *you are running a risk of having your account permanently banned from Discord*.
+# NOTICE
 
-> This project is not being actively maintained. Be prepared to encounter critical errors or buggy behavior, and not all bug reports will be addressed immediately. However, pull requests to fix these bugs are welcome and will be merged as soon as possible.
+MudaeFarm repository has been archived. I ([phosphene47](https://github.com/phosphene47)) has no intention of working on this project anymore.
+
+I created this bot when I was playing with Mudae in 2018. It was meant to be a simple experiment with Discord selfbots, but I kept receiving bug reports and feature requests in this repository after I was done. I spent much time fixing those bugs and implementing those features, but it's not easy to convince myself to work on a project which I have zero interest in anymore.
+
+You can still download MudaeFarm in the [Releases](https://github.com/chiyadev/MudaeFarm/releases) page, but please note that the bot may be completely broken. As of 2021/02/01 the bot still seems to be somewhat functioning. This may change anytime.
+
+If you are experienced in C# programming and Discord.NET and wish to take over this project, please contact me on [Twitter](https://twitter.com/phosphene47).
 
 # MudaeFarm
 

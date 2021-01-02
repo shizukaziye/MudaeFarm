@@ -4,7 +4,7 @@ MudaeFarm repository has been archived. I ([phosphene47](https://github.com/phos
 
 I created this bot when I was playing with Mudae in 2018. It was meant to be a simple experiment with Discord selfbots, but I kept receiving bug reports and feature requests in this repository after I was done. I spent much time fixing those bugs and implementing those features, but it's not easy to convince myself to work on a project which I have zero interest in anymore.
 
-You can still download MudaeFarm in the [Releases](https://github.com/chiyadev/MudaeFarm/releases) page, but please note that the bot may be completely broken. As of 2021/02/01 the bot still seems to be somewhat functioning. This may change anytime.
+You can still download MudaeFarm in the [Releases](https://github.com/chiyadev/MudaeFarm/releases) page, but please note that the bot may be completely broken. As of 2021/01/02 the bot still seems to be somewhat functioning. This may change anytime.
 
 If you are experienced in C# programming and Discord.NET and wish to take over this project, please contact me on [Twitter](https://twitter.com/phosphene47).
 

@@ -1,4 +1,4 @@
-using System;
+fusing System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -134,7 +134,7 @@ namespace MudaeFarm
 
                 if (!options.Enabled)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                    await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
                     continue;
                 }
 
@@ -153,7 +153,7 @@ namespace MudaeFarm
                 {
                     _logger.LogWarning(e, $"Could not roll '{options.Command}' in {logPlace}.");
 
-                    await Task.Delay(TimeSpan.FromMinutes(30), cancellationToken);
+                    await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
                     continue;
                 }
 
@@ -214,7 +214,7 @@ namespace MudaeFarm
 
                 if (!options.DailyKakeraEnabled)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                    await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
                     continue;
                 }
 
@@ -233,7 +233,7 @@ namespace MudaeFarm
                 {
                     _logger.LogWarning(e, $"Could not roll daily kakera in {logPlace}.");
 
-                    await Task.Delay(TimeSpan.FromMinutes(30), cancellationToken);
+                    await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
                     continue;
                 }
 

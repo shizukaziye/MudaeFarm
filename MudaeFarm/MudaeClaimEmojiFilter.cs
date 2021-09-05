@@ -66,7 +66,7 @@ namespace MudaeFarm
             { "kakeray", KakeraType.Yellow },
             { "kakerao", KakeraType.Orange },
             { "kakerar", KakeraType.Red },
-            { "kakeraw", KakeraType.Rainbow }
+            { "kakeraw", KakeraType.Rainbow },
             { "kakeral", KakeraType.Light
         };
 

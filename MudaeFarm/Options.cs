@@ -72,6 +72,12 @@ namespace MudaeFarm
 
         [JsonProperty("daily_kakera_command")]
         public string DailyKakeraCommand { get; set; } = "$dk";
+        
+        [JsonProperty("daily_roll_reset_enabled")]
+        public bool DailyRollResetEnabled { get; set; }
+
+        [JsonProperty("daily_roll_reset_command")]
+        public string DailyRollResetCommand { get; set; } = "$daily";
 
         [JsonProperty("typing_delay_seconds")]
         public double TypingDelaySeconds { get; set; } = 0.3;
@@ -84,6 +90,9 @@ namespace MudaeFarm
 
         [JsonProperty("daily_kakera_wait_hours")]
         public int DailyKakeraWaitHours { get; set; } = 20;
+        
+        [JsonProperty("daily_roll_reset_wait_hours")]
+        public int DailyRollResetWaitHours { get; set; } = 20;
     }
 
     public class CharacterWishlist

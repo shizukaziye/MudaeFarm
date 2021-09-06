@@ -249,6 +249,55 @@ namespace MudaeFarm
                 _logger.LogInformation($"Claimed daily kakera in {logPlace}.");
 
                 await Task.Delay(TimeSpan.FromHours(options.DailyKakeraWaitHours), cancellationToken);
+               }
+            }
+        }
+
+        async Task RunDailyRollResetAsync(IMessageChannel channel, CancellationToken cancellationToken = default)
+        {
+            var logPlace = $"channel '{channel.Name}' ({channel.Id})";
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var options = _options.CurrentValue;
+
+                if (!options.DailyRollResetEnabled)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
+                    continue;
+                }
+
+                IUserMessage response;
+
+                try
+                {
+                    using (channel.Typing())
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(options.TypingDelaySeconds), cancellationToken);
+
+                        response = await _commandHandler.SendAsync(channel, options.RollResetCommand, cancellationToken);
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.LogWarning(e, $"Could not roll daily roll reset in {logPlace}.");
+
+                    await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
+                    continue;
+                }
+
+                if (_outputParser.TryParseTime(response.Content, out var resetTime))
+                {
+                    _logger.LogInformation($"Could not claim daily roll resett in {logPlace}. Next reset in {resetTime}.");
+
+                    await Task.Delay(resetTime, cancellationToken);
+                    continue;
+                }
+
+                // daily output doesn't really matter, because we'll have to wait a day anyway
+                _logger.LogInformation($"Claimed daily roll reset in {logPlace}.");
+
+                await Task.Delay(TimeSpan.FromHours(options.DailyRollResetWaitHours), cancellationToken);
             }
         }
     }

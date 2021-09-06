@@ -275,7 +275,7 @@ namespace MudaeFarm
                     {
                         await Task.Delay(TimeSpan.FromSeconds(options.TypingDelaySeconds), cancellationToken);
 
-                        response = await _commandHandler.SendAsync(channel, options.RollResetCommand, cancellationToken);
+                        response = await _commandHandler.SendAsync(channel, options.DailyRollResetCommand, cancellationToken);
                     }
                 }
                 catch (Exception e)

@@ -57,17 +57,17 @@ namespace MudaeFarm
 MudaeFarm requires your user token in order to proceed.
 
 A user token is a long piece of text that is synonymous to your Discord password.
-How to find your token: https://github.com/chiyadev/MudaeFarm/blob/master/User%20tokens.md
+How to find your token: https://github.com/moriyahiroaki/MudaeFarm/blob/master/User%20tokens.md
 
 What happens when you enter your token:
   - MudaeFarm will save this token to the disk UNENCRYPTED. (see %localappdata%\MudaeFarm)
   - MudaeFarm will authenticate to Discord using this token, ACTING ON BEHALF OF YOU.
 
 MudaeFarm makes no guarantee regarding your account's privacy nor safety.
-If you are concerned, you may inspect MudaeFarm's complete source code at: https://github.com/chiyadev/MudaeFarm
+If you are concerned, you may inspect MudaeFarm's complete source code at: https://github.com/moriyahiroaki/MudaeFarm
 
 MudaeFarm is licensed under the MIT License. The authors of MudaeFarm shall not be held liable for any claim, damage or liability.
-You can read the license terms at: https://github.com/chiyadev/MudaeFarm/blob/master/LICENSE
+You can read the license terms at: https://github.com/moriyahiroaki/MudaeFarm/blob/master/LICENSE
 ".Trim());
 
                 Console.Write("Enter token: ");

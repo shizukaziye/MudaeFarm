@@ -64,7 +64,7 @@ namespace MudaeFarm
                     _logger.LogWarning(
                         "MudaeFarm is up and running! " +
                         "MudaeFarm will shut down when you close this window. " +
-                        "Refer to https://github.com/chiyadev/MudaeFarm#configuration for the configuration guide. " +
+                        "Refer to https://github.com/moriyahiroaki/MudaeFarm#configuration for the configuration guide. " +
                         "For additional logging information, restart MudaeFarm with a --verbose CLI argument.");
 
                     _source.TrySetResult(client);

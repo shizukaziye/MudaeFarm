@@ -134,7 +134,7 @@ namespace MudaeFarm
 
                 if (!options.Enabled)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
+                    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                     continue;
                 }
 
@@ -214,7 +214,7 @@ namespace MudaeFarm
 
                 if (!options.DailyKakeraEnabled)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
+                    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                     continue;
                 }
 
@@ -262,7 +262,7 @@ namespace MudaeFarm
 
                 if (!options.DailyRollResetEnabled)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
+                    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                     continue;
                 }
 

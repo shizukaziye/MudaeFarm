@@ -97,7 +97,7 @@ namespace MudaeFarm
 
             try
             {
-                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
                 using var linkedCts  = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, cancellationToken);
 
                 cancellationToken = linkedCts.Token;

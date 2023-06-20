@@ -75,7 +75,7 @@ namespace MudaeFarm
             return match.Success;
         }
 
-        static readonly Regex _kakeraFailedRegex = new Regex(@"can't\s+react\s+to\s+a\s+kakera", _regexOptions);
+        static readonly Regex _kakeraFailedRegex = new Regex(@"can't\s+react\s+to\s+kakera", _regexOptions);
 
         public bool TryParseKakeraFailed(string s, out TimeSpan resetTime) => _kakeraFailedRegex.IsMatch(s) & TryParseTime(s, out resetTime);
     }

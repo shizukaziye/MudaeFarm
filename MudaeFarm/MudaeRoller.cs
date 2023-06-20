@@ -23,12 +23,12 @@ namespace MudaeFarm
 
         public MudaeRoller(IDiscordClientService discord, IOptionsMonitor<RollingOptions> options, IOptionsMonitor<BotChannelList> channelList, IMudaeCommandHandler commandHandler, IMudaeOutputParser outputParser, ILogger<MudaeRoller> logger)
         {
-            _discord        = discord;
-            _options        = options;
-            _channelList    = channelList;
+            _discord = discord;
+            _options = options;
+            _channelList = channelList;
             _commandHandler = commandHandler;
-            _outputParser   = outputParser;
-            _logger         = logger;
+            _outputParser = outputParser;
+            _logger = logger;
         }
 
         sealed class Roller
@@ -39,13 +39,13 @@ namespace MudaeFarm
             public Roller(BotChannelList.Item item, CancellationToken cancellationToken)
             {
                 Cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                CurrentItem  = item;
+                CurrentItem = item;
             }
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var client  = await _discord.GetClientAsync();
+            var client = await _discord.GetClientAsync();
             var rollers = new Dictionary<ulong, Roller>();
 
             void handleChange(BotChannelList o)
@@ -61,7 +61,7 @@ namespace MudaeFarm
                             roller?.Cancellation.Cancel();
                             roller?.Cancellation.Dispose();
 
-                            var newRoller         = new Roller(item, stoppingToken);
+                            var newRoller = new Roller(item, stoppingToken);
                             var cancellationToken = newRoller.Cancellation.Token;
 
                             rollers[id] = newRoller;
@@ -118,7 +118,7 @@ namespace MudaeFarm
                 return;
             }
 
-            await Task.WhenAll(RunRollAsync(client, channel, cancellationToken), RunDailyKakeraAsync(channel, cancellationToken));
+            await Task.WhenAll(RunRollAsync(client, channel, cancellationToken), RunDailyKakeraAsync(channel, cancellationToken), RunDailyRollResetAsync(channel, cancellationToken));
         }
 
         async Task RunRollAsync(DiscordClient client, IMessageChannel channel, CancellationToken cancellationToken = default)
@@ -126,7 +126,7 @@ namespace MudaeFarm
             var logPlace = $"channel '{channel.Name}' ({channel.Id})";
 
             var batches = 0;
-            var rolls   = 0;
+            var rolls = 0;
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -134,7 +134,7 @@ namespace MudaeFarm
 
                 if (!options.Enabled)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                     continue;
                 }
 
@@ -153,7 +153,7 @@ namespace MudaeFarm
                 {
                     _logger.LogWarning(e, $"Could not roll '{options.Command}' in {logPlace}.");
 
-                    await Task.Delay(TimeSpan.FromMinutes(30), cancellationToken);
+                    await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
                     continue;
                 }
 
@@ -214,7 +214,7 @@ namespace MudaeFarm
 
                 if (!options.DailyKakeraEnabled)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                     continue;
                 }
 
@@ -233,7 +233,7 @@ namespace MudaeFarm
                 {
                     _logger.LogWarning(e, $"Could not roll daily kakera in {logPlace}.");
 
-                    await Task.Delay(TimeSpan.FromMinutes(30), cancellationToken);
+                    await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
                     continue;
                 }
 
@@ -249,6 +249,54 @@ namespace MudaeFarm
                 _logger.LogInformation($"Claimed daily kakera in {logPlace}.");
 
                 await Task.Delay(TimeSpan.FromHours(options.DailyKakeraWaitHours), cancellationToken);
+            }
+        }
+
+        private async Task RunDailyRollResetAsync(IMessageChannel channel, CancellationToken cancellationToken = default)
+        {
+            var logPlace = $"channel '{channel.Name}' ({channel.Id})";
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var options = _options.CurrentValue;
+
+                if (!options.DailyRollResetEnabled)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+                    continue;
+                }
+
+                IUserMessage response;
+
+                try
+                {
+                    using (channel.Typing())
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(options.TypingDelaySeconds), cancellationToken);
+
+                        response = await _commandHandler.SendAsync(channel, options.DailyRollResetCommand, cancellationToken);
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.LogWarning(e, $"Could not claim daily roll reset in {logPlace}.");
+
+                    await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
+                    continue;
+                }
+
+                if (_outputParser.TryParseTime(response.Content, out var resetTime))
+                {
+                    _logger.LogInformation($"Could not claim daily roll reset in {logPlace}. Next reset in {resetTime}.");
+
+                    await Task.Delay(resetTime, cancellationToken);
+                    continue;
+                }
+
+                // daily output doesn't really matter, because we'll have to wait a day anyway
+                _logger.LogInformation($"Claimed daily roll reset in {logPlace}.");
+
+                await Task.Delay(TimeSpan.FromHours(options.DailyRollResetWaitHours), cancellationToken);
             }
         }
     }
